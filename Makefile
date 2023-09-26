@@ -8,14 +8,15 @@ SRC_DIR 	= src/
 
 OBJ_DIR		= obj/
 
-_SRC 		=	main.cpp
+_SRC 		=	main.cpp\
+				WebServer.cpp
 
 OBJ_FOLDERS =	obj/
 
 SRC 		= ${addprefix ${SRC_DIR}, ${_SRC}}
 OBJ			= ${patsubst ${SRC_DIR}%.cpp, ${OBJ_DIR}%.o, ${SRC}}
 
-INCLUDES	= -I ./include
+INCLUDES	= -I ./include/
 
 ${NAME}:	${OBJ}
 			@echo "Compiling $(NAME)..."
