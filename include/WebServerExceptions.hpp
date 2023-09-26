@@ -17,6 +17,13 @@ class SocketOptionsException: public std::exception {
 	}
 };
 
+class SocketPollingError: public std::exception {
+	virtual const char *what() const throw()
+	{
+		return ("Socket polling failed. Unable to poll the given sockets, check that timeout is not too short.\n");
+	}
+};
+
 class BindingException: public std::exception {
 	virtual const char *what() const throw()
 	{
