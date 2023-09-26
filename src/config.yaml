@@ -1,0 +1,54 @@
+server {
+    listen 8002; (1)
+    server_name localhost; (2)
+    host 127.0.0.1; (1)
+    root docs/fusion_web/; (8)
+    client_max_body_size 3000; (4)
+    index index.html; (10)
+    error_page 404 405 ./4xx.html; (3)
+    error_page 500 ./5xx.html; (3)
+
+    location /test { (5)
+        allow_methods  DELETE POST GET; (6)
+        autoindex off (9);
+    }
+    
+    location /tours { (5)
+        autoindex on; (9)
+        index tours1.html; (10)
+        allow_methods GET POST PUT HEAD; (6)
+    }
+
+    location /red { (5)
+	return /tours; (7)
+    }
+
+    location /cgi-bin { (5)
+        root ./; (8)
+        allow_methods GET POST DELETE; (6)
+        index time.py; (10)
+        cgi_path /usr/bin/python3 /bin/bash; (11)
+        cgi_ext .py .sh;
+    }
+}
+
+server: 
+    root:  (8)
+    name:  (2)
+    cgi_path:
+    client_max_body_size: 3000  (4)
+    error_page:    (3)
+        path:
+        status_code:
+    listen:       (1)
+        host: 127.0.0.0
+        port: 8080
+    location:
+        route:
+        root:
+        index:
+        autoindex: off
+        allow_methods: GET POST DELETE
+        cgi_ext: .php
+
+    
