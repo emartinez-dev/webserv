@@ -3,6 +3,7 @@
 
 # include <iostream>
 # include <netinet/in.h>
+# include <fcntl.h>
 # include <sys/socket.h>
 # include <sys/types.h>
 # include <unistd.h>
@@ -10,11 +11,13 @@
 
 # include "WebServerExceptions.hpp"
 
+# define MAX_BACKLOG 128
+
 class WebServer
 {
 	private:
-		std::string ip_address;
-		int			port;
+		sockaddr_in	server_address;
+		int			server_socket;
 
 	public:
 		WebServer();
@@ -23,11 +26,9 @@ class WebServer
 		WebServer(WebServer const &copy);
 		WebServer	&operator=(WebServer const &copy);
 
-		int	start(void);
-		
-		sockaddr_in	  config_address(void);
-		unsigned long parse_ip(const std::string &ip_address);
-
+		int			  get_server_socket(void) const;
+		sockaddr_in	  get_server_address(void) const;
 };
+
 
 #endif

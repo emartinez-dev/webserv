@@ -9,7 +9,8 @@ SRC_DIR 	= src/
 OBJ_DIR		= obj/
 
 _SRC 		=	main.cpp\
-				WebServer.cpp
+				WebServer.cpp\
+				Utils.cpp
 
 OBJ_FOLDERS =	obj/
 

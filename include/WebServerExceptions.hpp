@@ -10,6 +10,13 @@ class SocketCreationException: public std::exception {
 	}
 };
 
+class SocketOptionsException: public std::exception {
+	virtual const char *what() const throw()
+	{
+		return ("Error setting the Socket options.\n");
+	}
+};
+
 class BindingException: public std::exception {
 	virtual const char *what() const throw()
 	{
