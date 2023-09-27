@@ -27,7 +27,6 @@ Server::Server(std::string const &ip_address, int port)
 
 Server::~Server()
 {
-	close(server_socket);
 }
 
 Server::Server(Server const &copy):server_address(copy.server_address),
@@ -43,25 +42,6 @@ Server	&Server::operator=(const Server &copy)
 		server_socket = copy.server_socket;
 	}
 	return *this;
-}
-
-pollfd Server::create_polldf(int fd, short mode)
-{
-	struct pollfd server_fd;
-	server_fd.fd = fd;
-	server_fd.events = mode;
-	return server_fd;
-}
-
-int	Server::accept_client(int server_fd)
-{
-	sockaddr_in client_address;
-	int			client_socket;
-	socklen_t	client_len = sizeof(client_address);
-
-	bzero(&client_address, sizeof(client_address));
-	client_socket = accept(server_fd, (struct sockaddr *)&client_address, &client_len);
-	return client_socket;
 }
 
 int	Server::get_server_socket(void) const

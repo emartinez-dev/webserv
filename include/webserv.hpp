@@ -4,5 +4,6 @@
 # include <iostream>
 # include "Server.hpp"
 # include "Utils.hpp"
+# include "Cluster.hpp"
 
 #endif

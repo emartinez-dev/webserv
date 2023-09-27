@@ -9,6 +9,7 @@ SRC_DIR 	= src/
 OBJ_DIR		= obj/
 
 _SRC 		=	main.cpp\
+				Cluster.cpp\
 				Server.cpp\
 				Utils.cpp
 

@@ -20,7 +20,7 @@ sockaddr_in	config_address(std::string const &ip_address, int port)
 {
 	sockaddr_in	server_address;
 
-	memset(&server_address, 0, sizeof(server_address));
+	bzero(&server_address, sizeof(server_address));
 	server_address.sin_family = AF_INET;
 	server_address.sin_addr.s_addr = parse_ip(ip_address);
 	server_address.sin_port = htons(port);

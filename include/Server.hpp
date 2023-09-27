@@ -14,8 +14,6 @@
 # include "WebServerExceptions.hpp"
 
 # define MAX_BACKLOG 128
-# define MAX_FDS 10
-# define TIMEOUT_MS 2500
 
 class Server
 {
@@ -29,9 +27,6 @@ class Server
 		~Server();
 		Server(Server const &copy);
 		Server	&operator=(Server const &copy);
-		pollfd		  create_polldf(int fd, short mode);
-		int			  accept_client(int server_fd);
-
 		int			  get_server_socket(void) const;
 		sockaddr_in	  get_server_address(void) const;
 };
