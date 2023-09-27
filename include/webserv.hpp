@@ -2,7 +2,7 @@
 #define WEBSERV_HPP
 
 # include <iostream>
-# include "WebServer.hpp"
+# include "Server.hpp"
 # include "Utils.hpp"
 
 #endif
