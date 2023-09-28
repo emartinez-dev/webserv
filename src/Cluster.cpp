@@ -78,7 +78,7 @@ int	Cluster::accept_client(int server_fd)
 
 int	Cluster::read_from_socket(pollfd const &connection)
 {
-	size_t	  bytes_read;
+	ssize_t	  bytes_read;
 	do
 	{
 		char  buff[BUFFER_SIZE];
@@ -98,19 +98,17 @@ int	Cluster::read_from_socket(pollfd const &connection)
 		std::cout << "Read from fd " << connection.fd << " : "<< connection_buffers[connection.fd].data() << std::endl;
 		connection_buffers[connection.fd].clear();
 	}
-	if (bytes_read == (size_t)-1 && (errno != EWOULDBLOCK && errno != EAGAIN))
+	if (bytes_read == -1 && (errno != EWOULDBLOCK && errno != EAGAIN))
 		std::cout << "Error reading\n";
 	return (1);
 }
 
 int	Cluster::write_to_socket(pollfd const &connection)
 {
-	/*
-	const char* response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 48\r\n\r\n<html><body><h1>Hello, World</h1></body></html>\r\n\r\n";
+	const char* response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 48\r\n\r\n<html><body><h1>Hola Limones</h1></body></html>\r\n";
 
-	send(connection.fd, response, strlen(response), 0);
-	*/
-	(void) connection;
+	if (send(connection.fd, response, strlen(response), 0) == -1)
+		std::cout << "Error writing\n";
 	return (0);
 }
 
