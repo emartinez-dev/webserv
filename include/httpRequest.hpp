@@ -18,6 +18,7 @@ public:
     std::string getHeader(const std::string& name) const;
     std::map<std::string, std::string> getHeaders() const;
     std::map<std::string, std::string> getParameters() const;
+	void  printRequest(void);
 
 private:
     void parseFirstLine(const std::string& first_line);

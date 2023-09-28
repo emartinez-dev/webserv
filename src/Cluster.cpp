@@ -1,4 +1,5 @@
 #include "Cluster.hpp"
+#include "httpRequest.hpp"
 
 Cluster::Cluster()
 {
@@ -116,7 +117,11 @@ int	Cluster::read_from_socket(pollfd const &connection)
 	}
 	else if (bytes_read <= 0)
 	{
-		std::cout << "Read from fd " << connection.fd << " : "<< connection_buffers[connection.fd].data() << std::endl;
+		std::string request_text(connection_buffers[connection.fd].begin(), connection_buffers[connection.fd].end());
+		HttpRequest request(request_text);
+		std::cout << "Read from fd " << connection.fd << std::endl;
+		request.printRequest();
+		std::cout << std::endl;
 		// here we use the buffer and we clear it after, we could create a 
 		// Request object and process it here
 		connection_buffers[connection.fd].clear();

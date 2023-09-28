@@ -2,8 +2,9 @@
 #define CLUSTER_HPP
 
 # include "Server.hpp"
+# include "httpRequest.hpp"
 # include <iostream>
-#include <unordered_map>
+# include <unordered_map>
 
 # define TIMEOUT_MS 2500
 # define BUFFER_SIZE 1024

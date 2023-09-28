@@ -106,3 +106,22 @@ void HttpRequest::parseParameters(const std::string& body) {
         }
     }
 }
+
+void  HttpRequest::printRequest(void)
+{
+	std::cout << "Método: " << getMethod() << std::endl;
+    std::cout << "Ruta: " << getPath() << std::endl;
+    std::cout << "Versión HTTP: " << getVersion() << std::endl;
+
+    std::cout << "Encabezados:" << std::endl;
+    std::map<std::string, std::string> headers = getHeaders();
+    for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it) {
+        std::cout << it->first << ": " << it->second << std::endl;
+    }
+
+    std::cout << "Parámetros:" << std::endl;
+    std::map<std::string, std::string> parameters = getParameters();
+    for (std::map<std::string, std::string>::const_iterator it = parameters.begin(); it != parameters.end(); ++it) {
+        std::cout << it->first << ": " << it->second << std::endl;
+    }
+}
