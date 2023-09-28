@@ -3,8 +3,10 @@
 
 # include "Server.hpp"
 # include <iostream>
+#include <unordered_map>
 
 # define TIMEOUT_MS 2500
+# define BUFFER_SIZE 1024
 
 class Cluster
 {
@@ -12,6 +14,7 @@ class Cluster
 		std::vector<Server> servers;
 		std::vector<int>	servers_fd;
 		std::vector<pollfd>	connections;
+		std::unordered_map<int, std::vector<char> > connection_buffers;
 
 	public:
 		Cluster();
@@ -20,7 +23,10 @@ class Cluster
 		Cluster	&operator=(Cluster const &copy);
 
 		void	add_server(std::string const &address, int port);
+		int		new_client_connection(int server_fd);
 		pollfd  create_pollfd(int fd, short mode);
+		int		read_from_socket(pollfd const &connection);
+		int		write_to_socket(pollfd const &connection);
 		int		accept_client(int server_fd);
 		void	poll(void);
 		int		is_server(int fd);
