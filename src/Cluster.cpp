@@ -109,17 +109,17 @@ int	Cluster::read_from_socket(pollfd const &connection)
 			);
 		}
 	} while (bytes_read > 0);
-	if (bytes_read == 0)
+	if (bytes_read == -1 && (errno != EWOULDBLOCK && errno != EAGAIN))
+	{
+		std::cout << "Error reading\n";
+		return (0);
+	}
+	else if (bytes_read <= 0)
 	{
 		std::cout << "Read from fd " << connection.fd << " : "<< connection_buffers[connection.fd].data() << std::endl;
 		// here we use the buffer and we clear it after, we could create a 
 		// Request object and process it here
 		connection_buffers[connection.fd].clear();
-	}
-	if (bytes_read == -1 && (errno != EWOULDBLOCK && errno != EAGAIN))
-	{
-		std::cout << "Error reading\n";
-		return (0);
 	}
 	return (1);
 }
