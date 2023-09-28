@@ -8,7 +8,10 @@ SRC_DIR 	= src/
 
 OBJ_DIR		= obj/
 
-_SRC 		=	main.cpp
+#_SRC 		=	main.cpp
+
+_SRC 		=	mainLemons.cpp \
+				httpRequest.cpp
 
 OBJ_FOLDERS =	obj/
 
