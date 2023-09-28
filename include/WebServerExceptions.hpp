@@ -6,28 +6,28 @@
 class SocketCreationException: public std::exception {
 	virtual const char *what() const throw()
 	{
-		return ("Socket creation failed. Unable to allocate system resources for the new socket.\n");
+		return ("Socket creation failed. Unable to allocate system resources for the new socket.");
 	}
 };
 
 class SocketOptionsException: public std::exception {
 	virtual const char *what() const throw()
 	{
-		return ("Error setting the Socket options.\n");
+		return ("Error setting the Socket options.");
 	}
 };
 
 class SocketPollingError: public std::exception {
 	virtual const char *what() const throw()
 	{
-		return ("Socket polling failed. Unable to poll the given sockets, check that timeout is not too short.\n");
+		return ("Socket polling failed. Unable to poll the given sockets, check that timeout is not too short.");
 	}
 };
 
 class BindingException: public std::exception {
 	virtual const char *what() const throw()
 	{
-		return ("Binding failed. The chosen IP and port combination may be in use or restricted.\n");
+		return ("Binding failed. The chosen IP and port combination may be in use or restricted.");
 	}
 };
 
@@ -35,21 +35,21 @@ class ListeningException: public std::exception {
 
 	virtual const char *what() const throw()
 	{
-		return ("Listening failed. The server cannot listen on the specified socket for incoming connections.\n");
+		return ("Listening failed. The server cannot listen on the specified socket for incoming connections.");
 	}
 };
 
 class ClientAcceptException: public std::exception {
 	virtual const char *what() const throw()
 	{
-		return ("Client acceptance failed. The server could not establish a new client connection.\n");
+		return ("Client acceptance failed. The server could not establish a new client connection.");
 	}
 };
 
 class InvalidIPException: public std::exception {
 	virtual const char *what() const throw()
 	{
-		return ("Invalid IP address format. Ensure the IP address adheres to IPv4 standards.\n");
+		return ("Invalid IP address format. Ensure the IP address adheres to IPv4 standards.");
 	}
 };
 

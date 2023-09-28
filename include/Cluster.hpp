@@ -23,13 +23,16 @@ class Cluster
 		Cluster	&operator=(Cluster const &copy);
 
 		void	add_server(std::string const &address, int port);
-		int		new_client_connection(int server_fd);
-		pollfd  create_pollfd(int fd, short mode);
+		int		add_client(int server_fd);
+		int		accept_client(int server_fd);
+
+		void	poll(void);
 		int		read_from_socket(pollfd const &connection);
 		int		write_to_socket(pollfd const &connection);
-		int		accept_client(int server_fd);
-		void	poll(void);
-		int		is_server(int fd);
+		void	close_and_remove_connection(size_t &i, size_t &initial_size);
+
+		bool	is_server(int fd);
+		pollfd  create_pollfd(int fd, short mode);
 };
 
 #endif
