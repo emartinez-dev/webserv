@@ -11,6 +11,7 @@ HttpRequest::HttpRequest(const std::string& request_str) {
     if (end != std::string::npos) {
         std::string first_line = request_str.substr(start, end - start);
         parseFirstLine(first_line);
+        parseHeaders(request_str);
     }
 
     // Encuentra el inicio del cuerpo de la solicitud
@@ -19,6 +20,19 @@ HttpRequest::HttpRequest(const std::string& request_str) {
         start += 4;  // Mueve el puntero al inicio del cuerpo
         std::string body = request_str.substr(start);
         parseParameters(body);
+    }
+}
+
+void HttpRequest::parseHeaders(const std::string& _headers) {
+     std::istringstream ss(_headers);
+    std::string header;
+    while (std::getline(ss, header, '\n')) {
+        size_t pos = header.find(':');
+        if (pos != std::string::npos) {
+            std::string key = header.substr(0, pos);
+            std::string value = header.substr(pos + 2);
+            headers[key] = value;
+        }
     }
 }
 
@@ -38,8 +52,8 @@ HttpRequest::HttpRequest(const HttpRequest& other) {
     method_ = other.method_;
     path_ = other.path_;
     version_ = other.version_;
-    headers_ = other.headers_;
-    parameters_ = other.parameters_;
+    headers = other.headers;
+    parameters = other.parameters;
 }
 
 // Operador de asignación de la clase HttpRequest
@@ -51,8 +65,8 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
     method_ = other.method_;
     path_ = other.path_;
     version_ = other.version_;
-    headers_ = other.headers_;
-    parameters_ = other.parameters_;
+    headers = other.headers;
+    parameters = other.parameters;
 
     return *this;
 }
@@ -79,18 +93,33 @@ std::string HttpRequest::getVersion() const {
 
 // Función para obtener un encabezado específico por su nombre
 std::string HttpRequest::getHeader(const std::string& name) const {
-    std::map<std::string, std::string>::const_iterator it = headers_.find(name);
-    return (it != headers_.end()) ? it->second : "";
+    std::map<std::string, std::string>::const_iterator it = headers.find(name);
+    //std::cout << "en getheader recibe -> " << name << std::endl;
+    if (it != headers.end()) {
+        return it->second;
+    } else {
+        return "";
+    }
+}
+
+std::string HttpRequest::getHeaderKey(const std::string& name) const {
+    std::map<std::string, std::string>::const_iterator it = headers.find(name);
+    
+    if (it != headers.end()) {
+        return it->first;
+    } else {
+        return "";
+    }
 }
 
 // Función para obtener todos los encabezados
 std::map<std::string, std::string> HttpRequest::getHeaders() const {
-    return headers_;
+    return headers;
 }
 
 // Función para obtener todos los parámetros
 std::map<std::string, std::string> HttpRequest::getParameters() const {
-    return parameters_;
+    return parameters;
 }
 
 // Función privada para analizar los parámetros del cuerpo de la solicitud HTTP
@@ -102,7 +131,7 @@ void HttpRequest::parseParameters(const std::string& body) {
         if (pos != std::string::npos) {
             std::string key = param.substr(0, pos);
             std::string value = param.substr(pos + 1);
-            parameters_[key] = value;
+            parameters[key] = value;
         }
     }
 }
@@ -116,7 +145,7 @@ void  HttpRequest::printRequest(void)
     std::cout << "Encabezados:" << std::endl;
     std::map<std::string, std::string> headers = getHeaders();
     for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it) {
-        std::cout << it->first << ": " << it->second << std::endl;
+        std::cout << "  " << it->first << "->" << it->second << std::endl;
     }
 
     std::cout << "Parámetros:" << std::endl;

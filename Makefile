@@ -1,6 +1,6 @@
 NAME 		= webserv
 
-CC			= c++
+CC			= c++ -g
 FLAGS 		= -Wall -Wextra -Werror
 RM			= rm -rf
 

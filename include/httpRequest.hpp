@@ -5,30 +5,32 @@
 #include <map>
 
 class HttpRequest {
-public:
-    HttpRequest(const std::string& request_str);
+    private:
+        std::string method_;
+        std::string path_;
+        std::string version_;
+        std::map<std::string, std::string> headers;
+        std::map<std::string, std::string> parameters;
 
-    HttpRequest(const HttpRequest& other);
-    HttpRequest& operator=(const HttpRequest& other);
-    ~HttpRequest();
+        void parseFirstLine(const std::string& first_line);
+        void parseHeaders(const std::string& line);
+        void parseParameters(const std::string& body);
 
-    std::string getMethod() const;
-    std::string getPath() const;
-    std::string getVersion() const;
-    std::string getHeader(const std::string& name) const;
-    std::map<std::string, std::string> getHeaders() const;
-    std::map<std::string, std::string> getParameters() const;
-	void  printRequest(void);
+    public:
+        HttpRequest(const std::string& request_str);
 
-private:
-    void parseFirstLine(const std::string& first_line);
-    void parseParameters(const std::string& body);
+        HttpRequest(const HttpRequest& other);
+        HttpRequest& operator=(const HttpRequest& other);
+        ~HttpRequest();
 
-    std::string method_;
-    std::string path_;
-    std::string version_;
-    std::map<std::string, std::string> headers_;
-    std::map<std::string, std::string> parameters_;
+        std::string getMethod() const;
+        std::string getPath() const;
+        std::string getVersion() const;
+        std::string getHeader(const std::string& name) const;
+        std::string getHeaderKey(const std::string& name) const;
+        std::map<std::string, std::string> getHeaders() const;
+        std::map<std::string, std::string> getParameters() const;
+        void  printRequest(void);
 };
 
 #endif // HTTPREQUEST_HPP
