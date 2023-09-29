@@ -1,6 +1,6 @@
 NAME 		= webserv
 
-CC			= c++
+CC			= c++ -g
 FLAGS 		= -Wall -Wextra -Werror
 RM			= rm -rf
 
@@ -9,8 +9,11 @@ SRC_DIR 	= src/
 OBJ_DIR		= obj/
 
 _SRC 		=	main.cpp \
-				config.cpp \
-				server_conf.cpp
+				Config.cpp \
+				ServerConfig.cpp \
+				Listen.cpp \
+				ErrorPage.cpp \
+				Location.cpp
 
 
 OBJ_FOLDERS =	obj/
