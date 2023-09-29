@@ -34,6 +34,7 @@ void	Cluster::add_server(std::string const &address, int port)
 	servers.push_back(server);
 	connections.push_back(server_poll);
 	servers_fd.push_back(server_poll.fd);
+	std::cout << "Server listening at http://" << address << ":" << port << "/" << std::endl;
 }
 
 int		Cluster::add_client(int server_fd)
