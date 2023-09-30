@@ -26,6 +26,8 @@ class Config
 
 		std::vector<ServerConfig> getServerConfigs();
 
+		void add_server(std::ifstream &config_file, std::string line);
+
 };
 
 #endif

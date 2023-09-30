@@ -8,7 +8,7 @@ SRC_DIR 	= src/
 
 OBJ_DIR		= obj/
 
-_SRC 		=	main.cpp \
+_SRC 		=	mainAlberto.cpp \
 				Config.cpp \
 				ServerConfig.cpp \
 				Listen.cpp \

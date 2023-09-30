@@ -39,12 +39,9 @@ void	ServerConfig::printConfig(void)
 
 void	ServerConfig::splitKeyValue(std::string &line, std::ifstream &config_file) {
 	size_t pointsPos = line.find(":");
-	std::cout << line << std::endl;
+	//std::cout << line << std::endl;
 	if (line.find("server") != std::string::npos)
-	{
-		std::cout << "soy un server" << std::endl;
 		return ;
-	}
 	if (pointsPos != LAST) {
 		std::string key = splitKey(line);
 		std::string value = splitValue(line);
