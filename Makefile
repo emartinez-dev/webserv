@@ -13,7 +13,7 @@ _SRC 		=	main.cpp\
 				ServerConfig.cpp \
 				Listen.cpp \
 				ErrorPage.cpp \
-				Location.cpp
+				Location.cpp \
 				Cluster.cpp\
 				Server.cpp\
 				httpRequest.cpp\

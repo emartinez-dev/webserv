@@ -59,6 +59,7 @@ void	ServerConfig::splitKeyValue(std::string &line, std::ifstream &config_file) 
 				else if (key == "port")
 					listen.setPort(value);
 			}
+			listens.push_back(listen);
 		}
 		else if (key == "error page")
 		{
@@ -73,6 +74,7 @@ void	ServerConfig::splitKeyValue(std::string &line, std::ifstream &config_file) 
 				else if (key == "status_code")
 					error.setCode(value);
 			}
+			error_pages.push_back(error);
 		}
 		else if (key == "location")
 		{

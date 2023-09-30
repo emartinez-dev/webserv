@@ -2,13 +2,25 @@
 
 int	main(int argc, char **argv)
 {
-	(void) argc;
-	(void) argv;
+	if (argc != 2)
+	{
+		std::cout << "Wrong number of params. Usage: ./webserv [config_file]\n";
+		return (1);
+	}
+	std::string str(argv[1]);
 	Cluster	webserv;
+	Config configuration(str);
+	std::vector<ServerConfig> server_configs = configuration.getServerConfigs();
 
 	try {
-		webserv.add_server("0.0.0.0", 8081);
-		webserv.add_server("127.0.0.1", 8080);
+		for (int i = server_configs.size() - 1; i >= 0; i--)
+		{
+			for (int j = server_configs[i].getListens().size() - 1; j >= 0; j--)
+			{
+				Listen server_listens = server_configs[i].getListens()[j];
+				webserv.add_server(server_listens.getHost(), server_listens.getPort());
+			}
+		}
 		webserv.poll();
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
