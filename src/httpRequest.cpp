@@ -1,4 +1,4 @@
-#include "../include/httpRequest.hpp"
+#include "../include/HttpRequest.hpp"
 #include <iostream>
 #include <sstream>
 

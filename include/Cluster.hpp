@@ -2,7 +2,7 @@
 #define CLUSTER_HPP
 
 # include "Server.hpp"
-# include "httpRequest.hpp"
+# include "HttpRequest.hpp"
 # include <iostream>
 # include <unordered_map>
 

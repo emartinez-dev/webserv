@@ -11,7 +11,7 @@ OBJ_DIR		= obj/
 _SRC 		=	main.cpp\
 				Cluster.cpp\
 				Server.cpp\
-				httpRequest.cpp\
+				HttpRequest.cpp\
 				Utils.cpp
 
 OBJ_FOLDERS =	obj/

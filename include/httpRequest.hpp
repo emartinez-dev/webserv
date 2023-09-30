@@ -1,5 +1,5 @@
-#ifndef HTTPREQUEST_HPP
-#define HTTPREQUEST_HPP
+#ifndef HttpRequest_HPP
+#define HttpRequest_HPP
 
 #include <string>
 #include <map>
@@ -33,4 +33,4 @@ class HttpRequest {
         void  printRequest(void);
 };
 
-#endif // HTTPREQUEST_HPP
+#endif // HttpRequest_HPP
