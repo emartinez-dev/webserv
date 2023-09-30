@@ -9,6 +9,11 @@ SRC_DIR 	= src/
 OBJ_DIR		= obj/
 
 _SRC 		=	main.cpp\
+				Config.cpp \
+				ServerConfig.cpp \
+				Listen.cpp \
+				ErrorPage.cpp \
+				Location.cpp
 				Cluster.cpp\
 				Server.cpp\
 				httpRequest.cpp\
