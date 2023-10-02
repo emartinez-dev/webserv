@@ -16,8 +16,10 @@ ErrorPage::ErrorPage(ErrorPage const &copy)
 
 ErrorPage	&ErrorPage::operator=(const ErrorPage &copy)
 {
-	this->status_code = copy.status_code;
-	this->path = copy.status_code;
+	if (this != &copy) {
+		this->status_code = copy.status_code;
+		this->path = copy.status_code;
+	}
 	return *this;
 }
 
