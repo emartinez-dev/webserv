@@ -17,7 +17,8 @@ _SRC 		=	main.cpp\
 				Cluster.cpp\
 				Server.cpp\
 				httpRequest.cpp\
-				Utils.cpp
+				Utils.cpp \
+				Cgi.cpp
 
 OBJ_FOLDERS =	obj/
 
