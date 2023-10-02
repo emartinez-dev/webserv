@@ -11,7 +11,7 @@ class Response
 {
 	private:
 		std::string status_code;
-		std::unordered_map<std::string, std::string> headers;
+		std::map<std::string, std::string> headers;
 		std::string	  body;
 		Response();
 
@@ -24,6 +24,7 @@ class Response
 		void  setStatusCode(const std::string &status_code);
 		void  setHeader(const std::string &key, const std::string &value);
 		void  setBody(const std::string &body);
+		const std::string getContent(void) const;
 };
 
 #endif

@@ -26,6 +26,12 @@ server:
         route: /red
         root: ./
         return: /tours
+    location:
+        route: /
+        root: ./
+        index:  index.html
+        autoindex: off
+        allow_methods: GET POST DELETE
 server:
     root:
     name:  alberto

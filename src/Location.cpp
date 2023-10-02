@@ -52,3 +52,12 @@ bool  Location::matches(const std::string &path)
 		return true;
 	return false;
 }
+
+const std::string Location::getValue(std::string const &key) const
+{
+	std::map<std::string, std::string>::const_iterator it = conf.find(key);
+    if (it != conf.end())
+        return it->second;
+    else
+        return "";
+}

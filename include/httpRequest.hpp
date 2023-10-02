@@ -17,8 +17,8 @@ class HttpRequest {
         void parseParameters(const std::string& body);
 
     public:
+		HttpRequest();
         HttpRequest(const std::string& request_str);
-
         HttpRequest(const HttpRequest& other);
         HttpRequest& operator=(const HttpRequest& other);
         ~HttpRequest();

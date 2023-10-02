@@ -3,6 +3,9 @@
 #include <sstream>
 
 // Constructor de la clase HttpRequest
+HttpRequest::HttpRequest() {
+}
+
 HttpRequest::HttpRequest(const std::string& request_str) {
     size_t start = 0;
     size_t end = request_str.find("\r\n");

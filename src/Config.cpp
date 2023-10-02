@@ -56,6 +56,9 @@ void Config::add_server(std::ifstream &config_file, std::string line)
 	servers.push_back(conf);
 }
 
+/* As the subject says, the first server will be the default if the request 
+doesn't belong to another server. In our vector, the first server is the last 
+one */
 const ServerConfig *Config::getServer(std::string const &host) const
 {
 	for (size_t i = 0; i < servers.size(); i++)
@@ -63,5 +66,5 @@ const ServerConfig *Config::getServer(std::string const &host) const
 		if (servers[i].matches(host))
 			return (&servers[i]);
 	}
-	return (0);
+	return (&servers[servers.size() - 1]);
 }

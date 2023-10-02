@@ -131,11 +131,10 @@ std::vector<ErrorPage> ServerConfig::getErrorPages() {
 	return error_pages;
 }
 
-
+// TODO: abstract this to a function or something, we repeat this a lot
 const std::string ServerConfig::getValue(std::string const &key) const
 {
 	std::map<std::string, std::string>::const_iterator it = conf.find(key);
-    //std::cout << "en getheader recibe -> " << name << std::endl;
     if (it != conf.end())
         return it->second;
     else
@@ -144,6 +143,7 @@ const std::string ServerConfig::getValue(std::string const &key) const
 
 
 // This functions also remove the trailing \r
+// TODO: abstract this to a function or something
 static const std::string getHostname(std::string const &host)
 {
 	if (host.find(":") == std::string::npos)
@@ -175,4 +175,41 @@ bool  ServerConfig::matches(std::string const &host) const
 			return (true);
 	}
 	return (false);
+}
+
+/* In our webserver context, we have to match the URL given with the prefixes on
+ * the config file. Example:
+ * We have a URL like /projects/alumni and a route with /projects and other with 
+ * /projects/alumni on the configuration file. We have to redirect the browser to
+ * the most specific one, being it the longest one */
+
+static int prefixMatch(std::string const &str, std::string const &prefix)
+{
+	if (str.length() < prefix.length())
+		return (0);
+	if (str.compare(0, prefix.length(), prefix) == 0)
+		return (prefix.length());
+	return (0);
+}
+
+const Location *ServerConfig::getLocation(std::string const &url) const
+{
+	Location const	*best_match = NULL;
+	int				best_match_len = -1;
+	int				temp_len;
+
+	for (size_t i = 0; i < locations.size(); i++)
+	{
+		std::string const &route = locations[i].getValue("route");
+		temp_len = prefixMatch(url, route);
+		if (temp_len > best_match_len)
+		{
+			best_match_len = temp_len;
+			best_match = &locations[i];
+		}
+	}
+	if (best_match_len > 0)
+		return best_match;
+	else
+		return (NULL);
 }

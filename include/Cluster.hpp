@@ -6,6 +6,7 @@
 # include <iostream>
 # include <unordered_map>
 # include "Config.hpp"
+# include "Response.hpp"
 
 # define TIMEOUT_MS 2500
 # define BUFFER_SIZE 1024
@@ -30,8 +31,8 @@ class Cluster
 		int		accept_client(int server_fd);
 
 		void	poll(void);
-		int		read_from_socket(pollfd const &connection);
-		int		write_to_socket(pollfd const &connection);
+		HttpRequest	read_from_socket(pollfd const &connection);
+		int		write_to_socket(pollfd const &connection, Response const &response);
 		void	close_and_remove_connection(size_t &i, size_t &initial_size);
 
 		bool	is_server(int fd);

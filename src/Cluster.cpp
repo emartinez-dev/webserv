@@ -90,8 +90,9 @@ void  Cluster::poll(void)
 					 add_client(connections[i].fd);
 				else
 				{
-					read_from_socket(connections[i]);
-					write_to_socket(connections[i]);
+					HttpRequest request = read_from_socket(connections[i]);
+					Response response(request, cluster_config);
+					write_to_socket(connections[i], response);
 					close_and_remove_connection(i, initial_size);
 				}
 			}
@@ -104,8 +105,9 @@ void  Cluster::poll(void)
 	}
 }
 
-int	Cluster::read_from_socket(pollfd const &connection)
+HttpRequest  Cluster::read_from_socket(pollfd const &connection)
 {
+	HttpRequest request;
 	ssize_t	  bytes_read;
 	do
 	{
@@ -124,28 +126,26 @@ int	Cluster::read_from_socket(pollfd const &connection)
 	if (bytes_read == -1 && (errno != EWOULDBLOCK && errno != EAGAIN))
 	{
 		std::cout << "Error reading\n";
-		return (0);
+		return request;
 	}
 	else if (bytes_read <= 0)
 	{
 		std::string request_text(connection_buffers[connection.fd].begin(), connection_buffers[connection.fd].end());
-		HttpRequest request(request_text);
 		std::cout << "Read from fd " << connection.fd << std::endl;
-		request.printRequest();
-		Response response(request, cluster_config);
+		HttpRequest	readRequest(request_text);
+		readRequest.printRequest();
 		std::cout << std::endl;
 		// here we use the buffer and we clear it after, we could create a 
 		// Request object and process it here
 		connection_buffers[connection.fd].clear();
+		request = readRequest;
 	}
-	return (1);
+	return request;
 }
 
-int	Cluster::write_to_socket(pollfd const &connection)
+int	Cluster::write_to_socket(pollfd const &connection, Response const &response)
 {
-	const char* response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 48\r\n\r\n<html><body><h1>Hola Limones</h1></body></html>\r\n";
-
-	if (send(connection.fd, response, strlen(response), 0) == -1)
+	if (send(connection.fd, response.getContent().c_str(), strlen(response.getContent().c_str()), 0) == -1)
 	{
 		std::cout << "Error writing\n";
 		return (0);
