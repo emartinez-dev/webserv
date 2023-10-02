@@ -33,7 +33,7 @@ void	Location::setConf(const std::string &key, const std::string &value) {
 	conf[key] = value;
 }
 
-const std::map<std::string, std::string>	Location::getConf() {
+std::map<std::string, std::string>	Location::getConf() {
 	return(conf);
 }
 

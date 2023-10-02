@@ -113,19 +113,19 @@ std::string ServerConfig::splitValue(std::string const &line) {
 	return value;
 }
 
-const std::map<std::string, std::string> ServerConfig::getConf() {
+std::map<std::string, std::string> ServerConfig::getConf() {
 	return conf;
 }
 
-const std::vector<Location> ServerConfig::getLocations() {
+std::vector<Location> ServerConfig::getLocations() {
 	return locations;
 }
 
-const std::vector<Listen> ServerConfig::getListens() {
+std::vector<Listen> ServerConfig::getListens() {
 	return listens;
 }
 
-const std::vector<ErrorPage> ServerConfig::getErrorPages() {
+std::vector<ErrorPage> ServerConfig::getErrorPages() {
 	return error_pages;
 }
 
@@ -169,7 +169,7 @@ bool  ServerConfig::matches(std::string const &host) const
 	{
 		if (listens[i].getPort() == int_port && listens[i].getHost() == hostname)
 			return (true);
-		if (hostname == getValue("name"))
+		if (hostname == getValue("name") && int_port == listens[i].getPort())
 			return (true);
 	}
 	return (false);

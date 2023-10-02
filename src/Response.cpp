@@ -28,7 +28,7 @@ const std::string Response::getContent(void) const
 
 	response_text += "HTTP/1.1 ";
 	response_text += status_code + " OK\r\n";
-	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); it++)
+	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
 		response_text += it->first + ": " + it->second + "\r\n";
 	response_text += "\r\n\r\n";
 	response_text += body;

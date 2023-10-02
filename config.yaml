@@ -1,6 +1,6 @@
 server:
     root:  docs/fusion_web/
-    name:  localhost
+    name: localhost
     cgi_path: /usr/bin/python3 /bin/bash
     client_max_body_size: 3000  
     error_page: 
@@ -9,6 +9,12 @@ server:
     listen:
         host: 127.0.0.1
         port: 8080
+  location:
+        route: /
+        root: ./
+        index:  index.html
+        autoindex: off
+        allow_methods: GET POST DELETE
     location: 
 		route: /test
         root: ./
@@ -25,12 +31,6 @@ server:
     location: 
         route: /red
         return: /tours
-    location:
-        route: /
-        root: ./
-        index:  index.html
-        autoindex: off
-        allow_methods: GET POST DELETE
 server:
     root:  docs/sweet_cake/
     name:  localhost
