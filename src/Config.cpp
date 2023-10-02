@@ -17,7 +17,9 @@ Config::Config(Config const &copy) {
 }
 
 Config	&Config::operator=(Config const &copy) {
-	(void)copy;
+	if (this != &copy) {
+		this->servers = copy.servers;
+	}
 	return *this;
 }
 

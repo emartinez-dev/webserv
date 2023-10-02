@@ -29,10 +29,10 @@ class ServerConfig
 		std::string splitKey(std::string const &line);
 		std::string splitValue(std::string const &line);
 
-		std::map<std::string, std::string> getConf();
-		std::vector<Location> getLocations();
-		std::vector<Listen> getListens();
-		std::vector<ErrorPage> getErrorPages();
+		const std::map<std::string, std::string> getConf();
+		const std::vector<Location> getLocations();
+		const std::vector<Listen> getListens();
+		const std::vector<ErrorPage> getErrorPages();
 
 		ServerConfig parseServer(std::string &line, std::ifstream &config_file);
 };

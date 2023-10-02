@@ -39,13 +39,11 @@ void	ServerConfig::printConfig(void)
 
 void	ServerConfig::splitKeyValue(std::string &line, std::ifstream &config_file) {
 	size_t pointsPos = line.find(":");
-	//std::cout << line << std::endl;
 	if (line.find("server") != std::string::npos)
 		return ;
 	if (pointsPos != LAST) {
 		std::string key = splitKey(line);
 		std::string value = splitValue(line);
-		//std::cout << "key: " << key << " value: " << value << std::endl;
 		if (key == "listen")
 		{
 			Listen listen;
@@ -114,18 +112,18 @@ std::string ServerConfig::splitValue(std::string const &line) {
 	return value;
 }
 
-std::map<std::string, std::string> ServerConfig::getConf() {
+const std::map<std::string, std::string> ServerConfig::getConf() {
 	return conf;
 }
 
-std::vector<Location> ServerConfig::getLocations() {
+const std::vector<Location> ServerConfig::getLocations() {
 	return locations;
 }
 
-std::vector<Listen> ServerConfig::getListens() {
+const std::vector<Listen> ServerConfig::getListens() {
 	return listens;
 }
 
-std::vector<ErrorPage> ServerConfig::getErrorPages() {
+const std::vector<ErrorPage> ServerConfig::getErrorPages() {
 	return error_pages;
 }

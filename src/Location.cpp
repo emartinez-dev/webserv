@@ -22,16 +22,18 @@ Location::Location(Location const &copy)
 
 Location	&Location::operator=(const Location &copy)
 {
-	this->conf = copy.conf;
-	this->allow_methods = copy.allow_methods;
+	if (this != &copy) {
+		this->conf = copy.conf;
+		this->allow_methods = copy.allow_methods;
+	}
 	return *this;
 }
 
-void	Location::setConf(std::string key, std::string value) {
+void	Location::setConf(const std::string &key, const std::string &value) {
 	conf[key] = value;
 }
 
-std::map<std::string, std::string>	Location::getConf() {
+const std::map<std::string, std::string>	Location::getConf() {
 	return(conf);
 }
 
