@@ -38,7 +38,7 @@ int	Config::check_file(std::ifstream &config_file)	{
 return 0;
 }
 
-std::vector<ServerConfig> Config::getServerConfigs() {
+const std::vector<ServerConfig> Config::getServerConfigs() const {
 	return servers;
 }
 
@@ -54,4 +54,14 @@ void Config::add_server(std::ifstream &config_file, std::string line)
 			add_server(config_file, line);
 	}
 	servers.push_back(conf);
+}
+
+const ServerConfig *Config::getServer(std::string const &host) const
+{
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		if (servers[i].matches(host))
+			return (&servers[i]);
+	}
+	return (0);
 }

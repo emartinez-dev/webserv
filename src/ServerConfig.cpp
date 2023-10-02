@@ -1,4 +1,5 @@
 #include "ServerConfig.hpp"
+#include <string>
 
 ServerConfig::ServerConfig()
 {
@@ -128,4 +129,50 @@ std::vector<Listen> ServerConfig::getListens() {
 
 std::vector<ErrorPage> ServerConfig::getErrorPages() {
 	return error_pages;
+}
+
+
+const std::string ServerConfig::getValue(std::string const &key) const
+{
+	std::map<std::string, std::string>::const_iterator it = conf.find(key);
+    //std::cout << "en getheader recibe -> " << name << std::endl;
+    if (it != conf.end())
+        return it->second;
+    else
+        return "";
+}
+
+
+// This functions also remove the trailing \r
+static const std::string getHostname(std::string const &host)
+{
+	if (host.find(":") == std::string::npos)
+		return (host.substr(0, host.length() - 1));
+	std::string	hostname = host.substr(0, host.find(":"));
+	return (hostname);
+}
+
+static const std::string getPort(std::string const &host)
+{
+	if (host.find(":") == std::string::npos)
+		return ("");
+	std::string	hostname = host.substr(host.find(":") + 1, host.length() - 1);
+	return (hostname);
+
+}
+
+bool  ServerConfig::matches(std::string const &host) const
+{
+	std::string hostname = getHostname(host);
+	std::string port = getPort(host);
+
+	int	int_port = atoi(port.c_str());
+	for (size_t i = 0; i < listens.size(); i++)
+	{
+		if (listens[i].getPort() == int_port && listens[i].getHost() == hostname)
+			return (true);
+		if (hostname == getValue("name"))
+			return (true);
+	}
+	return (false);
 }

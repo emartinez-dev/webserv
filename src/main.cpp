@@ -8,19 +8,9 @@ int	main(int argc, char **argv)
 		return (1);
 	}
 	std::string str(argv[1]);
-	Cluster	webserv;
 	Config configuration(str);
-	std::vector<ServerConfig> server_configs = configuration.getServerConfigs();
-
 	try {
-		for (int i = server_configs.size() - 1; i >= 0; i--)
-		{
-			for (int j = server_configs[i].getListens().size() - 1; j >= 0; j--)
-			{
-				Listen server_listens = server_configs[i].getListens()[j];
-				webserv.add_server(server_listens.getHost(), server_listens.getPort());
-			}
-		}
+		Cluster	webserv(configuration);
 		webserv.poll();
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;

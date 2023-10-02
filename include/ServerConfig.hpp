@@ -2,10 +2,11 @@
 #define SERVERCONFIG_HPP
 
 # include <iostream>
+# include <string>
 # include <map>
 # include <vector>
-# include "Config.hpp"
 # include "ErrorPage.hpp"
+# include "Config.hpp"
 # include "Listen.hpp"
 # include "Location.hpp"
 # include <iostream>
@@ -33,8 +34,10 @@ class ServerConfig
 		std::vector<Location> getLocations();
 		std::vector<Listen> getListens();
 		std::vector<ErrorPage> getErrorPages();
+		const std::string getValue(std::string const &key) const;
 
 		ServerConfig parseServer(std::string &line, std::ifstream &config_file);
+		bool  matches(std::string const &host) const;
 };
 
 #endif

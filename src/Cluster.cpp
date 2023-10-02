@@ -1,8 +1,18 @@
 #include "Cluster.hpp"
+#include "Response.hpp"
 #include "httpRequest.hpp"
 
-Cluster::Cluster()
+Cluster::Cluster(const Config &config): cluster_config(config)
 {
+	std::vector<ServerConfig> server_configs = config.getServerConfigs();
+	for (int i = server_configs.size() - 1; i >= 0; i--)
+	{
+		for (int j = server_configs[i].getListens().size() - 1; j >= 0; j--)
+		{
+			Listen server_listens = server_configs[i].getListens()[j];
+			add_server(server_listens.getHost(), server_listens.getPort());
+		}
+	}
 }
 
 Cluster::~Cluster()
@@ -11,7 +21,7 @@ Cluster::~Cluster()
 		close(it->get_server_socket());
 }
 
-Cluster::Cluster(Cluster const &copy):servers(copy.servers),
+Cluster::Cluster(Cluster const &copy):cluster_config(copy.cluster_config),servers(copy.servers),
 	connections(copy.connections)
 {
 }
@@ -122,6 +132,7 @@ int	Cluster::read_from_socket(pollfd const &connection)
 		HttpRequest request(request_text);
 		std::cout << "Read from fd " << connection.fd << std::endl;
 		request.printRequest();
+		Response response(request, cluster_config);
 		std::cout << std::endl;
 		// here we use the buffer and we clear it after, we could create a 
 		// Request object and process it here

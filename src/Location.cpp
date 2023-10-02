@@ -45,3 +45,10 @@ int	Location::getAllowMethods() {
 		methods += 5;
 	return methods;
 }
+
+bool  Location::matches(const std::string &path)
+{
+	if (path == conf["route"])
+		return true;
+	return false;
+}

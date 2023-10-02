@@ -30,10 +30,10 @@ void Listen::setPort(std::string value) {
 
 }
 
-std::string Listen::getHost() {
-	return(host);
+const std::string Listen::getHost() const {
+	return (host);
 }
 
-int Listen::getPort() {
-	return(port);
+int Listen::getPort() const {
+	return (port);
 }

@@ -5,6 +5,7 @@
 # include "httpRequest.hpp"
 # include <iostream>
 # include <unordered_map>
+# include "Config.hpp"
 
 # define TIMEOUT_MS 2500
 # define BUFFER_SIZE 1024
@@ -12,13 +13,14 @@
 class Cluster
 {
 	private:
+		const Config		&cluster_config;
 		std::vector<Server> servers;
 		std::vector<int>	servers_fd;
 		std::vector<pollfd>	connections;
 		std::unordered_map<int, std::vector<char> > connection_buffers;
 
 	public:
-		Cluster();
+		Cluster(const Config &config);
 		~Cluster();
 		Cluster(Cluster const &copy);
 		Cluster	&operator=(Cluster const &copy);

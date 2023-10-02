@@ -24,6 +24,7 @@ class Location
 		void printConfig(void);
 		void setConf(std::string key, std::string value);
 		std::map<std::string, std::string>	getConf();
+		bool  matches(const std::string &path);
 		int	getAllowMethods();
 };
 
