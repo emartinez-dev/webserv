@@ -25,7 +25,7 @@ class ServerConfig
 		ServerConfig(ServerConfig const &copy);
 		ServerConfig	&operator=(ServerConfig const &copy);
 
-		void printConfig(void);
+		void printConfig(void) const;
 		void splitKeyValue(std::string &line, std::ifstream &config_file);
 		std::string splitKey(std::string const &line);
 		std::string splitValue(std::string const &line);

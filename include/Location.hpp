@@ -21,7 +21,7 @@ class Location
 		Location(Location const &copy);
 		Location	&operator=(Location const &copy);
 
-		void printConfig(void);
+		void printConfig(void) const;
 		void	setConf(const std::string &key, const std::string &value);
 		std::map<std::string, std::string>	getConf();
 		bool  matches(const std::string &path);

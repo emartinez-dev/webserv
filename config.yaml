@@ -1,6 +1,6 @@
 server:
     root:  docs/fusion_web/
-    name: localhost
+    server_name: localhost
     cgi_path: /usr/bin/python3 /bin/bash
     client_max_body_size: 3000  
     error_page: 
@@ -33,7 +33,7 @@ server:
         return: /tours
 server:
     root:  docs/sweet_cake/
-    name:  localhost
+    server_name:  localhost
     cgi_path: /usr/bin/python3 /bin/bash
     client_max_body_size: 3000  
     error_page: 

@@ -1,8 +1,8 @@
 #include "Location.hpp"
 
-void	Location::printConfig(void)
+void	Location::printConfig(void) const
 {
-	for(std::map<std::string, std::string>::iterator it=conf.begin(); it != conf.end(); ++it)
+	for(std::map<std::string, std::string>::const_iterator it=conf.begin(); it != conf.end(); ++it)
 		std::cout << "\tLocation Clave: " << it->first << " valor: " << it->second << std::endl;
 }
 

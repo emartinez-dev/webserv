@@ -26,9 +26,9 @@ ServerConfig	&ServerConfig::operator=(const ServerConfig &copy)
 	return *this;
 }
 
-void	ServerConfig::printConfig(void)
+void	ServerConfig::printConfig(void) const
 {
-	for(std::map<std::string, std::string>::iterator it=conf.begin(); it != conf.end(); ++it)
+	for(std::map<std::string, std::string>::const_iterator it=conf.begin(); it != conf.end(); ++it)
 		std::cout << "Clave: " << it->first << " valor: " << it->second << std::endl;
 	for (size_t i = 0; i < locations.size(); i++)
 	{
@@ -40,7 +40,7 @@ void	ServerConfig::printConfig(void)
 
 void	ServerConfig::splitKeyValue(std::string &line, std::ifstream &config_file) {
 	size_t pointsPos = line.find(":");
-	if (line.find("server") != std::string::npos)
+	if (line.find("server:") != std::string::npos)
 		return ;
 	if (pointsPos != LAST) {
 		std::string key = splitKey(line);
@@ -90,7 +90,7 @@ void	ServerConfig::splitKeyValue(std::string &line, std::ifstream &config_file) 
 			}
 			locations.push_back(location);
 		}
-		else if (key == "server")
+		else if (key == "server:")
 			return ;
 		else
 			conf[key] = value;
@@ -169,7 +169,7 @@ bool  ServerConfig::matches(std::string const &host) const
 	{
 		if (listens[i].getPort() == int_port && listens[i].getHost() == hostname)
 			return (true);
-		if (hostname == getValue("name") && int_port == listens[i].getPort())
+		if (hostname == getValue("server_name") && int_port == listens[i].getPort())
 			return (true);
 	}
 	return (false);

@@ -31,7 +31,7 @@ int	Config::check_file(std::ifstream &config_file)	{
 		return 0;
 	}
 	std::getline(config_file, line);
-	if (line.find("server") == std::string::npos) {
+	if (line.find("server:") == std::string::npos) {
 		std::cerr << "error: file" << std::endl;
 		return 0;
 	}
@@ -52,7 +52,7 @@ void Config::add_server(std::ifstream &config_file, std::string line)
 	{
 		if (line.empty()) continue;
 		conf.splitKeyValue(line, config_file);
-		if (line.find("server") != std::string::npos)
+		if (line.find("server:") != std::string::npos)
 			add_server(config_file, line);
 	}
 	servers.push_back(conf);
