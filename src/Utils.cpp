@@ -1,4 +1,5 @@
 #include "webserv.hpp"
+#define NOT_FOUND ""
 
 unsigned long parse_ip(const std::string &ip_address)
 {
@@ -27,4 +28,39 @@ sockaddr_in	config_address(std::string const &ip_address, int port)
 	return server_address;
 }
 
+std::string splitKey(std::string const &line) {
+	size_t pointsPos = line.find(":");
+	std::string key = line.substr(0, pointsPos);
+    key.erase(0, key.find_first_not_of(" \t\r"));
+    key.erase(key.find_last_not_of(" \t\r") + 1);
+	return key;
+}
 
+std::string splitValue(std::string const &line) {
+	size_t pointsPos = line.find(":");
+	std::string value = line.substr(pointsPos + 1);
+    value.erase(0, value.find_first_not_of(" \t\r"));
+    value.erase(value.find_last_not_of(" \t\r") + 1);
+	return value;
+}
+
+// Función para obtener un encabezado específico por su nombre
+const std::string& getMapValue(const std::string& name, const std::map<std::string, std::string>& map) {
+    std::map<std::string, std::string>::const_iterator it = map.find(name);
+	static const std::string &empty = "";
+    if (it != map.end()) {
+        return it->second;
+    } else {
+        return empty;
+    }
+}
+
+const std::string& getMapKey(const std::string& name, const std::map<std::string, std::string>& map) {
+    std::map<std::string, std::string>::const_iterator it = map.find(name);
+    static const std::string &empty = "";
+    if (it != map.end()) {
+        return it->first;
+    } else {
+        return empty;
+    }
+}

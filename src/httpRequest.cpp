@@ -32,8 +32,8 @@ void HttpRequest::parseHeaders(const std::string& _headers) {
     while (std::getline(ss, header, '\n')) {
         size_t pos = header.find(':');
         if (pos != std::string::npos) {
-            std::string key = header.substr(0, pos);
-            std::string value = header.substr(pos + 2);
+            std::string key = splitKey(header.substr(0, pos));
+            std::string value = splitValue(header.substr(pos + 2));
             headers[key] = value;
         }
     }
@@ -96,23 +96,11 @@ std::string HttpRequest::getVersion() const {
 
 // Función para obtener un encabezado específico por su nombre
 std::string HttpRequest::getHeader(const std::string& name) const {
-    std::map<std::string, std::string>::const_iterator it = headers.find(name);
-    //std::cout << "en getheader recibe -> " << name << std::endl;
-    if (it != headers.end()) {
-        return it->second;
-    } else {
-        return "";
-    }
+    return (getMapValue(name, this->headers));
 }
 
 std::string HttpRequest::getHeaderKey(const std::string& name) const {
-    std::map<std::string, std::string>::const_iterator it = headers.find(name);
-    
-    if (it != headers.end()) {
-        return it->first;
-    } else {
-        return "";
-    }
+    return (getMapKey(name, this->headers));
 }
 
 // Función para obtener todos los encabezados
