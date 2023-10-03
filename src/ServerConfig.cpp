@@ -1,4 +1,5 @@
 #include "ServerConfig.hpp"
+#include "Utils.hpp"
 #include <string>
 
 ServerConfig::ServerConfig()
@@ -132,11 +133,7 @@ std::vector<ErrorPage> ServerConfig::getErrorPages() {
 // TODO: abstract this to a function or something, we repeat this a lot
 const std::string ServerConfig::getValue(std::string const &key) const
 {
-	std::map<std::string, std::string>::const_iterator it = conf.find(key);
-    if (it != conf.end())
-        return it->second;
-    else
-        return "";
+	return (getMapValue(key, this->conf));
 }
 
 

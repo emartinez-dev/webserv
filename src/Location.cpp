@@ -1,4 +1,5 @@
 #include "Location.hpp"
+#include "Utils.hpp"
 
 void	Location::printConfig(void) const
 {
@@ -57,9 +58,5 @@ bool  Location::matches(const std::string &path)
 
 const std::string Location::getValue(std::string const &key) const
 {
-	std::map<std::string, std::string>::const_iterator it = conf.find(key);
-    if (it != conf.end())
-        return it->second;
-    else
-        return "";
+	return (getMapValue(key, this->conf));
 }
