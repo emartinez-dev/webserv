@@ -23,8 +23,10 @@ std::string runCGI(const std::string& cgi_path, const std::string& cgi_file, cha
     } 
 	else if (child_pid == 0) {
         // Proceso hijo: configurar las variables de entorno y ejecutar el script CGI.
-        setenv("QUERY_STRING", "param1=value1&param2=value2", 1);
-        setenv("REQUEST_METHOD", "GET", 1);
+        
+        // Ha falta de ver como hacen falta las variables de entorno
+        // setenv("QUERY_STRING", "param1=value1&param2=value2", 1);
+        // setenv("REQUEST_METHOD", "GET", 1);
 
         // Redirigir la salida estándar al extremo de escritura de la tubería.
         close(pipe_fd[0]);
