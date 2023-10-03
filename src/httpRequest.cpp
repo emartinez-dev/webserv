@@ -141,6 +141,7 @@ void HttpRequest::parseParameters(const std::string& body) {
 
 void  HttpRequest::printRequest(void)
 {
+	std::cout << "\n\n------------------Request--------------------\n";
 	std::cout << "Método: " << getMethod() << std::endl;
     std::cout << "Ruta: " << getPath() << std::endl;
     std::cout << "Versión HTTP: " << getVersion() << std::endl;

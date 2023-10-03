@@ -91,6 +91,7 @@ void  Cluster::poll(void)
 				else
 				{
 					HttpRequest request = read_from_socket(connections[i]);
+					// check if request is complete
 					Response response(request, cluster_config);
 					write_to_socket(connections[i], response);
 					close_and_remove_connection(i, initial_size);
@@ -130,14 +131,17 @@ HttpRequest  Cluster::read_from_socket(pollfd const &connection)
 	}
 	else if (bytes_read <= 0)
 	{
+		std::cout << "\n----------------------Parte socket----------------------\n\n";
+		std::cout << "Bytes read: " << bytes_read << std::endl;
 		std::string request_text(connection_buffers[connection.fd].begin(), connection_buffers[connection.fd].end());
-		std::cout << "Read from fd " << connection.fd << std::endl;
+		//std::cout << "Read from fd " << connection.fd << std::endl;
 		HttpRequest	readRequest(request_text);
+		std::cout << "Request text:\n" << request_text << std::endl;
+		std::cout << "\n----------------------end socket----------------------\n\n";
 		readRequest.printRequest();
 		std::cout << std::endl;
 		// here we use the buffer and we clear it after, we could create a 
 		// Request object and process it here
-		connection_buffers[connection.fd].clear();
 		request = readRequest;
 	}
 	return request;
@@ -155,6 +159,7 @@ int	Cluster::write_to_socket(pollfd const &connection, Response const &response)
 
 void  Cluster::close_and_remove_connection(size_t &i, size_t &initial_size)
 {
+	connection_buffers[connections[i].fd].clear();
 	close(connections[i].fd);
 	connections.erase(connections.begin() + i);
 	--i;
