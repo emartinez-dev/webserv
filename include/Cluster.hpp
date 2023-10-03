@@ -7,6 +7,8 @@
 # include <unordered_map>
 # include "Config.hpp"
 # include "Response.hpp"
+# include <cstring>
+# include <algorithm>
 
 # define TIMEOUT_MS 2500
 # define BUFFER_SIZE 1024
