@@ -32,8 +32,8 @@ void HttpRequest::parseHeaders(const std::string& _headers) {
     while (std::getline(ss, header, '\n')) {
         size_t pos = header.find(':');
         if (pos != std::string::npos) {
-            std::string key = header.substr(0, pos);
-            std::string value = header.substr(pos + 2);
+            std::string key = splitKey(header.substr(0, pos));
+            std::string value = splitValue(header.substr(pos + 2));
             headers[key] = value;
         }
     }

@@ -97,21 +97,21 @@ void	ServerConfig::splitKeyValue(std::string &line, std::ifstream &config_file) 
 	}
 }
 
-std::string ServerConfig::splitKey(std::string const &line) {
-	size_t pointsPos = line.find(":");
-	std::string key = line.substr(0, pointsPos);
-    key.erase(0, key.find_first_not_of(" \t"));
-    key.erase(key.find_last_not_of(" \t") + 1);
-	return key;
-}
+// std::string ServerConfig::splitKey(std::string const &line) {
+// 	size_t pointsPos = line.find(":");
+// 	std::string key = line.substr(0, pointsPos);
+//     key.erase(0, key.find_first_not_of(" \t"));
+//     key.erase(key.find_last_not_of(" \t") + 1);
+// 	return key;
+// }
 
-std::string ServerConfig::splitValue(std::string const &line) {
-	size_t pointsPos = line.find(":");
-	std::string value = line.substr(pointsPos + 1);
-    value.erase(0, value.find_first_not_of(" \t"));
-    value.erase(value.find_last_not_of(" \t") + 1);
-	return value;
-}
+// std::string ServerConfig::splitValue(std::string const &line) {
+// 	size_t pointsPos = line.find(":");
+// 	std::string value = line.substr(pointsPos + 1);
+//     value.erase(0, value.find_first_not_of(" \t"));
+//     value.erase(value.find_last_not_of(" \t") + 1);
+// 	return value;
+// }
 
 std::map<std::string, std::string> ServerConfig::getConf() {
 	return conf;

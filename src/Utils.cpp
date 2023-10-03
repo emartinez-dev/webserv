@@ -27,4 +27,18 @@ sockaddr_in	config_address(std::string const &ip_address, int port)
 	return server_address;
 }
 
+std::string splitKey(std::string const &line) {
+	size_t pointsPos = line.find(":");
+	std::string key = line.substr(0, pointsPos);
+    key.erase(0, key.find_first_not_of(" \t\r"));
+    key.erase(key.find_last_not_of(" \t\r") + 1);
+	return key;
+}
 
+std::string splitValue(std::string const &line) {
+	size_t pointsPos = line.find(":");
+	std::string value = line.substr(pointsPos + 1);
+    value.erase(0, value.find_first_not_of(" \t\r"));
+    value.erase(value.find_last_not_of(" \t\r") + 1);
+	return value;
+}
