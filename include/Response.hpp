@@ -16,10 +16,12 @@ class Response
 		std::string		version;
 		std::string 	status_code;
 		std::string	  	body;
+		std::streampos	body_len;
 		std::string 	pwd;
 		std::map<std::string, std::string> headers;
 		Response();
 	public:
+		size_t			size_body;
 		Response(const HttpRequest &request, const Config &config);
 		~Response();
 		Response(Response const &copy);
@@ -28,6 +30,7 @@ class Response
 		void  setStatusCode(const std::string &status_code);
 		void  setHeader(const std::string &key, const std::string &value);
 		void  setBody(const std::string &body);
+		void  setContentLength(std::string& key);
 
 		const std::string getContent(void) const;
 		bool readFile();
@@ -35,6 +38,9 @@ class Response
 		void getResponse(std::string newpwd);
 		std::string getFirstLine() const;
 		std::string getStatusMessage() const;
+		bool getSize();
+
+		void printResponse();
 };
 
 #endif

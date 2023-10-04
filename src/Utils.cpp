@@ -1,5 +1,4 @@
 #include "webserv.hpp"
-#define NOT_FOUND ""
 
 unsigned long parse_ip(const std::string &ip_address)
 {
@@ -63,4 +62,10 @@ const std::string& getMapKey(const std::string& name, const std::map<std::string
     } else {
         return empty;
     }
+}
+
+std::string itoa(std::streampos number) {
+	std::ostringstream	strNumber;
+	strNumber << number;
+	return (strNumber.str());
 }

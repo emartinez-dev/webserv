@@ -42,22 +42,28 @@ Response::Response()
 
 Response::Response(const HttpRequest &request, const Config &config)
 {
+	std::string content_length_key = "Content-Length";
 	pwd = request.getHeader("path");
 	version = request.getVersion();
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
 	Location const *location = server_config->getLocation(request.getPath());
 	getResponse(request.getPath());
 	bool can_read = readFile();
+	
+	getSize();
 	if (location == NULL || !can_read)
 	{
 		setStatusCode("404");
 		setHeader("Content-Type", "text/html");
+		setHeader("Content-Length", itoa(getSize()));
 		setBody("<html><body><h1>Page not found</h1></body></html>");
 	}
 	else
 	{
+		//TODO Hay que detectar la extension del archivo
 		setStatusCode("200");
-		setHeader("Content-Type", "text/html");
+		setHeader("Content-Length", itoa(body_len));
+		setHeader("Content-Type", "image/jpeg");
 	}
 }
 
@@ -72,7 +78,7 @@ const std::string Response::getContent(void) const
 	response_text += headers_text;
 	response_text += "\r\n";
 	response_text += body;
-	std::cout << body << std::endl;
+	//std::cout << body << std::endl;
 	return (response_text);
 }
 
@@ -146,17 +152,27 @@ std::string Response::getStatusMessage() const {
 
 bool Response::readFile() {
 	std::ifstream file(getPwd());
-
 	if (file.is_open()) {
-		std::string line;
-		while (std::getline(file, line)) {
-			std::cout << line << std::endl;
-			body += line;
+		char character;
+		while (file.get(character)) {
+			body += character;
 		}
 		file.close();
 	} else {
 		return false;
 	}
+	return true;
+}
+
+bool Response::getSize() {
+	std::ifstream file(getPwd(), std::ios::binary);
+	if (!file.is_open()) {
+		return false;
+	}
+	file.seekg(0, std::ios::end);
+	body_len = file.tellg();
+	file.close();
+	std::cout << "body_len: " << body_len << std::endl;
 	return true;
 }
 
@@ -174,4 +190,17 @@ void  Response::setHeader(const std::string &key, const std::string &value)
 void  Response::setBody(const std::string &body)
 {
 	this->body = body;
+}
+
+void Response::setContentLength(std::string& key) {
+	std::cout << "-------------------------" << getMapValue(key, headers) << std::endl;
+	std::cout << "key: " << key << std::endl;
+}
+
+
+void Response::printResponse() {
+	std::cout << "version: " << version << std::endl;
+	std::cout << "status_code: " << status_code << std::endl;
+	std::cout << "body: " << body << std::endl;
+	std::cout << "pwd: " << pwd << std::endl;
 }
