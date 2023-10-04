@@ -7,9 +7,11 @@
 
 class HttpRequest {
     private:
+		bool		received_headers;
         std::string method_;
         std::string path_;
         std::string version_;
+        std::string body;
         std::map<std::string, std::string> headers;
         std::map<std::string, std::string> parameters;
 
@@ -24,9 +26,12 @@ class HttpRequest {
         HttpRequest& operator=(const HttpRequest& other);
         ~HttpRequest();
 
+		bool  receivedHeaders() const;
+		bool  receivedBody() const;
         std::string getMethod() const;
         std::string getPath() const;
         std::string getVersion() const;
+        const std::string &getBody() const;
         std::string getHeader(const std::string& name) const;
         std::string getHeaderKey(const std::string& name) const;
         std::map<std::string, std::string> getHeaders() const;
