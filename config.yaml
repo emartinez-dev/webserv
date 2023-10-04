@@ -1,7 +1,7 @@
 server:
-    root:  docs/fusion_web/
+    root: ./example
     server_name: localhost
-    cgi_path: /usr/bin/python3 /bin/bash
+    cgi_path: /usr/bin/php
     client_max_body_size: 3000  
     error_page: 
         path: ./4xx.html
@@ -10,21 +10,28 @@ server:
         host: 127.0.0.1
         port: 8080
   location:
-        route: /
-        root: ./
+        route: /index
+        root: /php
         index:  index.html
         autoindex: off
-        allow_methods: GET POST DELETE
+        allow_methods: GET POST
+        cgi_ext: .php
     location: 
-		route: /test
-        root: ./
-        index:  index.html
+		route: /html
+        root: /html
+        index:  limones.html
         autoindex: off 
         allow_methods: GET POST DELETE 
-        cgi_ext: .php    
+        cgi_ext: .php
     location: 
 		route: /tours
         root: ./
+        index: time.py
+        autoindex: off 
+        allow_methods: GET
+    location: 
+		route: /test
+        root: html/
         index: time.py
         autoindex: off 
         allow_methods: GET
