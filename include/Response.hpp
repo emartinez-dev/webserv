@@ -39,6 +39,7 @@ class Response
 		std::string getFirstLine() const;
 		std::string getStatusMessage() const;
 		bool getSize();
+		std::string getContentType(const std::string& fileExtension);
 
 		void printResponse();
 };

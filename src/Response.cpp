@@ -63,7 +63,7 @@ Response::Response(const HttpRequest &request, const Config &config)
 		//TODO Hay que detectar la extension del archivo
 		setStatusCode("200");
 		setHeader("Content-Length", itoa(body_len));
-		setHeader("Content-Type", "image/jpeg");
+		//setHeader("Content-Type", "image/jpeg");
 	}
 }
 
@@ -203,4 +203,46 @@ void Response::printResponse() {
 	std::cout << "status_code: " << status_code << std::endl;
 	std::cout << "body: " << body << std::endl;
 	std::cout << "pwd: " << pwd << std::endl;
+}
+
+// std::string Response::getExtension() {
+// Funcion Para obtener la extension////
+// }
+
+std::string Response::getContentType(const std::string& fileExtension) {
+    std::string contentType = "application/octet-stream"; // Valor predeterminado
+
+    if (!fileExtension.empty()) {
+        std::string ext = fileExtension.substr(1); // Elimina el punto inicial de la extensión
+
+        switch (ext[0]) {
+            case 't':
+                if (ext == "txt") contentType = "text/plain";
+                break;
+            case 'h':
+                if (ext == "html") contentType = "text/html";
+                break;
+            case 'j':
+                if (ext == "json") contentType = "application/json";
+                else if (ext == "jpg" || ext == "jpeg") contentType = "image/jpeg";
+                break;
+            case 'x':
+                if (ext == "xml") contentType = "application/xml";
+                break;
+            case 'p':
+                if (ext == "pdf") contentType = "application/pdf";
+                else if (ext == "png") contentType = "image/png";
+                break;
+            case 'g':
+                if (ext == "gif") contentType = "image/gif";
+                break;
+            case 'c':
+                if (ext == "css") contentType = "text/css";
+                break;
+            default:
+				contentType = "unknown-type";
+                break;
+        }
+    }
+    return contentType;
 }
