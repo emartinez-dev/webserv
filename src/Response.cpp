@@ -70,7 +70,7 @@ const std::string Response::getContent(void) const
 	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
 		headers_text += it->first + ": " + it->second + "\r\n";
 	response_text += headers_text;
-	response_text += "\r\n\r\n";
+	response_text += "\r\n";
 	response_text += body;
 	std::cout << body << std::endl;
 	return (response_text);
