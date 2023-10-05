@@ -31,7 +31,7 @@ server:
         allow_methods: GET
     location: 
 		route: /test
-        root: html/
+        root: test/
         index: time.py
         autoindex: off 
         allow_methods: GET

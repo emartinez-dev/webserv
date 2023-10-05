@@ -134,7 +134,7 @@ void HttpRequest::parseParameters(const std::string& body) {
     }
 }
 
-void  HttpRequest::printRequest(void)
+void  HttpRequest::printRequest(void) const
 {
 	std::cout << "\n\n------------------start Request--------------------\n";
 	std::cout << "Método: " << getMethod() << std::endl;

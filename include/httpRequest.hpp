@@ -36,7 +36,7 @@ class HttpRequest {
         std::string getHeaderKey(const std::string& name) const;
         std::map<std::string, std::string> getHeaders() const;
         std::map<std::string, std::string> getParameters() const;
-        void  printRequest(void);
+        void  printRequest(void) const;
 };
 
 #endif // HTTPREQUEST_HPP

@@ -6,7 +6,7 @@ Response::Response()
 
 	/* Server Response process diagram:
 	 * 1. Get the server and location of the given request, we should add
-	 *	  a root or something like this concatenating the 'server_root' 
+	 *	  a route or something like this concatenating the 'server_root' 
 	 *	  with the route 'root'
 	 * 2. If the location is NULL or the file is not found, set status 
 	 *	  code to 404.
@@ -40,43 +40,40 @@ Response::Response()
 	 *	  json, etc
 	 * */
 
+
 Response::Response(const HttpRequest &request, const Config &config)
 {
 	std::string content_length_key = "Content-Length";
-	root = request.getHeader("path");
+	route = request.getHeader("path");
 	version = request.getVersion();
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
 	Location const *location = server_config->getLocation(request.getPath());
-	getResponse(request.getPath());
-	bool can_read = readFile();
-	getSize();
+	int allow = getResponseMethods(request.getMethod());
+	//Aqui comprobamos que el metodo sea correcto, Hay que ver que hacer a partir de aqui.
+	if (isAllowedMethod(location->getAllowMethods(), allow) == "200")
+		std::cout << "El metodo esta permitido" << std::endl;
+	else
+		std::cout << "El metodo No esta permitido" << std::endl;
+	setPath(request.getPath());
+	//isDir || isFile;
+	request.printRequest();
+	bool can_read = readFileAndsetBody();
 	if (location == NULL || !can_read)
 	{
 		setStatusCode("404");
 		setHeader("Content-Type", getContentType(getExtension()));
-		setHeader("Content-Length", itoa(getSize()));
 		setBody("<html><body><h1>Page not found</h1></body></html>");
+		setHeader("Content-Length", itoa(getSize()));
 	}
 	else
 	{
+		//TODO Hay que detectar la extension del archivo
+		getSize();
 		setStatusCode("200");
 		setHeader("Content-Length", itoa(body_len));
 		setHeader("Content-Type", getContentType(getExtension()));
 	}
-}
 
-const std::string Response::getContent(void) const
-{
-	std::string headers_text;
-	std::string response_text;
-
-	response_text += getFirstLine();
-	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
-		headers_text += it->first + ": " + it->second + "\r\n";
-	response_text += headers_text;
-	response_text += "\r\n";
-	response_text += body;
-	return (response_text);
 }
 
 Response::~Response()
@@ -84,7 +81,7 @@ Response::~Response()
 }
 
 Response::Response(Response const &copy):status_code(copy.status_code),
-	body(copy.body), root(copy.root), headers(copy.headers)
+	body(copy.body), route(copy.route), headers(copy.headers)
 {
 }
 
@@ -100,17 +97,17 @@ Response	&Response::operator=(const Response &copy)
 
 /*GETTERS*/
 
-const std::string& Response::getroot() const {
-	return (this->root);
+const std::string& Response::getRoute() const {
+	return (this->route);
 }
 
-void Response::getResponse(std::string newroot) {
-	root = "./example" + root + newroot;
-	
-	if (access(root.c_str(), F_OK) == 0) {
+void Response::setPath(std::string newroute) {
+	std::cout << "llega a getResponse" << newroute << std::endl;
+	route = "./example" + newroute;
+	if (access(route.c_str(), F_OK) == 0) {
 		std::cout << "Se puede acceder" << std::endl;
 	}
-	if (access(root.c_str(), F_OK) == -1) {
+	if (access(route.c_str(), F_OK) == -1) {
 		std::cout << "No se puede acceder" << std::endl;
 	}
 }
@@ -147,8 +144,8 @@ std::string Response::getStatusMessage() const {
     }
 }
 
-bool Response::readFile() {
-	std::ifstream file(getroot());
+bool Response::readFileAndsetBody() {
+	std::ifstream file(getRoute());
 	if (file.is_open()) {
 		char character;
 		while (file.get(character)) {
@@ -162,7 +159,7 @@ bool Response::readFile() {
 }
 
 bool Response::getSize() {
-	std::ifstream file(getroot(), std::ios::binary);
+	std::ifstream file(getRoute(), std::ios::binary);
 	if (!file.is_open()) {
 		return false;
 	}
@@ -199,12 +196,13 @@ void Response::printResponse() {
 	std::cout << "version: " << version << std::endl;
 	std::cout << "status_code: " << status_code << std::endl;
 	std::cout << "body: " << body << std::endl;
-	std::cout << "root: " << root << std::endl;
+	std::cout << "route: " << route << std::endl;
 }
 
 std::string Response::getExtension() {
 	std::string extension;
-	extension = root.substr(root.find_last_of("."), root.length());
+	extension = route.substr(route.find_last_of("."), route.length());
+	std::cout << "extension = " << extension << std::endl;
 	return extension;
 }
 
@@ -246,13 +244,56 @@ std::string Response::getContentType(const std::string& fileExtension) {
     return contentType;
 }
 
-// void Response::getRoute(Location location) {
-	
-	
-// 	if (access(root.c_str(), F_OK) == 0) {
-// 		std::cout << "Se puede acceder" << std::endl;
-// 	}
-// 	if (access(root.c_str(), F_OK) == -1) {
-// 		std::cout << "No se puede acceder" << std::endl;
-// 	}
-// }
+const std::string Response::getContent(void) const
+{
+	std::string headers_text;
+	std::string response_text;
+
+	response_text += getFirstLine();
+	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+		headers_text += it->first + ": " + it->second + "\r\n";
+	response_text += headers_text;
+	response_text += "\r\n";
+	response_text += body;
+	return (response_text);
+}
+
+int	Response::getResponseMethods(std::string met_req) {
+	int methods = 0;
+	if (met_req.find("GET") != LAST)
+		methods = 1;
+	else if (met_req.find("POST") != LAST)
+		methods = 3;
+	else if (met_req.find("DELETE") != LAST)
+		methods = 5;
+	return methods;
+}
+
+std::string Response::isAllowedMethod(int method_conf, int met_req) {
+	std::cout << "conf = " << method_conf << std::endl;
+	std::cout << "met = " << met_req << std::endl;
+	std::string status = "200";
+	switch (met_req) {
+		case 1:
+		std::cout << "entra en 1" << std::endl;
+			if (method_conf == 1 || method_conf == 4 || method_conf == 6 ||method_conf == 9)
+				break;
+			status = "405";
+		case 3:
+		std::cout << "entra en 3" << std::endl;
+			if (method_conf == 3 || method_conf == 4 || method_conf == 8 ||method_conf == 9)
+				break;
+			status = "405";
+		case 5:
+		std::cout << "entra en 5" << std::endl;
+			if (method_conf == 5 || method_conf == 6 || method_conf == 8 ||method_conf == 9)
+				break;
+			status = "405";
+			break;
+		default:
+			status = "405";
+    }
+	setStatusCode(status);
+	return status;
+}
+
