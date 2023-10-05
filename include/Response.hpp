@@ -18,6 +18,7 @@ class Response
 		std::string	  	body;
 		std::streampos	body_len;
 		std::string 	root;
+		std::string 	route_;
 		std::map<std::string, std::string> headers;
 		Response();
 	public:

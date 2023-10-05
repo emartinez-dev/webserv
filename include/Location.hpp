@@ -25,8 +25,11 @@ class Location
 		void	setConf(const std::string &key, const std::string &value);
 		std::map<std::string, std::string>	getConf();
 		bool  matches(const std::string &path);
+
 		int	  getAllowMethods();
 		const std::string getValue(std::string const &key) const;
+		std::string getRoot();
+		std::string getRoute();
 };
 
 #endif

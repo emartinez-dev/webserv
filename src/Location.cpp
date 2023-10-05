@@ -60,3 +60,11 @@ const std::string Location::getValue(std::string const &key) const
 {
 	return (getMapValue(key, this->conf));
 }
+
+std::string Location::getRoot(const std::string& name) const {
+    return (getMapValue(name, this->root));
+}
+
+std::string Location::getRoute(const std::string& name) const {
+    return (getMapKey(name, this->route));
+}

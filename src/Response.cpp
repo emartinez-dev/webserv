@@ -246,3 +246,13 @@ std::string Response::getContentType(const std::string& fileExtension) {
     return contentType;
 }
 
+// void Response::getRoute(Location location) {
+	
+	
+// 	if (access(root.c_str(), F_OK) == 0) {
+// 		std::cout << "Se puede acceder" << std::endl;
+// 	}
+// 	if (access(root.c_str(), F_OK) == -1) {
+// 		std::cout << "No se puede acceder" << std::endl;
+// 	}
+// }
