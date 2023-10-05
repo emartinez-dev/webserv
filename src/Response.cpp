@@ -49,12 +49,11 @@ Response::Response(const HttpRequest &request, const Config &config)
 	Location const *location = server_config->getLocation(request.getPath());
 	getResponse(request.getPath());
 	bool can_read = readFile();
-	
 	getSize();
 	if (location == NULL || !can_read)
 	{
 		setStatusCode("404");
-		setHeader("Content-Type", "text/html");
+		setHeader("Content-Type", getContentType(getExtension()));
 		setHeader("Content-Length", itoa(getSize()));
 		setBody("<html><body><h1>Page not found</h1></body></html>");
 	}
@@ -63,7 +62,7 @@ Response::Response(const HttpRequest &request, const Config &config)
 		//TODO Hay que detectar la extension del archivo
 		setStatusCode("200");
 		setHeader("Content-Length", itoa(body_len));
-		//setHeader("Content-Type", "image/jpeg");
+		setHeader("Content-Type", getContentType(getExtension()));
 	}
 }
 
@@ -205,15 +204,17 @@ void Response::printResponse() {
 	std::cout << "pwd: " << pwd << std::endl;
 }
 
-// std::string Response::getExtension() {
-// Funcion Para obtener la extension////
-// }
+std::string Response::getExtension() {
+	std::string extension;
+	extension = pwd.substr(pwd.find_last_of("."), pwd.length());
+	return extension;
+}
 
 std::string Response::getContentType(const std::string& fileExtension) {
-    std::string contentType = "application/octet-stream"; // Valor predeterminado
+    std::string contentType = "unknown-type"; // Valor predeterminado
 
     if (!fileExtension.empty()) {
-        std::string ext = fileExtension.substr(1); // Elimina el punto inicial de la extensión
+        std::string ext = getExtension().substr(1); // Elimina el punto inicial de la extensión
 
         switch (ext[0]) {
             case 't':
@@ -240,9 +241,9 @@ std::string Response::getContentType(const std::string& fileExtension) {
                 if (ext == "css") contentType = "text/css";
                 break;
             default:
-				contentType = "unknown-type";
                 break;
         }
     }
+	std::cout << "contentType: " << contentType << std::endl;
     return contentType;
 }
