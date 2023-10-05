@@ -1,4 +1,5 @@
-#include "../include/httpRequest.hpp"
+#include "httpRequest.hpp"
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 
@@ -7,29 +8,26 @@ HttpRequest::HttpRequest() {
 }
 
 HttpRequest::HttpRequest(const std::string& request_str) {
-    size_t start = 0;
-    size_t end = request_str.find("\r\n");
-
-    // Parsea la primera línea de la solicitud HTTP
-    if (end != std::string::npos) {
-        std::string first_line = request_str.substr(start, end - start);
+	size_t pos = request_str.find("\r\n\r\n");
+    if (request_str.find("\r\n") != std::string::npos) {
+        std::string first_line = request_str.substr(0, request_str.find("\r\n"));
+		std::string headers = request_str.substr(0, pos);
         parseFirstLine(first_line);
-        parseHeaders(request_str);
+        parseHeaders(headers);
     }
 
     // Encuentra el inicio del cuerpo de la solicitud
-    start = request_str.find("\r\n\r\n");
-    if (start != std::string::npos) {
-        start += 4;  // Mueve el puntero al inicio del cuerpo
-        std::string body = request_str.substr(start);
+    if (request_str.find("\r\n\r\n") != std::string::npos) {
+		received_headers = true;
+        body = request_str.substr(pos + 4);
         parseParameters(body);
     }
 }
 
 void HttpRequest::parseHeaders(const std::string& _headers) {
-     std::istringstream ss(_headers);
+    std::istringstream ss(_headers);
     std::string header;
-    while (std::getline(ss, header, '\n')) {
+    while (std::getline(ss, header)) {
         size_t pos = header.find(':');
         if (pos != std::string::npos) {
             std::string key = splitKey(header.substr(0, pos));
@@ -52,7 +50,9 @@ void HttpRequest::parseFirstLine(const std::string& first_line) {
 
 // Constructor de copia de la clase HttpRequest
 HttpRequest::HttpRequest(const HttpRequest& other) {
+	received_headers = other.received_headers;
     method_ = other.method_;
+	body = other.body;
     path_ = other.path_;
     version_ = other.version_;
     headers = other.headers;
@@ -64,9 +64,10 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
     if (this == &other) {
         return *this;
     }
-
+	received_headers = other.received_headers;
     method_ = other.method_;
     path_ = other.path_;
+	body = other.body;
     version_ = other.version_;
     headers = other.headers;
     parameters = other.parameters;
@@ -87,6 +88,10 @@ std::string HttpRequest::getMethod() const {
 // Función para obtener la ruta
 std::string HttpRequest::getPath() const {
     return path_;
+}
+
+const std::string &HttpRequest::getBody() const {
+    return body;
 }
 
 // Función para obtener la versión HTTP
@@ -117,6 +122,8 @@ std::map<std::string, std::string> HttpRequest::getParameters() const {
 void HttpRequest::parseParameters(const std::string& body) {
     std::istringstream ss(body);
     std::string param;
+	if (getHeader("Content-Type").find("multipart/form-data") != std::string::npos)
+		return ;
     while (std::getline(ss, param, '&')) {
         size_t pos = param.find('=');
         if (pos != std::string::npos) {
@@ -129,6 +136,7 @@ void HttpRequest::parseParameters(const std::string& body) {
 
 void  HttpRequest::printRequest(void)
 {
+	std::cout << "\n\n------------------start Request--------------------\n";
 	std::cout << "Método: " << getMethod() << std::endl;
     std::cout << "Ruta: " << getPath() << std::endl;
     std::cout << "Versión HTTP: " << getVersion() << std::endl;
@@ -139,9 +147,31 @@ void  HttpRequest::printRequest(void)
         std::cout << "  " << it->first << "->" << it->second << std::endl;
     }
 
+    std::cout << "Body length: " << body.length() << std::endl;
+    std::cout << "Body______________________\n" << body << "________________endbody"<< std::endl;
+
     std::cout << "Parámetros:" << std::endl;
     std::map<std::string, std::string> parameters = getParameters();
     for (std::map<std::string, std::string>::const_iterator it = parameters.begin(); it != parameters.end(); ++it) {
         std::cout << it->first << ": " << it->second << std::endl;
+	std::cout << "\n\n------------------end Request--------------------\n";
     }
+}
+
+bool  HttpRequest::receivedHeaders(void) const
+{
+	return received_headers;
+}
+
+bool  HttpRequest::receivedBody(void) const
+{
+	unsigned int  content_length = 0;
+
+	if (getHeader("Content-Length") != "" || getHeader("Expect") == "100-continue")
+		content_length = atol(getHeader("Content-Length").c_str());
+	else
+		return (true);
+	if (getBody().length() == content_length)
+		return (true);
+	return (false);
 }

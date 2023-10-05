@@ -91,9 +91,12 @@ void  Cluster::poll(void)
 				else
 				{
 					HttpRequest request = read_from_socket(connections[i]);
-					Response response(request, cluster_config);
-					write_to_socket(connections[i], response);
-					close_and_remove_connection(i, initial_size);
+					if (request.receivedHeaders() && request.receivedBody())
+					{
+						Response response(request, cluster_config);
+						write_to_socket(connections[i], response);
+						close_and_remove_connection(i, initial_size);
+					}
 				}
 			}
 			else if ((connections[i].revents & POLLHUP) || (connections[i].revents & POLLERR))
@@ -131,13 +134,8 @@ HttpRequest  Cluster::read_from_socket(pollfd const &connection)
 	else if (bytes_read <= 0)
 	{
 		std::string request_text(connection_buffers[connection.fd].begin(), connection_buffers[connection.fd].end());
-		//std::cout << "Read from fd " << connection.fd << std::endl;
 		HttpRequest	readRequest(request_text);
 		//readRequest.printRequest();
-		std::cout << std::endl;
-		// here we use the buffer and we clear it after, we could create a 
-		// Request object and process it here
-		connection_buffers[connection.fd].clear();
 		request = readRequest;
 	}
 	return request;
@@ -155,6 +153,7 @@ int	Cluster::write_to_socket(pollfd const &connection, Response const &response)
 
 void  Cluster::close_and_remove_connection(size_t &i, size_t &initial_size)
 {
+	connection_buffers[connections[i].fd].clear();
 	close(connections[i].fd);
 	connections.erase(connections.begin() + i);
 	--i;
