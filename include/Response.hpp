@@ -17,7 +17,7 @@ class Response
 		std::string 	status_code;
 		std::string	  	body;
 		std::streampos	body_len;
-		std::string 	pwd;
+		std::string 	root;
 		std::map<std::string, std::string> headers;
 		Response();
 	public:
@@ -34,8 +34,8 @@ class Response
 
 		const std::string getContent(void) const;
 		bool readFile();
-		const std::string& getPwd() const;
-		void getResponse(std::string newpwd);
+		const std::string& getroot() const;
+		void getResponse(std::string newroot);
 		std::string getFirstLine() const;
 		std::string getStatusMessage() const;
 		bool getSize();

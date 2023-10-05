@@ -131,9 +131,9 @@ HttpRequest  Cluster::read_from_socket(pollfd const &connection)
 	else if (bytes_read <= 0)
 	{
 		std::string request_text(connection_buffers[connection.fd].begin(), connection_buffers[connection.fd].end());
-		std::cout << "Read from fd " << connection.fd << std::endl;
+		//std::cout << "Read from fd " << connection.fd << std::endl;
 		HttpRequest	readRequest(request_text);
-		readRequest.printRequest();
+		//readRequest.printRequest();
 		std::cout << std::endl;
 		// here we use the buffer and we clear it after, we could create a 
 		// Request object and process it here

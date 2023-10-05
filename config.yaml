@@ -10,8 +10,8 @@ server:
         host: 127.0.0.1
         port: 8080
   location:
-        route: /index
-        root: /php
+        route: /inicio
+        root: /index
         index:  index.html
         autoindex: off
         allow_methods: GET POST

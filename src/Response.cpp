@@ -6,7 +6,7 @@ Response::Response()
 
 	/* Server Response process diagram:
 	 * 1. Get the server and location of the given request, we should add
-	 *	  a PWD or something like this concatenating the 'server_root' 
+	 *	  a root or something like this concatenating the 'server_root' 
 	 *	  with the route 'root'
 	 * 2. If the location is NULL or the file is not found, set status 
 	 *	  code to 404.
@@ -43,7 +43,7 @@ Response::Response()
 Response::Response(const HttpRequest &request, const Config &config)
 {
 	std::string content_length_key = "Content-Length";
-	pwd = request.getHeader("path");
+	root = request.getHeader("path");
 	version = request.getVersion();
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
 	Location const *location = server_config->getLocation(request.getPath());
@@ -59,7 +59,6 @@ Response::Response(const HttpRequest &request, const Config &config)
 	}
 	else
 	{
-		//TODO Hay que detectar la extension del archivo
 		setStatusCode("200");
 		setHeader("Content-Length", itoa(body_len));
 		setHeader("Content-Type", getContentType(getExtension()));
@@ -77,7 +76,6 @@ const std::string Response::getContent(void) const
 	response_text += headers_text;
 	response_text += "\r\n";
 	response_text += body;
-	//std::cout << body << std::endl;
 	return (response_text);
 }
 
@@ -86,7 +84,7 @@ Response::~Response()
 }
 
 Response::Response(Response const &copy):status_code(copy.status_code),
-	body(copy.body), pwd(copy.pwd), headers(copy.headers)
+	body(copy.body), root(copy.root), headers(copy.headers)
 {
 }
 
@@ -102,17 +100,17 @@ Response	&Response::operator=(const Response &copy)
 
 /*GETTERS*/
 
-const std::string& Response::getPwd() const {
-	return (this->pwd);
+const std::string& Response::getroot() const {
+	return (this->root);
 }
 
-void Response::getResponse(std::string newpwd) {
-	pwd = "./example" + pwd + newpwd;
+void Response::getResponse(std::string newroot) {
+	root = "./example" + root + newroot;
 	
-	if (access(pwd.c_str(), F_OK) == 0) {
+	if (access(root.c_str(), F_OK) == 0) {
 		std::cout << "Se puede acceder" << std::endl;
 	}
-	if (access(pwd.c_str(), F_OK) == -1) {
+	if (access(root.c_str(), F_OK) == -1) {
 		std::cout << "No se puede acceder" << std::endl;
 	}
 }
@@ -150,7 +148,7 @@ std::string Response::getStatusMessage() const {
 }
 
 bool Response::readFile() {
-	std::ifstream file(getPwd());
+	std::ifstream file(getroot());
 	if (file.is_open()) {
 		char character;
 		while (file.get(character)) {
@@ -164,7 +162,7 @@ bool Response::readFile() {
 }
 
 bool Response::getSize() {
-	std::ifstream file(getPwd(), std::ios::binary);
+	std::ifstream file(getroot(), std::ios::binary);
 	if (!file.is_open()) {
 		return false;
 	}
@@ -201,12 +199,12 @@ void Response::printResponse() {
 	std::cout << "version: " << version << std::endl;
 	std::cout << "status_code: " << status_code << std::endl;
 	std::cout << "body: " << body << std::endl;
-	std::cout << "pwd: " << pwd << std::endl;
+	std::cout << "root: " << root << std::endl;
 }
 
 std::string Response::getExtension() {
 	std::string extension;
-	extension = pwd.substr(pwd.find_last_of("."), pwd.length());
+	extension = root.substr(root.find_last_of("."), root.length());
 	return extension;
 }
 
@@ -247,3 +245,4 @@ std::string Response::getContentType(const std::string& fileExtension) {
 	std::cout << "contentType: " << contentType << std::endl;
     return contentType;
 }
+
