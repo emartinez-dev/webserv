@@ -4,11 +4,6 @@ Response::Response()
 {
 }
 
-Response::Response(const HttpRequest &request, const Config &config)
-{
-	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
-	Location const *location = server_config->getLocation(request.getPath());
-
 	/* Server Response process diagram:
 	 * 1. Get the server and location of the given request, we should add
 	 *	  a PWD or something like this concatenating the 'server_root' 
@@ -45,30 +40,44 @@ Response::Response(const HttpRequest &request, const Config &config)
 	 *	  json, etc
 	 * */
 
-	if (location == NULL)
+Response::Response(const HttpRequest &request, const Config &config)
+{
+	std::string content_length_key = "Content-Length";
+	pwd = request.getHeader("path");
+	version = request.getVersion();
+	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
+	Location const *location = server_config->getLocation(request.getPath());
+	getResponse(request.getPath());
+	bool can_read = readFile();
+	getSize();
+	if (location == NULL || !can_read)
 	{
 		setStatusCode("404");
-		setHeader("Content-Type", "text/html");
+		setHeader("Content-Type", getContentType(getExtension()));
+		setHeader("Content-Length", itoa(getSize()));
 		setBody("<html><body><h1>Page not found</h1></body></html>");
 	}
 	else
 	{
+		//TODO Hay que detectar la extension del archivo
 		setStatusCode("200");
-		setHeader("Content-Type", "text/html");
-		setBody("<html><body><h1>" + location->getValue("route") + location->getValue("index") + "</h1></body></html>");
+		setHeader("Content-Length", itoa(body_len));
+		setHeader("Content-Type", getContentType(getExtension()));
 	}
 }
 
 const std::string Response::getContent(void) const
 {
-	std::string response_text = "";
+	std::string headers_text;
+	std::string response_text;
 
-	response_text += "HTTP/1.1 ";
-	response_text += status_code + " OK\r\n";
+	response_text += getFirstLine();
 	for (std::map<std::string, std::string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
-		response_text += it->first + ": " + it->second + "\r\n";
-	response_text += "\r\n\r\n";
+		headers_text += it->first + ": " + it->second + "\r\n";
+	response_text += headers_text;
+	response_text += "\r\n";
 	response_text += body;
+	//std::cout << body << std::endl;
 	return (response_text);
 }
 
@@ -77,7 +86,7 @@ Response::~Response()
 }
 
 Response::Response(Response const &copy):status_code(copy.status_code),
-	headers(copy.headers), body(copy.body)
+	body(copy.body), pwd(copy.pwd), headers(copy.headers)
 {
 }
 
@@ -91,6 +100,82 @@ Response	&Response::operator=(const Response &copy)
 	return *this;
 }
 
+/*GETTERS*/
+
+const std::string& Response::getPwd() const {
+	return (this->pwd);
+}
+
+void Response::getResponse(std::string newpwd) {
+	pwd = "./example" + pwd + newpwd;
+	
+	if (access(pwd.c_str(), F_OK) == 0) {
+		std::cout << "Se puede acceder" << std::endl;
+	}
+	if (access(pwd.c_str(), F_OK) == -1) {
+		std::cout << "No se puede acceder" << std::endl;
+	}
+}
+
+std::string Response::getFirstLine () const {
+	return (version + " " + status_code + " " + getStatusMessage() + "\r\n");
+}
+
+
+std::string Response::getStatusMessage() const {
+    int status = atoi(status_code.c_str());
+
+    switch (status) {
+        case 200:
+            return "OK";
+        case 201:
+            return "Created";
+        case 204:
+            return "No Content";
+        case 400:
+            return "Bad Request";
+        case 401:
+            return "Unauthorized";
+        case 403:
+            return "Forbidden";
+        case 404:
+            return "Not Found";
+        case 500:
+            return "Internal Server Error";
+        case 501:
+            return "Not Implemented";
+        default:
+            return "Unknown Status";
+    }
+}
+
+bool Response::readFile() {
+	std::ifstream file(getPwd());
+	if (file.is_open()) {
+		char character;
+		while (file.get(character)) {
+			body += character;
+		}
+		file.close();
+	} else {
+		return false;
+	}
+	return true;
+}
+
+bool Response::getSize() {
+	std::ifstream file(getPwd(), std::ios::binary);
+	if (!file.is_open()) {
+		return false;
+	}
+	file.seekg(0, std::ios::end);
+	body_len = file.tellg();
+	file.close();
+	std::cout << "body_len: " << body_len << std::endl;
+	return true;
+}
+
+/*SETTERS*/
 void  Response::setStatusCode(const std::string &status_code)
 {
 	this->status_code = status_code;
@@ -104,4 +189,61 @@ void  Response::setHeader(const std::string &key, const std::string &value)
 void  Response::setBody(const std::string &body)
 {
 	this->body = body;
+}
+
+void Response::setContentLength(std::string& key) {
+	std::cout << "-------------------------" << getMapValue(key, headers) << std::endl;
+	std::cout << "key: " << key << std::endl;
+}
+
+
+void Response::printResponse() {
+	std::cout << "version: " << version << std::endl;
+	std::cout << "status_code: " << status_code << std::endl;
+	std::cout << "body: " << body << std::endl;
+	std::cout << "pwd: " << pwd << std::endl;
+}
+
+std::string Response::getExtension() {
+	std::string extension;
+	extension = pwd.substr(pwd.find_last_of("."), pwd.length());
+	return extension;
+}
+
+std::string Response::getContentType(const std::string& fileExtension) {
+    std::string contentType = "unknown-type"; // Valor predeterminado
+
+    if (!fileExtension.empty()) {
+        std::string ext = getExtension().substr(1); // Elimina el punto inicial de la extensión
+
+        switch (ext[0]) {
+            case 't':
+                if (ext == "txt") contentType = "text/plain";
+                break;
+            case 'h':
+                if (ext == "html") contentType = "text/html";
+                break;
+            case 'j':
+                if (ext == "json") contentType = "application/json";
+                else if (ext == "jpg" || ext == "jpeg") contentType = "image/jpeg";
+                break;
+            case 'x':
+                if (ext == "xml") contentType = "application/xml";
+                break;
+            case 'p':
+                if (ext == "pdf") contentType = "application/pdf";
+                else if (ext == "png") contentType = "image/png";
+                break;
+            case 'g':
+                if (ext == "gif") contentType = "image/gif";
+                break;
+            case 'c':
+                if (ext == "css") contentType = "text/css";
+                break;
+            default:
+                break;
+        }
+    }
+	std::cout << "contentType: " << contentType << std::endl;
+    return contentType;
 }
