@@ -6,8 +6,8 @@ Response::Response()
 
 	/* Server Response process diagram:
 	 * 1. Get the server and location of the given request, we should add
-	 *	  a route or something like this concatenating the 'server_root' 
-	 *	  with the route 'root'
+	 *	  a route_relative or something like this concatenating the 'server_root' 
+	 *	  with the route_relative 'root'
 	 * 2. If the location is NULL or the file is not found, set status 
 	 *	  code to 404.
 	 * 3. Check if the method of a request is allowed, set status code
@@ -44,17 +44,18 @@ Response::Response()
 Response::Response(const HttpRequest &request, const Config &config)
 {
 	std::string content_length_key = "Content-Length";
-	route = request.getHeader("path");
+	route_relative = request.getHeader("path");
 	version = request.getVersion();
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
+	HttpPath httpPath(request.getPath());
 	Location const *location = server_config->getLocation(request.getPath());
-	errorRoute(request, location, server_config);
+	errorroute_relative(request, location, server_config);
 	bool can_read = readFileAndsetBody();
-	//request.printRequest();
+	request.printRequest();
 	if (location == NULL || !can_read)
 	{
 		setStatusCode("404");
-		setHeader("Content-Type", getContentType(getExtension()));
+		setHeader("Content-Type", getContentType(httpPath.getExtension()));
 		setBody("<html><body><h1>Page not found</h1></body></html>");
 		setHeader("Content-Length", itoa(getSize()));
 	}
@@ -64,7 +65,7 @@ Response::Response(const HttpRequest &request, const Config &config)
 		getSize();
 		setStatusCode("200");
 		setHeader("Content-Length", itoa(body_len));
-		setHeader("Content-Type", getContentType(getExtension()));
+		setHeader("Content-Type", getContentType(httpPath.getExtension()));
 	}
 
 }
@@ -74,7 +75,7 @@ Response::~Response()
 }
 
 Response::Response(Response const &copy):status_code(copy.status_code),
-	body(copy.body), route(copy.route), headers(copy.headers)
+	body(copy.body), route_relative(copy.route_relative), headers(copy.headers)
 {
 }
 
@@ -88,7 +89,7 @@ Response	&Response::operator=(const Response &copy)
 	return *this;
 }
 
-bool Response::errorRoute(const HttpRequest &request, const Location* location, const ServerConfig* server_config) {
+bool Response::errorroute_relative(const HttpRequest &request, const Location* location, const ServerConfig* server_config) {
 	int method_request = getResponseMethods(request.getMethod());
 	// Aqui comprobamos que el metodo sea correcto, Hay que ver que hacer a 
 	// partir de aqui.
@@ -100,8 +101,8 @@ bool Response::errorRoute(const HttpRequest &request, const Location* location, 
 	// ¿La ruta es Accesible?
 	if (isAccessible(server_config->getValue("root"))) {
 		std::cout << "Se puede acceder" << std::endl;
-		setRoute(request.getPath());
-		setFullRoute(request.getPath(), server_config->getValue("root"));
+		setroute_relative(request.getPath());
+		setFullroute_relative(request.getPath(), server_config->getValue("root"));
 	} else {
 		std::cout << "NO se puede acceder" << std::endl;
 	}
@@ -116,12 +117,12 @@ bool Response::errorRoute(const HttpRequest &request, const Location* location, 
 
 /*GETTERS*/
 
-const std::string& Response::getRoute() const {
-	return (this->route);
+const std::string& Response::getroute_relative() const {
+	return (this->route_relative);
 }
 
-const std::string& Response::getFullRoute() const {
-	return (this->fullRoute);
+const std::string& Response::getFullroute_relative() const {
+	return (this->fullroute_relative);
 }
 
 std::string Response::getFirstLine () const {
@@ -157,7 +158,7 @@ std::string Response::getStatusMessage() const {
 }
 
 bool Response::readFileAndsetBody() {
-	std::ifstream file(getFullRoute());
+	std::ifstream file(getFullroute_relative());
 	if (file.is_open()) {
 		char character;
 		while (file.get(character)) {
@@ -171,7 +172,7 @@ bool Response::readFileAndsetBody() {
 }
 
 bool Response::getSize() {
-	std::ifstream file(getFullRoute(), std::ios::binary);
+	std::ifstream file(getFullroute_relative(), std::ios::binary);
 	if (!file.is_open()) {
 		return false;
 	}
@@ -198,12 +199,12 @@ void  Response::setBody(const std::string &body)
 	this->body = body;
 }
 
-void Response::setFullRoute(const std::string& request_route, const std::string& root) {
-	fullRoute = (root + request_route);
+void Response::setFullroute_relative(const std::string& request_route_relative, const std::string& root) {
+	fullroute_relative = (root + request_route_relative);
 }
 
-void Response::setRoute(const std::string& root_cnf) {
-	route = root_cnf;
+void Response::setroute_relative(const std::string& root_cnf) {
+	route_relative = root_cnf;
 }
 
 void Response::setContentLength(std::string& key) {
@@ -216,26 +217,8 @@ void Response::printResponse() {
 	std::cout << "version: " << version << std::endl;
 	std::cout << "status_code: " << status_code << std::endl;
 	std::cout << "body: " << body << std::endl;
-	std::cout << "route: " << route << std::endl;
+	std::cout << "route_relative: " << route_relative << std::endl;
 }
-
-/**
- * @brief obtain the extension of the route given by the browser.
- * 
- * @return std::string the extension or empty if it does not have an extension.
- */
-std::string Response::getExtension() const {
-    std::string extension;
-    size_t pos = route.rfind(".");
-    std::cout << "pos en getExtension -> " << pos << std::endl;
-    if (pos != std::string::npos) {
-        extension = route.substr(pos, route.length());
-    } else {
-        extension = "";
-    }
-    return extension;
-}
-
 
 /**
  * @brief Determines the content type of the response.
@@ -247,7 +230,7 @@ std::string Response::getContentType(const std::string& fileExtension) {
     std::string contentType = "unknown-type"; // Valor predeterminado
 
     if (!fileExtension.empty()) {
-        std::string ext = getExtension().substr(1); // Elimina el punto inicial de la extensión
+        std::string ext = fileExtension.substr(1); // Elimina el punto inicial de la extensión
 
         switch (ext[0]) {
             case 't':
@@ -342,15 +325,15 @@ std::string Response::isAllowedMethod(int method_conf, int method_request) const
 }
 
 /**
- * @brief determines whether a route is accessible or not.
+ * @brief determines whether a route_relative is accessible or not.
  * 
- * @param request_route request_route
+ * @param request_route_relative request_route_relative
  * @param root_cnf 
  * @return true 
  * @return false 
  */
 bool Response::isAccessible(const std::string& root_cnf) const{
-	if (access((route + root_cnf).c_str(), F_OK) == 0) {
+	if (access((route_relative + root_cnf).c_str(), F_OK) == 0) {
 		return true;
 	}
 	return false;
@@ -363,10 +346,10 @@ bool Response::isAccessible(const std::string& root_cnf) const{
  * @return false if it is a directory.
  */
 bool Response::isFile() const{
-	size_t pos = route.rfind('.');
+	size_t pos = route_relative.rfind('.');
 
 	if (pos != std::string::npos) {
-		if (pos < route.length() - 1) {
+		if (pos < route_relative.length() - 1) {
 			return true;
 		}
     }

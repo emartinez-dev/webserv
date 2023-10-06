@@ -18,6 +18,7 @@ _SRC 		=	main.cpp\
 				Server.cpp\
 				httpRequest.cpp\
 				Response.cpp\
+				HttpPath.cpp\
 				Utils.cpp
 
 OBJ_FOLDERS =	obj/
