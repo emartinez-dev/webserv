@@ -48,16 +48,9 @@ Response::Response(const HttpRequest &request, const Config &config)
 	version = request.getVersion();
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
 	Location const *location = server_config->getLocation(request.getPath());
-	int allow = getResponseMethods(request.getMethod());
-	//Aqui comprobamos que el metodo sea correcto, Hay que ver que hacer a partir de aqui.
-	if (isAllowedMethod(location->getAllowMethods(), allow) == "200")
-		std::cout << "El metodo esta permitido" << std::endl;
-	else
-		std::cout << "El metodo No esta permitido" << std::endl;
-	setPath(request.getPath());
-	//isDir || isFile;
-	request.printRequest();
+	errorRoute(request, location, server_config);
 	bool can_read = readFileAndsetBody();
+	//request.printRequest();
 	if (location == NULL || !can_read)
 	{
 		setStatusCode("404");
@@ -95,21 +88,40 @@ Response	&Response::operator=(const Response &copy)
 	return *this;
 }
 
+bool Response::errorRoute(const HttpRequest &request, const Location* location, const ServerConfig* server_config) {
+	int method_request = getResponseMethods(request.getMethod());
+	// Aqui comprobamos que el metodo sea correcto, Hay que ver que hacer a 
+	// partir de aqui.
+	if (isAllowedMethod(location->getAllowMethods(), method_request) == "200")
+		std::cout << "El metodo esta permitido" << std::endl;
+	else
+		std::cout << "El metodo No esta permitido" << std::endl;
+	
+	// ¿La ruta es Accesible?
+	if (isAccessible(server_config->getValue("root"))) {
+		std::cout << "Se puede acceder" << std::endl;
+		setRoute(request.getPath());
+		setFullRoute(request.getPath(), server_config->getValue("root"));
+	} else {
+		std::cout << "NO se puede acceder" << std::endl;
+	}
+
+	// ¿Es un archivo?
+	if (isFile())
+		std::cout << "es un archivo" << std::endl;
+	else
+		std::cout << "NO es un archivo" << std::endl;
+	return true;	
+}
+
 /*GETTERS*/
 
 const std::string& Response::getRoute() const {
 	return (this->route);
 }
 
-void Response::setPath(std::string newroute) {
-	std::cout << "llega a getResponse" << newroute << std::endl;
-	route = "./example" + newroute;
-	if (access(route.c_str(), F_OK) == 0) {
-		std::cout << "Se puede acceder" << std::endl;
-	}
-	if (access(route.c_str(), F_OK) == -1) {
-		std::cout << "No se puede acceder" << std::endl;
-	}
+const std::string& Response::getFullRoute() const {
+	return (this->fullRoute);
 }
 
 std::string Response::getFirstLine () const {
@@ -145,7 +157,7 @@ std::string Response::getStatusMessage() const {
 }
 
 bool Response::readFileAndsetBody() {
-	std::ifstream file(getRoute());
+	std::ifstream file(getFullRoute());
 	if (file.is_open()) {
 		char character;
 		while (file.get(character)) {
@@ -159,7 +171,7 @@ bool Response::readFileAndsetBody() {
 }
 
 bool Response::getSize() {
-	std::ifstream file(getRoute(), std::ios::binary);
+	std::ifstream file(getFullRoute(), std::ios::binary);
 	if (!file.is_open()) {
 		return false;
 	}
@@ -186,6 +198,14 @@ void  Response::setBody(const std::string &body)
 	this->body = body;
 }
 
+void Response::setFullRoute(const std::string& request_route, const std::string& root) {
+	fullRoute = (root + request_route);
+}
+
+void Response::setRoute(const std::string& root_cnf) {
+	route = root_cnf;
+}
+
 void Response::setContentLength(std::string& key) {
 	std::cout << "-------------------------" << getMapValue(key, headers) << std::endl;
 	std::cout << "key: " << key << std::endl;
@@ -199,13 +219,30 @@ void Response::printResponse() {
 	std::cout << "route: " << route << std::endl;
 }
 
-std::string Response::getExtension() {
-	std::string extension;
-	extension = route.substr(route.find_last_of("."), route.length());
-	std::cout << "extension = " << extension << std::endl;
-	return extension;
+/**
+ * @brief obtain the extension of the route given by the browser.
+ * 
+ * @return std::string the extension or empty if it does not have an extension.
+ */
+std::string Response::getExtension() const {
+    std::string extension;
+    size_t pos = route.rfind(".");
+    std::cout << "pos en getExtension -> " << pos << std::endl;
+    if (pos != std::string::npos) {
+        extension = route.substr(pos, route.length());
+    } else {
+        extension = "";
+    }
+    return extension;
 }
 
+
+/**
+ * @brief Determines the content type of the response.
+ * 
+ * @param fileExtension receives the file extension of the path.
+ * @return std::string string with the assigned content type.
+ */
 std::string Response::getContentType(const std::string& fileExtension) {
     std::string contentType = "unknown-type"; // Valor predeterminado
 
@@ -258,7 +295,13 @@ const std::string Response::getContent(void) const
 	return (response_text);
 }
 
-int	Response::getResponseMethods(std::string met_req) {
+/**
+ * @brief Assigns a number to the request method.
+ * 
+ * @param met_req Receives the request method of type string.
+ * @return int with the number assigned after checking it.
+ */
+int	Response::getResponseMethods(std::string met_req) const{
 	int methods = 0;
 	if (met_req.find("GET") != LAST)
 		methods = 1;
@@ -269,23 +312,25 @@ int	Response::getResponseMethods(std::string met_req) {
 	return methods;
 }
 
-std::string Response::isAllowedMethod(int method_conf, int met_req) {
-	std::cout << "conf = " << method_conf << std::endl;
-	std::cout << "met = " << met_req << std::endl;
+/**
+ * @brief This function determines if the method is allowed
+ * 
+ * @param method_conf receives an integer that determines the methods allowed by the configuration file.
+ * @param met_req Receive the method that the request requires.
+ * @return std::string Returns the status code after checking the allowed methods.
+ */
+std::string Response::isAllowedMethod(int method_conf, int method_request) const{
 	std::string status = "200";
-	switch (met_req) {
+	switch (method_request) {
 		case 1:
-		std::cout << "entra en 1" << std::endl;
 			if (method_conf == 1 || method_conf == 4 || method_conf == 6 ||method_conf == 9)
 				break;
 			status = "405";
 		case 3:
-		std::cout << "entra en 3" << std::endl;
 			if (method_conf == 3 || method_conf == 4 || method_conf == 8 ||method_conf == 9)
 				break;
 			status = "405";
 		case 5:
-		std::cout << "entra en 5" << std::endl;
 			if (method_conf == 5 || method_conf == 6 || method_conf == 8 ||method_conf == 9)
 				break;
 			status = "405";
@@ -293,7 +338,37 @@ std::string Response::isAllowedMethod(int method_conf, int met_req) {
 		default:
 			status = "405";
     }
-	setStatusCode(status);
 	return status;
 }
 
+/**
+ * @brief determines whether a route is accessible or not.
+ * 
+ * @param request_route request_route
+ * @param root_cnf 
+ * @return true 
+ * @return false 
+ */
+bool Response::isAccessible(const std::string& root_cnf) const{
+	if (access((route + root_cnf).c_str(), F_OK) == 0) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * @brief determines whether a path reaches a file or a directory.
+ * 
+ * @return true if it is a file.
+ * @return false if it is a directory.
+ */
+bool Response::isFile() const{
+	size_t pos = route.rfind('.');
+
+	if (pos != std::string::npos) {
+		if (pos < route.length() - 1) {
+			return true;
+		}
+    }
+	return false;
+}

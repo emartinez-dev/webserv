@@ -10,7 +10,7 @@ server:
         host: 127.0.0.1
         port: 8080
   location:
-        route: /inicio
+        route: /
         root: /index
         index:  index.html
         autoindex: off
