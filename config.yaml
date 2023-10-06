@@ -10,14 +10,14 @@ server:
         host: 127.0.0.1
         port: 8080
   location:
-        route: /
+        route: /index
         root: /index
         index:  index.html
         autoindex: off
         allow_methods: GET POST
         cgi_ext: .php
     location: 
-		route: /html
+		route: /
         root: /html
         index:  limones.html
         autoindex: off 

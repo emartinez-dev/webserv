@@ -47,8 +47,8 @@ Response::Response(const HttpRequest &request, const Config &config)
 	route_relative = request.getHeader("path");
 	version = request.getVersion();
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
-	HttpPath httpPath(request.getPath());
 	Location const *location = server_config->getLocation(request.getPath());
+	HttpPath httpPath(request.getPath(), location->getValue("root"), location->getValue("route"));
 	errorroute_relative(request, location, server_config);
 	bool can_read = readFileAndsetBody();
 	request.printRequest();

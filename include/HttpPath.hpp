@@ -16,9 +16,10 @@ class HttpPath
         std::string file_;
         bool        isFile_;
         std::vector<std::string> splitRoute_;
+        std::vector<std::string> splitRoot_;
         HttpPath();
     public:
-        HttpPath(std::string path);
+        HttpPath(std::string path, const std::string& root, const std::string& route);
         ~HttpPath();
         HttpPath(HttpPath const &copy);
         HttpPath	&operator=(HttpPath const &copy);
@@ -41,6 +42,9 @@ class HttpPath
 
         /* PARSER PATH */
         bool isCharValid();
+
+        /* SPLIT ROOT AND CONCATENATE */
+        void concatRoot();
         void printHttpPath();
 };
 

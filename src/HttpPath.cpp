@@ -1,13 +1,17 @@
 #include "../include/HttpPath.hpp"
+#include "../include/Location.hpp"
 
 
 /*the extension or empty if it does not have an extension.Methods 
     for orthodox canonical class.*/
-HttpPath::HttpPath(std::string path): path_(path), isFile_(true){
+HttpPath::HttpPath(std::string path, const std::string& root, const std::string& route): path_(path), isFile_(true){
+    std::cout << "root -> " << root << std::endl;
+    std::cout << "route -> " << route << std::endl;
     if (isCharValid()) {
         initFile();
         initExtension();
         initVector();
+        concatRoot();
         isFile_ = (getFile() != "" && getExtension() != "") ? true : false;
     } else {
         std::cout << "aqui Hay que controlar el error" << std::endl;
@@ -77,13 +81,6 @@ void HttpPath::initFile(){
     }
 }
 
-// bool HttpPath::isDir() {
-//     struct stat s;
-//     if (stat(path_.c_str(), &s) == 0 && (s.st_mode & S_IFDIR))
-//         return true;
-//     return false;
-// }
-
 void HttpPath::initVector() {
     std::istringstream stream(path_);
     std::string token;
@@ -105,6 +102,15 @@ bool HttpPath::isCharValid() {
     }
     return true;
 }
+
+/* SPLIT ROOT AND CONCATENATE */
+void HttpPath::concatRoot() {
+    for (size_t i = 0; i < splitRoute_.size(); i++) {
+        std::cout << "route: " << splitRoute_[i] << std::endl;
+    }
+    
+}
+
 
 void HttpPath::printHttpPath() {
     std::cout << std::endl;
