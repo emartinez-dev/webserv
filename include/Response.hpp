@@ -20,6 +20,7 @@ class Response
 		std::streampos	body_len;
 		std::string 	route_relative;
 		std::string 	fullroute_relative;
+		std::string 	root_finish;
 		std::map<std::string, std::string> headers;
 		Response();
 	public:
@@ -32,6 +33,7 @@ class Response
 		void  				setStatusCode(const std::string &status_code);
 		void  				setHeader(const std::string &key, const std::string &value);
 		void  				setBody(const std::string &body);
+		void  				setRootFinish(std::string root_main, std::string add_root);
 		void  				setContentLength(std::string& key);
 		void				setFullroute_relative(const std::string& request_route_relative, const std::string& root_cnf);
 		void				setroute_relative(const std::string& root_cnf);
@@ -44,6 +46,7 @@ class Response
 		std::string 		getStatusMessage() const;
 		bool 				getSize();
 		std::string 		getContentType(const std::string& fileExtension);
+        std::string getRootFinish() const;
 
 		void 				printResponse();
 

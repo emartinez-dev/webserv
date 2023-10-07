@@ -48,12 +48,15 @@ Response::Response(const HttpRequest &request, const Config &config)
 	version = request.getVersion();
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
 	Location const *location = server_config->getLocation(request.getPath());
-	HttpPath httpPath(request.getPath(), location->getValue("root"), location->getValue("route"));
+	HttpPath httpPath(request.getPath(), location);
 	errorroute_relative(request, location, server_config);
+	setRootFinish(server_config->getValue("root"), httpPath.getRoot());
 	bool can_read = readFileAndsetBody();
-	request.printRequest();
+	//request.printRequest();
 	if (location == NULL || !can_read)
 	{
+			std::cout << "entra en 1: " << std::endl;
+
 		setStatusCode("404");
 		setHeader("Content-Type", getContentType(httpPath.getExtension()));
 		setBody("<html><body><h1>Page not found</h1></body></html>");
@@ -61,6 +64,7 @@ Response::Response(const HttpRequest &request, const Config &config)
 	}
 	else
 	{
+			std::cout << "entra en 2: " << std::endl;
 		//TODO Hay que detectar la extension del archivo
 		getSize();
 		setStatusCode("200");
@@ -158,7 +162,8 @@ std::string Response::getStatusMessage() const {
 }
 
 bool Response::readFileAndsetBody() {
-	std::ifstream file(getFullroute_relative());
+	std::cout << "root_finish que llega a read -> " << root_finish << std::endl;
+	std::ifstream file(root_finish);
 	if (file.is_open()) {
 		char character;
 		while (file.get(character)) {
@@ -172,7 +177,7 @@ bool Response::readFileAndsetBody() {
 }
 
 bool Response::getSize() {
-	std::ifstream file(getFullroute_relative(), std::ios::binary);
+	std::ifstream file(getRootFinish(), std::ios::binary);
 	if (!file.is_open()) {
 		return false;
 	}
@@ -199,6 +204,10 @@ void  Response::setBody(const std::string &body)
 	this->body = body;
 }
 
+void Response::setRootFinish(std::string root_main, std::string add_root) {
+	root_finish = (root_main + add_root);
+}
+
 void Response::setFullroute_relative(const std::string& request_route_relative, const std::string& root) {
 	fullroute_relative = (root + request_route_relative);
 }
@@ -218,6 +227,10 @@ void Response::printResponse() {
 	std::cout << "status_code: " << status_code << std::endl;
 	std::cout << "body: " << body << std::endl;
 	std::cout << "route_relative: " << route_relative << std::endl;
+}
+
+std::string Response::getRootFinish() const{
+	return root_finish;
 }
 
 /**

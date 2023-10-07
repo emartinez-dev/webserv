@@ -10,7 +10,7 @@ server:
         host: 127.0.0.1
         port: 8080
   location:
-        route: /index
+        route: /pppp
         root: /index
         index:  index.html
         autoindex: off
@@ -19,7 +19,7 @@ server:
     location: 
 		route: /
         root: /html
-        index:  limones.html
+        index:  index.html
         autoindex: off 
         allow_methods: GET POST DELETE 
         cgi_ext: .php

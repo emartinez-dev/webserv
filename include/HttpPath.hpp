@@ -7,6 +7,7 @@
 # include <sstream>
 # include <vector>
 # include <string>
+#include "Location.hpp"
 
 class HttpPath
 {
@@ -14,12 +15,13 @@ class HttpPath
         std::string path_;
         std::string extension_;
         std::string file_;
+        std::string root_;
         bool        isFile_;
         std::vector<std::string> splitRoute_;
         std::vector<std::string> splitRoot_;
         HttpPath();
     public:
-        HttpPath(std::string path, const std::string& root, const std::string& route);
+        HttpPath(std::string path, const Location *location);
         ~HttpPath();
         HttpPath(HttpPath const &copy);
         HttpPath	&operator=(HttpPath const &copy);
@@ -28,6 +30,7 @@ class HttpPath
         std::string getPath() const;
         std::string getExtension() const;
         std::string getFile() const;
+        std::string getRoot() const;
         std::string getIsFile() const;
 
         void setPath(std::string& newPath);
@@ -44,7 +47,7 @@ class HttpPath
         bool isCharValid();
 
         /* SPLIT ROOT AND CONCATENATE */
-        void concatRoot();
+        std::string concatRoot(const Location *location);
         void printHttpPath();
 };
 
