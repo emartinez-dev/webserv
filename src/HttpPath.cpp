@@ -3,27 +3,32 @@
 
 /*the extension or empty if it does not have an extension.Methods 
     for orthodox canonical class.*/
-HttpPath::HttpPath(std::string path, const Location *location): path_(path), isFile_(true){
+HttpPath::HttpPath(std::string path, const Location *location): path_(path), isFile_(true), status_code(HTTP_STATUS_OK) {
     if (isCharValid()) {
         initFile();
         initExtension();
         initVector();
         isFile_ = (getFile() != "" && getExtension() != "") ? true : false;
+        root_ = concatRoot(location);
     } else {
+        status_code = HTTP_STATUS_BAD_REQUEST;
         std::cout << "aqui Hay que controlar el error" << std::endl;
     }
-    root_ = concatRoot(location);
-    printHttpPath();
+    //printHttpPath();
 }
+
+
 
 HttpPath::~HttpPath() {
 }
 
-HttpPath::HttpPath(HttpPath const &copy) {
+HttpPath::HttpPath(HttpPath const &copy): splitRoute_(copy.splitRoute_), splitRoot_(copy.splitRoot_) {
     path_ = copy.path_;
     file_ = copy.file_;
     extension_ = copy.extension_;
     isFile_ = copy.isFile_;
+    root_ = copy.root_;
+    
 }
 
 HttpPath	&HttpPath::operator=(const HttpPath &copy) {
@@ -131,7 +136,6 @@ std::string HttpPath::concatRoot(const Location *location) {
     for (size_t i = 0; i < splitRoot_.size(); i++) {
         root_complet += splitRoot_[i];
     }
-    std::cout << "devuelve -> " << root_complet << std::endl;
     return root_complet;
 }
 

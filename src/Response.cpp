@@ -41,37 +41,33 @@ Response::Response()
 	 * */
 
 
-Response::Response(const HttpRequest &request, const Config &config)
+Response::Response(const HttpRequest &request, const Config &config):version(request.getVersion()), \
+	status_code(HTTP_STATUS_OK), route_relative(request.getHeader("path"))
 {
-	std::string content_length_key = "Content-Length";
-	route_relative = request.getHeader("path");
-	version = request.getVersion();
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
 	Location const *location = server_config->getLocation(request.getPath());
 	HttpPath httpPath(request.getPath(), location);
-	errorroute_relative(request, location, server_config);
+
+	setResponseMethods(request.getMethod());
+	errorroute_relative(request, server_config);
 	setRootFinish(server_config->getValue("root"), httpPath.getRoot());
 	bool can_read = readFileAndsetBody();
 	//request.printRequest();
 	if (location == NULL || !can_read)
 	{
-			std::cout << "entra en 1: " << std::endl;
 
-		setStatusCode("404");
+		setStatusCode(HTTP_STATUS_NOT_FOUND);
 		setHeader("Content-Type", getContentType(httpPath.getExtension()));
 		setBody("<html><body><h1>Page not found</h1></body></html>");
 		setHeader("Content-Length", itoa(getSize()));
 	}
 	else
 	{
-			std::cout << "entra en 2: " << std::endl;
-		//TODO Hay que detectar la extension del archivo
 		getSize();
-		setStatusCode("200");
+		setStatusCode(HTTP_STATUS_OK);
 		setHeader("Content-Length", itoa(body_len));
 		setHeader("Content-Type", getContentType(httpPath.getExtension()));
 	}
-
 }
 
 Response::~Response()
@@ -93,29 +89,30 @@ Response	&Response::operator=(const Response &copy)
 	return *this;
 }
 
-bool Response::errorroute_relative(const HttpRequest &request, const Location* location, const ServerConfig* server_config) {
-	int method_request = getResponseMethods(request.getMethod());
+bool Response::errorroute_relative(const HttpRequest &request, const ServerConfig* server_config) {
 	// Aqui comprobamos que el metodo sea correcto, Hay que ver que hacer a 
 	// partir de aqui.
-	if (isAllowedMethod(location->getAllowMethods(), method_request) == "200")
+	if (status_code == HTTP_STATUS_OK) {
 		std::cout << "El metodo esta permitido" << std::endl;
-	else
+	} else {
 		std::cout << "El metodo No esta permitido" << std::endl;
+		status_code = HTTP_STATUS_METHOD_NOT_ALLOWED;
+	}
 	
 	// ¿La ruta es Accesible?
 	if (isAccessible(server_config->getValue("root"))) {
-		std::cout << "Se puede acceder" << std::endl;
 		setroute_relative(request.getPath());
-		setFullroute_relative(request.getPath(), server_config->getValue("root"));
+		setfull_route_relative(request.getPath(), server_config->getValue("root"));
 	} else {
-		std::cout << "NO se puede acceder" << std::endl;
+		status_code = HTTP_STATUS_NOT_FOUND;
 	}
 
 	// ¿Es un archivo?
 	if (isFile())
-		std::cout << "es un archivo" << std::endl;
-	else
-		std::cout << "NO es un archivo" << std::endl;
+		status_code = HTTP_STATUS_OK;
+	else {
+		std::cout << "-------------------------Aqui debe entrar el Autoindex----------------------------" << std::endl;
+	}
 	return true;	
 }
 
@@ -125,36 +122,36 @@ const std::string& Response::getroute_relative() const {
 	return (this->route_relative);
 }
 
-const std::string& Response::getFullroute_relative() const {
-	return (this->fullroute_relative);
+const std::string& Response::getfull_route_relative() const {
+	return (this->full_route_relative);
 }
 
 std::string Response::getFirstLine () const {
-	return (version + " " + status_code + " " + getStatusMessage() + "\r\n");
+	return (version + " " + itoa(status_code) + " " + getStatusMessage() + "\r\n");
 }
 
 
 std::string Response::getStatusMessage() const {
-    int status = atoi(status_code.c_str());
+    int status = status_code;
 
     switch (status) {
-        case 200:
+        case HTTP_STATUS_OK:
             return "OK";
-        case 201:
+        case HTTP_STATUS_CREATED:
             return "Created";
-        case 204:
+        case HTTP_STATUS_NO_CONTENT:
             return "No Content";
-        case 400:
+        case HTTP_STATUS_BAD_REQUEST:
             return "Bad Request";
-        case 401:
+        case HTTP_STATUS_UNAUTHORIZED:
             return "Unauthorized";
-        case 403:
+        case HTTP_STATUS_FORBIDDEN:
             return "Forbidden";
-        case 404:
+        case HTTP_STATUS_NOT_FOUND:
             return "Not Found";
-        case 500:
+        case HTTP_STATUS_INTERNAL_SERVER_ERROR:
             return "Internal Server Error";
-        case 501:
+        case HTTP_STATUS_NOT_IMPLEMENTED:
             return "Not Implemented";
         default:
             return "Unknown Status";
@@ -162,8 +159,7 @@ std::string Response::getStatusMessage() const {
 }
 
 bool Response::readFileAndsetBody() {
-	std::cout << "root_finish que llega a read -> " << root_finish << std::endl;
-	std::ifstream file(root_finish);
+	std::ifstream file(real_root);
 	if (file.is_open()) {
 		char character;
 		while (file.get(character)) {
@@ -177,19 +173,19 @@ bool Response::readFileAndsetBody() {
 }
 
 bool Response::getSize() {
-	std::ifstream file(getRootFinish(), std::ios::binary);
+	std::ifstream file(getRealRoot(), std::ios::binary);
 	if (!file.is_open()) {
 		return false;
 	}
 	file.seekg(0, std::ios::end);
 	body_len = file.tellg();
 	file.close();
-	std::cout << "body_len: " << body_len << std::endl;
 	return true;
 }
 
 /*SETTERS*/
-void  Response::setStatusCode(const std::string &status_code)
+
+void  Response::setStatusCode(const int status_code)
 {
 	this->status_code = status_code;
 }
@@ -205,11 +201,11 @@ void  Response::setBody(const std::string &body)
 }
 
 void Response::setRootFinish(std::string root_main, std::string add_root) {
-	root_finish = (root_main + add_root);
+	real_root = (root_main + add_root);
 }
 
-void Response::setFullroute_relative(const std::string& request_route_relative, const std::string& root) {
-	fullroute_relative = (root + request_route_relative);
+void Response::setfull_route_relative(const std::string& request_route_relative, const std::string& root) {
+	full_route_relative = (root + request_route_relative);
 }
 
 void Response::setroute_relative(const std::string& root_cnf) {
@@ -222,15 +218,16 @@ void Response::setContentLength(std::string& key) {
 }
 
 
-void Response::printResponse() {
+void Response::printResponse() const{
 	std::cout << "version: " << version << std::endl;
 	std::cout << "status_code: " << status_code << std::endl;
+	std::cout << "body_len: " << body_len << std::endl;
 	std::cout << "body: " << body << std::endl;
 	std::cout << "route_relative: " << route_relative << std::endl;
 }
 
-std::string Response::getRootFinish() const{
-	return root_finish;
+std::string Response::getRealRoot() const{
+	return real_root;
 }
 
 /**
@@ -288,6 +285,7 @@ const std::string Response::getContent(void) const
 	response_text += headers_text;
 	response_text += "\r\n";
 	response_text += body;
+	printResponse();
 	return (response_text);
 }
 
@@ -297,15 +295,17 @@ const std::string Response::getContent(void) const
  * @param met_req Receives the request method of type string.
  * @return int with the number assigned after checking it.
  */
-int	Response::getResponseMethods(std::string met_req) const{
-	int methods = 0;
-	if (met_req.find("GET") != LAST)
+void	Response::setResponseMethods(std::string met_req) {
+	if (met_req.find("GET") != LAST) 
 		methods = 1;
 	else if (met_req.find("POST") != LAST)
 		methods = 3;
 	else if (met_req.find("DELETE") != LAST)
 		methods = 5;
-	return methods;
+	else {
+		methods = 0;
+		status_code = HTTP_STATUS_METHOD_NOT_ALLOWED;
+	}
 }
 
 /**
@@ -315,26 +315,24 @@ int	Response::getResponseMethods(std::string met_req) const{
  * @param met_req Receive the method that the request requires.
  * @return std::string Returns the status code after checking the allowed methods.
  */
-std::string Response::isAllowedMethod(int method_conf, int method_request) const{
-	std::string status = "200";
+void Response::isAllowedMethod(int method_conf, int method_request) {
 	switch (method_request) {
 		case 1:
 			if (method_conf == 1 || method_conf == 4 || method_conf == 6 ||method_conf == 9)
 				break;
-			status = "405";
+			status_code = HTTP_STATUS_METHOD_NOT_ALLOWED;
 		case 3:
 			if (method_conf == 3 || method_conf == 4 || method_conf == 8 ||method_conf == 9)
 				break;
-			status = "405";
+			status_code = HTTP_STATUS_METHOD_NOT_ALLOWED;
 		case 5:
 			if (method_conf == 5 || method_conf == 6 || method_conf == 8 ||method_conf == 9)
 				break;
-			status = "405";
+			status_code = HTTP_STATUS_METHOD_NOT_ALLOWED;
 			break;
 		default:
-			status = "405";
+			status_code = HTTP_STATUS_METHOD_NOT_ALLOWED;
     }
-	return status;
 }
 
 /**

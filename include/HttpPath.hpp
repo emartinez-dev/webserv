@@ -9,6 +9,10 @@
 # include <string>
 #include "Location.hpp"
 
+#define HTTP_STATUS_OK 200                    // 200 OK
+#define HTTP_STATUS_BAD_REQUEST 400          // 400 Bad Request
+
+
 class HttpPath
 {
     private:
@@ -19,7 +23,9 @@ class HttpPath
         bool        isFile_;
         std::vector<std::string> splitRoute_;
         std::vector<std::string> splitRoot_;
+        int status_code;
         HttpPath();
+
     public:
         HttpPath(std::string path, const Location *location);
         ~HttpPath();
