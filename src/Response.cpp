@@ -111,9 +111,16 @@ bool Response::errorroute_relative(const HttpRequest &request, const Location *l
 	if (isFile())
 		status_code = HTTP_STATUS_OK;
 	else {
-		std::cout << "-------------------------Aqui debe entrar el Autoindex----------------------------" << std::endl;
-		std::cout << "autoindex = " <<  location->getValue("index") << std::endl;
-		std::cout << "real_root = " <<  real_root + "/" + location->getValue("index") << std::endl;
+		std::cout << "-------------------------Es un directorio----------------------------" << std::endl;
+		// std::cout << "index = " <<  location->getValue("index") << std::endl;
+		// std::cout << "real_root = " <<  real_root + "/" + location->getValue("index") << std::endl;
+		if (location->getValue("index") != "")
+		{
+			std::cout << "es index" << std::endl;
+			index(location->getValue("index"));
+		}
+		else if (location->getValue("autoindex") == "on")
+			autoindex();
 	}
 	return true;	
 }
@@ -367,4 +374,53 @@ bool Response::isFile() const{
 		}
     }
 	return false;
+}
+
+void Response::index(std::string index_file) {
+	std::cout << "ruta antes:" << real_root << std::endl;
+	real_root = real_root + "/" + index_file;
+	std::cout << "ruta despues:" << real_root << std::endl;
+	if (readFileAndsetBody())
+		std::cout << "salio bien el body" << std::endl;
+	
+}
+
+void Response::autoindex() {
+	// std::cout << "ENTRA EN EL AUTOINDEX" << std::endl;
+	std::string auto_body = "<!DOCTYPE html>\n<html>\n<head>\n";
+    auto_body += "<title>Autoindex</title>\n";
+    auto_body += "</head>\n<body>\n";
+    auto_body += "<h1>Contenido del directorio:</h1>\n";
+    auto_body += "<ul>\n";
+
+     DIR* directory = opendir(real_root.c_str());
+    if (directory) {
+        struct dirent* entry;
+        while ((entry = readdir(directory)) != nullptr) {
+            std::string name = entry->d_name;
+            if (name != "." && name != "..") {
+
+                if (entry->d_type == DT_REG) {
+                     auto_body += "<li><a href=\"" + name + "\">" + name + "</a></li>\n";
+                } else if (entry->d_type == DT_DIR) {
+                     auto_body += "<li><a href=\"" + name + "\">" + name + "</a></li>\n";
+                }
+
+				// auto_body += "<li><a href=\"" + name + "\" class=\"";
+                // if (entry->d_type == DT_DIR) {
+                //     auto_body += "folder";
+                // } else {
+                //     auto_body += "file";
+                // }
+                // auto_body += "\">" + name + "</a></li>\n";
+            }
+        }
+        closedir(directory);
+		setBody(auto_body);
+    } 
+	else {
+        std::cerr << "Error al abrir el directorio autoindex." << std::endl;
+    }
+	auto_body += "</ul>\n";
+    auto_body += "</body>\n</html>\n";
 }

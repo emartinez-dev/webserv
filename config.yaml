@@ -10,17 +10,16 @@ server:
         host: 127.0.0.1
         port: 8080
   location:
-        route: /pppp
-        root: /index
+        route: /
+        root: /alberto
         index:  index.html
         autoindex: off
         allow_methods: GET POST
         cgi_ext: .php
     location: 
 		route: /
-        root: /html
-        index:  index.html
-        autoindex: off 
+        root: /hola
+        autoindex: on 
         allow_methods: GET POST DELETE 
         cgi_ext: .php
     location: 
@@ -64,4 +63,4 @@ server:
         allow_methods: GET
     location: 
         route: /red
-        return: /tours
+        return: /tours        return: /tours

@@ -6,6 +6,7 @@
 # include <fstream>
 # include <unordered_map>
 # include <cstdlib>
+# include <dirent.h>
 # include "Config.hpp"
 # include "httpRequest.hpp"
 # include "HttpPath.hpp"
@@ -127,7 +128,9 @@ class Response
 		void				setResponseMethods(std::string met_req);
 		bool 				isFile() const;
 		bool 				isAccessible(const std::string& root_cnf) const;
-		bool 				errorroute_relative(const HttpRequest &request, const Location *location, const ServerConfig* server_config) ;
+		bool 				errorroute_relative(const HttpRequest &request, const Location *location, const ServerConfig* server_config);
+		void				autoindex();
+		void				index(std::string index_file);
 };
 
 #endif
