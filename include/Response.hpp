@@ -127,7 +127,7 @@ class Response
 		void				setResponseMethods(std::string met_req);
 		bool 				isFile() const;
 		bool 				isAccessible(const std::string& root_cnf) const;
-		bool 				errorroute_relative(const HttpRequest &request, const ServerConfig* server_config) ;
+		bool 				errorroute_relative(const HttpRequest &request, const Location *location, const ServerConfig* server_config) ;
 };
 
 #endif

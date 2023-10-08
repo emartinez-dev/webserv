@@ -49,10 +49,10 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 	HttpPath httpPath(request.getPath(), location);
 
 	setResponseMethods(request.getMethod());
-	errorroute_relative(request, server_config);
 	setRootFinish(server_config->getValue("root"), httpPath.getRoot());
 	bool can_read = readFileAndsetBody();
 	//request.printRequest();
+	errorroute_relative(request, location, server_config);
 	if (location == NULL || !can_read)
 	{
 
@@ -89,7 +89,7 @@ Response	&Response::operator=(const Response &copy)
 	return *this;
 }
 
-bool Response::errorroute_relative(const HttpRequest &request, const ServerConfig* server_config) {
+bool Response::errorroute_relative(const HttpRequest &request, const Location *location, const ServerConfig* server_config) {
 	// Aqui comprobamos que el metodo sea correcto, Hay que ver que hacer a 
 	// partir de aqui.
 	if (status_code == HTTP_STATUS_OK) {
@@ -112,6 +112,8 @@ bool Response::errorroute_relative(const HttpRequest &request, const ServerConfi
 		status_code = HTTP_STATUS_OK;
 	else {
 		std::cout << "-------------------------Aqui debe entrar el Autoindex----------------------------" << std::endl;
+		std::cout << "autoindex = " <<  location->getValue("index") << std::endl;
+		std::cout << "real_root = " <<  real_root + "/" + location->getValue("index") << std::endl;
 	}
 	return true;	
 }
