@@ -23,7 +23,8 @@ Cluster::~Cluster()
 }
 
 Cluster::Cluster(Cluster const &copy):cluster_config(copy.cluster_config),servers(copy.servers),
-	connections(copy.connections)
+	connections(copy.connections),connection_buffers(copy.connection_buffers),bytes_sent(copy.bytes_sent),
+	requests(copy.requests),responses(copy.responses)
 {
 }
 
@@ -31,7 +32,12 @@ Cluster	&Cluster::operator=(const Cluster &copy)
 {
 	if (this != &copy) {
 		servers = copy.servers;
+		servers_fd = copy.servers_fd;
 		connections = copy.connections;
+		connection_buffers = copy.connection_buffers;
+		bytes_sent = copy.bytes_sent;
+		requests = copy.requests;
+		responses = copy.responses;
 	}
 	return *this;
 }
@@ -98,6 +104,8 @@ void  Cluster::poll(void)
 					{
 						connections[i].events = POLLOUT;
 						bytes_sent[connections[i].fd] = 0;
+						requests[i] = HttpRequest(connection_buffers[connections[i].fd]);
+						responses[i] = Response(requests[i], cluster_config);
 					}
 					else if (status == -1)
 						close_and_remove_connection(i, initial_size);
@@ -105,11 +113,13 @@ void  Cluster::poll(void)
 			}
 			if ((connections[i].revents & POLLOUT))
 			{
-				HttpRequest request(connection_buffers[connections[i].fd]);
-				Response response(request, cluster_config);
-				int status = send(connections[i], response);
+				int status = send(connections[i], responses[i]);
 				if (status == 1 || status == -1)
+				{
+					requests.erase(i);
+					responses.erase(i);
 					close_and_remove_connection(i, initial_size);
+				}
 			}
 			if ((connections[i].revents & POLLHUP) || (connections[i].revents & POLLERR))
 			{

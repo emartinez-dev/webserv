@@ -22,6 +22,8 @@ class Cluster
 		std::vector<pollfd>	connections;
 		std::unordered_map<int, std::vector<char> > connection_buffers;
 		std::unordered_map<int, ssize_t> bytes_sent;
+		std::unordered_map<int, HttpRequest> requests;
+		std::unordered_map<int, Response> responses;
 
 	public:
 		Cluster(const Config &config);
