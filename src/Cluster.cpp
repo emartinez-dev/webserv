@@ -61,6 +61,7 @@ int		Cluster::add_client(int server_fd)
 	{
 		connections.push_back(create_pollfd(client_socket, POLLIN));
 		connection_buffers[client_socket] = std::vector<char>();
+		timeouts[client_socket] = time(NULL) + TIMEOUT_SEC;
 	}
 	else
 	{
@@ -91,6 +92,11 @@ void  Cluster::poll(void)
 			throw SocketPollingError();
 		for (size_t i = 0; i < initial_size; i++)
 		{
+			if (!is_server(connections[i].fd) && timeouts[connections[i].fd] < time(NULL))
+			{
+				std::cout << "Closing connection due to timeout on fd " << connections[i].fd << std::endl;
+				close_and_remove_connection(i, initial_size);
+			}
 			if (connections[i].revents & POLLIN)
 			{
 				if (is_server(connections[i].fd))
@@ -181,6 +187,7 @@ int	Cluster::send(pollfd const &connection, Response const &response)
 void  Cluster::close_and_remove_connection(size_t &i, size_t &initial_size)
 {
 	connection_buffers[connections[i].fd].clear();
+	timeouts.erase(connections[i].fd);
 	close(connections[i].fd);
 	connections.erase(connections.begin() + i);
 	--i;

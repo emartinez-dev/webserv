@@ -9,9 +9,11 @@
 # include "Response.hpp"
 # include <cstring>
 # include <algorithm>
+# include <sys/time.h>
 
 # define TIMEOUT_MS 2500
 # define BUFFER_SIZE 1024
+# define TIMEOUT_SEC 2
 
 class Cluster
 {
@@ -24,6 +26,7 @@ class Cluster
 		std::unordered_map<int, ssize_t> bytes_sent;
 		std::unordered_map<int, HttpRequest> requests;
 		std::unordered_map<int, Response> responses;
+		std::unordered_map<int, time_t> timeouts;
 
 	public:
 		Cluster(const Config &config);
