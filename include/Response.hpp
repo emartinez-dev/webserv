@@ -131,6 +131,7 @@ class Response
 		bool 				errorroute_relative(const HttpRequest &request, const Location *location, const ServerConfig* server_config);
 		void				autoindex();
 		void				index(std::string index_file);
+		void 				setBodylen(std::string &body);
 };
 
 #endif

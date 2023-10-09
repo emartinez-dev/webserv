@@ -10,6 +10,7 @@ HttpPath::HttpPath(std::string path, const Location *location): path_(path), isF
         initVector();
         isFile_ = (getFile() != "" && getExtension() != "") ? true : false;
         root_ = concatRoot(location);
+        std::cout << "root_ -> " << root_ << std::endl;
     } else {
         status_code = HTTP_STATUS_BAD_REQUEST;
         std::cout << "aqui Hay que controlar el error" << std::endl;
@@ -118,7 +119,7 @@ std::string HttpPath::concatRoot(const Location *location) {
     for (size_t i = 0; i < splitRoute_.size(); i++) {
         std::string valueToAdd; // Variable auxiliar para almacenar el valor a agregar en esta iteración
 
-        if (location->getValue("route") == "/" && root == false) {
+        if (location->getValue("route") == "/" && splitRoute_.size() > 1 && root == false) {
             root = true;
             valueToAdd = location->getValue("root");
         }

@@ -49,7 +49,9 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 	HttpPath httpPath(request.getPath(), location);
 
 	setResponseMethods(request.getMethod());
+	std::cout << "real_root -> " << real_root << std::endl;
 	setRootFinish(server_config->getValue("root"), httpPath.getRoot());
+	std::cout << "real_root -> " << real_root << std::endl;
 	bool can_read = readFileAndsetBody();
 	//request.printRequest();
 	errorroute_relative(request, location, server_config);
@@ -63,7 +65,7 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 	}
 	else
 	{
-		getSize();
+		//getSize();
 		setStatusCode(HTTP_STATUS_OK);
 		setHeader("Content-Length", itoa(body_len));
 		setHeader("Content-Type", getContentType(httpPath.getExtension()));
@@ -114,13 +116,16 @@ bool Response::errorroute_relative(const HttpRequest &request, const Location *l
 		std::cout << "-------------------------Es un directorio----------------------------" << std::endl;
 		// std::cout << "index = " <<  location->getValue("index") << std::endl;
 		// std::cout << "real_root = " <<  real_root + "/" + location->getValue("index") << std::endl;
+
+		
 		if (location->getValue("index") != "")
 		{
 			std::cout << "es index" << std::endl;
 			index(location->getValue("index"));
 		}
-		else if (location->getValue("autoindex") == "on")
+		else if (location->getValue("autoindex") == "on") {
 			autoindex();
+		}
 	}
 	return true;	
 }
@@ -385,8 +390,11 @@ void Response::index(std::string index_file) {
 	
 }
 
+void Response::setBodylen(std::string &body){
+	body_len = body.size();
+}
+
 void Response::autoindex() {
-	// std::cout << "ENTRA EN EL AUTOINDEX" << std::endl;
 	std::string auto_body = "<!DOCTYPE html>\n<html>\n<head>\n";
     auto_body += "<title>Autoindex</title>\n";
     auto_body += "</head>\n<body>\n";
@@ -394,7 +402,7 @@ void Response::autoindex() {
     auto_body += "<ul>\n";
 
      DIR* directory = opendir(real_root.c_str());
-    if (directory) {
+    if (!isFile()) {
         struct dirent* entry;
         while ((entry = readdir(directory)) != nullptr) {
             std::string name = entry->d_name;
@@ -415,12 +423,13 @@ void Response::autoindex() {
                 // auto_body += "\">" + name + "</a></li>\n";
             }
         }
+		auto_body += "</ul>\n";
+		auto_body += "</body>\n</html>\n";
         closedir(directory);
+		setBodylen(auto_body);
 		setBody(auto_body);
     } 
 	else {
         std::cerr << "Error al abrir el directorio autoindex." << std::endl;
     }
-	auto_body += "</ul>\n";
-    auto_body += "</body>\n</html>\n";
 }
