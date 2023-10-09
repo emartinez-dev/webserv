@@ -1,6 +1,7 @@
 #include "Cluster.hpp"
 #include "Response.hpp"
 #include "httpRequest.hpp"
+#include <unordered_map>
 
 Cluster::Cluster(const Config &config): cluster_config(config)
 {
@@ -91,18 +92,26 @@ void  Cluster::poll(void)
 				else
 				{
 					int status = receive(connections[i]);
+					/* I can't get the server that is receiving the request, so I can't cut the connection 
+					 * earlier if the request is too long */
 					if (status == 1)
 					{
-						HttpRequest request(connection_buffers[connections[i].fd]);
-						Response response(request, cluster_config);
-						write_to_socket(connections[i], response);
-						close_and_remove_connection(i, initial_size);
+						connections[i].events = POLLOUT;
+						bytes_sent[connections[i].fd] = 0;
 					}
 					else if (status == -1)
 						close_and_remove_connection(i, initial_size);
 				}
 			}
-			else if ((connections[i].revents & POLLHUP) || (connections[i].revents & POLLERR))
+			if ((connections[i].revents & POLLOUT))
+			{
+				HttpRequest request(connection_buffers[connections[i].fd]);
+				Response response(request, cluster_config);
+				int status = send(connections[i], response);
+				if (status == 1 || status == -1)
+					close_and_remove_connection(i, initial_size);
+			}
+			if ((connections[i].revents & POLLHUP) || (connections[i].revents & POLLERR))
 			{
 				std::cout << "Closing connection due to POLLHUP or POLLERR on fd " << connections[i].fd << std::endl;
 				close_and_remove_connection(i, initial_size);
@@ -146,14 +155,17 @@ int  Cluster::receive(pollfd const &connection)
 	return 0;
 }
 
-int	Cluster::write_to_socket(pollfd const &connection, Response const &response)
+int	Cluster::send(pollfd const &connection, Response const &response)
 {
-	if (send(connection.fd, response.getContent().c_str(), strlen(response.getContent().c_str()), 0) == -1)
-	{
-		std::cout << "Error writing\n";
-		return (0);
-	}
-	return (1);
+	ssize_t sent = bytes_sent[connection.fd];
+
+	int status = ::send(connection.fd, response.getContent().data() + sent, response.getContent().size() - sent, 0);
+	if (status == -1)
+		return (-1);
+	else if (sent + status == static_cast<ssize_t>(response.getContent().size()))
+		return (1);
+	bytes_sent[connection.fd] += status;
+	return (0);
 }
 
 void  Cluster::close_and_remove_connection(size_t &i, size_t &initial_size)

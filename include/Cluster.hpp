@@ -21,6 +21,7 @@ class Cluster
 		std::vector<int>	servers_fd;
 		std::vector<pollfd>	connections;
 		std::unordered_map<int, std::vector<char> > connection_buffers;
+		std::unordered_map<int, ssize_t> bytes_sent;
 
 	public:
 		Cluster(const Config &config);
@@ -35,7 +36,7 @@ class Cluster
 		void	poll(void);
 		int		receive(pollfd const &connection);
 		ssize_t	read_socket(pollfd const &connection, char *buffer, size_t buffer_size);
-		int		write_to_socket(pollfd const &connection, Response const &response);
+		int		send(pollfd const &connection, Response const &response);
 		void	close_and_remove_connection(size_t &i, size_t &initial_size);
 
 		bool	is_server(int fd);
