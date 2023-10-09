@@ -65,7 +65,8 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 	}
 	else
 	{
-		//getSize();
+		if (body_len == 0)
+			getSize();
 		setStatusCode(HTTP_STATUS_OK);
 		setHeader("Content-Length", itoa(body_len));
 		setHeader("Content-Type", getContentType(httpPath.getExtension()));
@@ -114,8 +115,9 @@ bool Response::errorroute_relative(const HttpRequest &request, const Location *l
 		status_code = HTTP_STATUS_OK;
 	else {
 		std::cout << "-------------------------Es un directorio----------------------------" << std::endl;
-		// std::cout << "index = " <<  location->getValue("index") << std::endl;
+		std::cout << "tiene el directorio root = " <<  location->getValue("root") << std::endl;
 		// std::cout << "real_root = " <<  real_root + "/" + location->getValue("index") << std::endl;
+		location->printConfig();
 
 		
 		if (location->getValue("index") != "")
