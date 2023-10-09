@@ -33,7 +33,8 @@ class Cluster
 		int		accept_client(int server_fd);
 
 		void	poll(void);
-		HttpRequest	read_from_socket(pollfd const &connection);
+		int		receive(pollfd const &connection);
+		ssize_t	read_socket(pollfd const &connection, char *buffer, size_t buffer_size);
 		int		write_to_socket(pollfd const &connection, Response const &response);
 		void	close_and_remove_connection(size_t &i, size_t &initial_size);
 

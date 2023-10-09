@@ -90,13 +90,16 @@ void  Cluster::poll(void)
 					 add_client(connections[i].fd);
 				else
 				{
-					HttpRequest request = read_from_socket(connections[i]);
-					if (request.receivedHeaders() && request.receivedBody())
+					int status = receive(connections[i]);
+					if (status == 1)
 					{
+						HttpRequest request(connection_buffers[connections[i].fd]);
 						Response response(request, cluster_config);
 						write_to_socket(connections[i], response);
 						close_and_remove_connection(i, initial_size);
 					}
+					else if (status == -1)
+						close_and_remove_connection(i, initial_size);
 				}
 			}
 			else if ((connections[i].revents & POLLHUP) || (connections[i].revents & POLLERR))
@@ -108,37 +111,39 @@ void  Cluster::poll(void)
 	}
 }
 
-HttpRequest  Cluster::read_from_socket(pollfd const &connection)
+ssize_t	Cluster::read_socket(pollfd const &connection, char *buffer, size_t buffer_size)
 {
-	HttpRequest request;
+	std::memset(buffer, 0, buffer_size);
+	ssize_t bytes_read = recv(connection.fd, buffer, buffer_size, 0);
+	return bytes_read;
+}
+
+int  Cluster::receive(pollfd const &connection)
+{
 	ssize_t	  bytes_read;
-	do
+	char	  buff[BUFFER_SIZE];
+
+	bytes_read = read_socket(connection, buff, BUFFER_SIZE);
+	if (bytes_read > 0)
 	{
-		char  buff[BUFFER_SIZE];
-		bzero(buff, BUFFER_SIZE);
-		bytes_read = recv(connection.fd, buff, BUFFER_SIZE, 0);
-		if (bytes_read > 0)
-		{
-			connection_buffers[connection.fd].insert(
-				connection_buffers[connection.fd].end(),
-				buff,
-				buff + bytes_read
-			);
-		}
-	} while (bytes_read > 0);
-	if (bytes_read == -1 && (errno != EWOULDBLOCK && errno != EAGAIN))
+		connection_buffers[connection.fd].insert(
+			connection_buffers[connection.fd].end(),
+			buff,
+			buff + bytes_read
+		);
+	}
+	if (bytes_read == -1)
 	{
 		std::cout << "Error reading\n";
-		return request;
+		return -1;
 	}
-	else if (bytes_read <= 0)
+	else
 	{
-		std::string request_text(connection_buffers[connection.fd].begin(), connection_buffers[connection.fd].end());
-		HttpRequest	readRequest(request_text);
-		//readRequest.printRequest();
-		request = readRequest;
+		HttpRequest	readRequest(connection_buffers[connection.fd]);
+		if (readRequest.receivedHeaders() && readRequest.receivedBody())
+			return 1;
 	}
-	return request;
+	return 0;
 }
 
 int	Cluster::write_to_socket(pollfd const &connection, Response const &response)
