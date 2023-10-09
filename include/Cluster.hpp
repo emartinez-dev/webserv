@@ -13,7 +13,7 @@
 
 # define TIMEOUT_MS 2500
 # define BUFFER_SIZE 1024
-# define TIMEOUT_SEC 2
+# define TIMEOUT_SEC 3
 
 class Cluster
 {
@@ -28,6 +28,16 @@ class Cluster
 		std::unordered_map<int, Response> responses;
 		std::unordered_map<int, time_t> timeouts;
 
+		int		add_client(int server_fd);
+		int		accept_client(int server_fd);
+		int		receive(pollfd const &connection);
+		ssize_t	read_socket(pollfd const &connection, char *buffer, size_t buffer_size);
+		int		send(pollfd const &connection, Response const &response);
+		void	close_and_remove_connection(size_t &i, size_t &initial_size);
+		bool	is_server(int fd);
+		bool	is_timeout(int i);
+		pollfd  create_pollfd(int fd, short mode);
+
 	public:
 		Cluster(const Config &config);
 		~Cluster();
@@ -35,17 +45,7 @@ class Cluster
 		Cluster	&operator=(Cluster const &copy);
 
 		void	add_server(std::string const &address, int port);
-		int		add_client(int server_fd);
-		int		accept_client(int server_fd);
-
-		void	poll(void);
-		int		receive(pollfd const &connection);
-		ssize_t	read_socket(pollfd const &connection, char *buffer, size_t buffer_size);
-		int		send(pollfd const &connection, Response const &response);
-		void	close_and_remove_connection(size_t &i, size_t &initial_size);
-
-		bool	is_server(int fd);
-		pollfd  create_pollfd(int fd, short mode);
-};
+		void	run(void);
+		};
 
 #endif

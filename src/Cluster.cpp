@@ -1,7 +1,6 @@
 #include "Cluster.hpp"
 #include "Response.hpp"
 #include "httpRequest.hpp"
-#include <unordered_map>
 
 Cluster::Cluster(const Config &config): cluster_config(config)
 {
@@ -12,6 +11,75 @@ Cluster::Cluster(const Config &config): cluster_config(config)
 		{
 			Listen server_listens = server_configs[i].getListens()[j];
 			add_server(server_listens.getHost(), server_listens.getPort());
+		}
+	}
+}
+
+void	Cluster::add_server(std::string const &address, int port)
+{
+	Server	server(address, port);
+	pollfd	server_poll;
+
+	server_poll = create_pollfd(server.get_server_socket(), POLLIN);
+	servers.push_back(server);
+	connections.push_back(server_poll);
+	servers_fd.push_back(server_poll.fd);
+	std::cout << "Server listening at http://" << address << ":" << port << "/" << std::endl;
+}
+
+void  Cluster::run(void)
+{
+	while (true)
+	{
+		size_t initial_size = connections.size();
+		int events = ::poll(connections.data(), connections.size(), TIMEOUT_MS);
+		if (events < 0)
+			throw SocketPollingError();
+		if (events > 0)
+		{
+			for (size_t i = 0; i < initial_size; i++)
+			{
+				if (!is_server(connections[i].fd) && is_timeout(connections[i].fd))
+				{
+					std::cout << "Closing connection due to timeout on fd " << connections[i].fd << std::endl;
+					close_and_remove_connection(i, initial_size);
+				}
+				if (connections[i].revents & POLLIN)
+				{
+					if (is_server(connections[i].fd))
+						 add_client(connections[i].fd);
+					else
+					{
+						int finish = receive(connections[i]);
+						/* I can't get the server that is receiving the request, so I can't cut the connection 
+						 * earlier if the request is too long */
+						if (finish == 1)
+						{
+							connections[i].events = POLLOUT;
+							bytes_sent[connections[i].fd] = 0;
+							requests[i] = HttpRequest(connection_buffers[connections[i].fd]);
+							responses[i] = Response(requests[i], cluster_config);
+						}
+						else if (finish == -1)
+							close_and_remove_connection(i, initial_size);
+					}
+				}
+				if ((connections[i].revents & POLLOUT))
+				{
+					int finish = send(connections[i], responses[i]);
+					if (finish == 1 || finish == -1)
+					{
+						requests.erase(i);
+						responses.erase(i);
+						close_and_remove_connection(i, initial_size);
+					}
+				}
+				if ((connections[i].revents & POLLHUP) || (connections[i].revents & POLLERR))
+				{
+					std::cout << "Closing connection due to POLLHUP or POLLERR on fd " << connections[i].fd << std::endl;
+					close_and_remove_connection(i, initial_size);
+				}
+			}
 		}
 	}
 }
@@ -42,18 +110,6 @@ Cluster	&Cluster::operator=(const Cluster &copy)
 	return *this;
 }
 
-void	Cluster::add_server(std::string const &address, int port)
-{
-	Server	server(address, port);
-	pollfd	server_poll;
-
-	server_poll = create_pollfd(server.get_server_socket(), POLLIN);
-	servers.push_back(server);
-	connections.push_back(server_poll);
-	servers_fd.push_back(server_poll.fd);
-	std::cout << "Server listening at http://" << address << ":" << port << "/" << std::endl;
-}
-
 int		Cluster::add_client(int server_fd)
 {
 	int client_socket = accept_client(server_fd);
@@ -80,67 +136,6 @@ int	Cluster::accept_client(int server_fd)
 	bzero(&client_address, sizeof(client_address));
 	client_socket = accept(server_fd, (struct sockaddr *)&client_address, &client_len);
 	return client_socket;
-}
-
-void  Cluster::poll(void)
-{
-	while (true)
-	{
-		size_t initial_size = connections.size();
-		int status = ::poll(connections.data(), connections.size(), TIMEOUT_MS);
-		if (status < 0)
-			throw SocketPollingError();
-		for (size_t i = 0; i < initial_size; i++)
-		{
-			if (!is_server(connections[i].fd) && timeouts[connections[i].fd] < time(NULL))
-			{
-				std::cout << "Closing connection due to timeout on fd " << connections[i].fd << std::endl;
-				close_and_remove_connection(i, initial_size);
-			}
-			if (connections[i].revents & POLLIN)
-			{
-				if (is_server(connections[i].fd))
-					 add_client(connections[i].fd);
-				else
-				{
-					int status = receive(connections[i]);
-					/* I can't get the server that is receiving the request, so I can't cut the connection 
-					 * earlier if the request is too long */
-					if (status == 1)
-					{
-						connections[i].events = POLLOUT;
-						bytes_sent[connections[i].fd] = 0;
-						requests[i] = HttpRequest(connection_buffers[connections[i].fd]);
-						responses[i] = Response(requests[i], cluster_config);
-					}
-					else if (status == -1)
-						close_and_remove_connection(i, initial_size);
-				}
-			}
-			if ((connections[i].revents & POLLOUT))
-			{
-				int status = send(connections[i], responses[i]);
-				if (status == 1 || status == -1)
-				{
-					requests.erase(i);
-					responses.erase(i);
-					close_and_remove_connection(i, initial_size);
-				}
-			}
-			if ((connections[i].revents & POLLHUP) || (connections[i].revents & POLLERR))
-			{
-				std::cout << "Closing connection due to POLLHUP or POLLERR on fd " << connections[i].fd << std::endl;
-				close_and_remove_connection(i, initial_size);
-			}
-		}
-	}
-}
-
-ssize_t	Cluster::read_socket(pollfd const &connection, char *buffer, size_t buffer_size)
-{
-	std::memset(buffer, 0, buffer_size);
-	ssize_t bytes_read = recv(connection.fd, buffer, buffer_size, 0);
-	return bytes_read;
 }
 
 int  Cluster::receive(pollfd const &connection)
@@ -171,6 +166,13 @@ int  Cluster::receive(pollfd const &connection)
 	return 0;
 }
 
+ssize_t	Cluster::read_socket(pollfd const &connection, char *buffer, size_t buffer_size)
+{
+	std::memset(buffer, 0, buffer_size);
+	ssize_t bytes_read = recv(connection.fd, buffer, buffer_size, 0);
+	return bytes_read;
+}
+
 int	Cluster::send(pollfd const &connection, Response const &response)
 {
 	ssize_t sent = bytes_sent[connection.fd];
@@ -199,6 +201,11 @@ bool  Cluster::is_server(int fd)
 	if (std::find(servers_fd.begin(), servers_fd.end(), fd) == servers_fd.end())
 		return (false);
 	return (true);
+}
+
+bool  Cluster::is_timeout(int fd)
+{
+	return (timeouts[fd] < time(NULL));
 }
 
 pollfd	Cluster::create_pollfd(int fd, short mode)

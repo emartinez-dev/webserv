@@ -11,7 +11,7 @@ int	main(int argc, char **argv)
 	Config configuration(str);
 	try {
 		Cluster	webserv(configuration);
-		webserv.poll();
+		webserv.run();
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		return (1);
