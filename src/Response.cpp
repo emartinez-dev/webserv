@@ -85,17 +85,20 @@ Response::~Response()
 {
 }
 
-Response::Response(Response const &copy):status_code(copy.status_code),
-	body(copy.body), pwd(copy.pwd), headers(copy.headers)
+Response::Response(Response const &copy):version(copy.version),status_code(copy.status_code),
+	body(copy.body), body_len(copy.body_len),pwd(copy.pwd), headers(copy.headers)
 {
 }
 
 Response	&Response::operator=(const Response &copy)
 {
 	if (this != &copy) {
+		version = copy.version;
 		status_code = copy.status_code;
-		headers = copy.headers;
 		body = copy.body;
+		body_len = copy.body_len;
+		pwd = copy.pwd;
+		headers = copy.headers;
 	}
 	return *this;
 }
@@ -197,7 +200,7 @@ void Response::setContentLength(std::string& key) {
 }
 
 
-void Response::printResponse() {
+void Response::printResponse() const {
 	std::cout << "version: " << version << std::endl;
 	std::cout << "status_code: " << status_code << std::endl;
 	std::cout << "body: " << body << std::endl;

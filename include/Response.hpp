@@ -19,9 +19,9 @@ class Response
 		std::streampos	body_len;
 		std::string 	pwd;
 		std::map<std::string, std::string> headers;
-		Response();
 	public:
 		size_t			size_body;
+		Response();
 		Response(const HttpRequest &request, const Config &config);
 		~Response();
 		Response(Response const &copy);
@@ -42,7 +42,7 @@ class Response
 		std::string getContentType(const std::string& fileExtension);
 		std::string getExtension();
 
-		void printResponse();
+		void printResponse() const;
 };
 
 #endif
