@@ -110,10 +110,10 @@ class Response
 		void  				setRootFinish(std::string root_main, std::string add_root);
 		void  				setContentLength(std::string& key);
 		void				setfull_route_relative(const std::string& request_route_relative, const std::string& root_cnf);
-		void				setroute_relative(const std::string& root_cnf);
+		void				setRouteRelative(const std::string& root_cnf);
 
 		const std::string 	getContent(void) const;
-		bool 				readFileAndsetBody();
+		void 				readFileAndsetBody();
 		const std::string& 	getroute_relative() const;
 		const std::string&	getfull_route_relative() const;
 		std::string 		getFirstLine() const;
@@ -124,11 +124,11 @@ class Response
 
 		void 				printResponse()const;
 
-		void				isAllowedMethod(int method, int met_req);
+		void				isAllowedMethod(int method_conf, std::string met_req);
 		void				setResponseMethods(std::string met_req);
 		bool 				isFile() const;
-		bool 				isAccessible(const std::string& root_cnf) const;
-		bool 				errorroute_relative(const HttpRequest &request, const Location *location, const ServerConfig* server_config);
+		void 				isAccessible(const std::string& root_cnf);
+		void 				controlStatus(const HttpRequest &request, const Location *location, const ServerConfig* server_config);
 		void				autoindex();
 		void				index(std::string index_file);
 		void 				setBodylen(std::string &body);

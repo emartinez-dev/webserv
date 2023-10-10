@@ -114,12 +114,13 @@ bool HttpPath::isCharValid() {
 std::string HttpPath::concatRoot(const Location *location) {
     bool root = false;
 
-    //splitRoot_.clear();
+    splitRoot_.clear();
 
     for (size_t i = 0; i < splitRoute_.size(); i++) {
-        std::string valueToAdd; // Variable auxiliar para almacenar el valor a agregar en esta iteración
+        std::string valueToAdd;
 
-        if (location->getValue("route") == "/" && splitRoute_.size() > 1 && root == false) {
+        if (location->getValue("route") == "/" && splitRoute_.size() < 2 && root == false) {
+           
             root = true;
             valueToAdd = location->getValue("root");
         }
@@ -130,13 +131,16 @@ std::string HttpPath::concatRoot(const Location *location) {
             valueToAdd = splitRoute_[i];
         }
         splitRoot_.push_back(valueToAdd);
-        
     }
     std::string root_complet;
 
     for (size_t i = 0; i < splitRoot_.size(); i++) {
         root_complet += splitRoot_[i];
     }
+    std::cout << "**/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*" << std::endl;
+    printHttpPath();
+    std::cout << "**/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*" << std::endl;
+
     return root_complet;
 }
 
