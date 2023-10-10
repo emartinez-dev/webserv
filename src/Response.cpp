@@ -394,7 +394,7 @@ void Response::index(std::string index_file, std::string auto_index) {
 		}
 		else {
 			std::cout << "ERROR AL ABRIR EL INDEX, FALTA SACAR BIEN EL ERROR" << std::endl;
-			status_code = 404;
+			setStatusCode(404);
 		}
 	}
 	
@@ -411,27 +411,23 @@ void Response::autoindex() {
     auto_body += "<h1>Contenido del directorio:</h1>\n";
     auto_body += "<ul>\n";
 
-	std::cout << "este es real_root" << real_root << std::endl;
+	std::cout << "este es real_root  " << real_root << std::endl;
+	std::cout << "este es full_route_relative  " << full_route_relative << std::endl;
+	std::string base_url = removeSubstring(real_root, "/example");
+	std::cout << "este es base_url  " << base_url << std::endl;
     DIR* directory = opendir(real_root.c_str());
     if (!isFile()) {
         struct dirent* entry;
         while ((entry = readdir(directory)) != nullptr) {
             std::string name = entry->d_name;
             if (name != "." && name != "..") {
+				auto_body += "<li><a href=\"" + base_url + name + "\">" + name + "</a></li>\n";
 
-                if (entry->d_type == DT_REG) {
-                     auto_body += "<li><a href=\"" + name + "\">" + name + "</a></li>\n";
-                } else if (entry->d_type == DT_DIR) {
-                     auto_body += "<li><a href=\"" + name + "\">" + name + "</a></li>\n";
-                }
-
-				// auto_body += "<li><a href=\"" + name + "\" class=\"";
-                // if (entry->d_type == DT_DIR) {
-                //     auto_body += "folder";
-                // } else {
-                //     auto_body += "file";
+                // if (entry->d_type == DT_REG) {
+                //      auto_body += "<li><a href=\"" + base_url + name + "\">" + name + "</a></li>\n";
+                // } else if (entry->d_type == DT_DIR) {
+                //      auto_body += "<li><a href=\"" + name + "\">" + name + "</a></li>\n";
                 // }
-                // auto_body += "\">" + name + "</a></li>\n";
             }
         }
 		auto_body += "</ul>\n";
