@@ -130,7 +130,7 @@ class Response
 		void 				isAccessible(const std::string& root_cnf);
 		void 				controlStatus(const HttpRequest &request, const Location *location, const ServerConfig* server_config);
 		void				autoindex();
-		void				index(std::string index_file);
+		void				index(std::string index_file, std::string auto_index);
 		void 				setBodylen(std::string &body);
 };
 

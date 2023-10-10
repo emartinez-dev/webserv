@@ -10,7 +10,7 @@ server:
         host: 127.0.0.1
         port: 8080
   location:
-        route: /aa
+        route: /alberto
         root: /alberto
         index:  index.html
         autoindex: off
@@ -18,7 +18,7 @@ server:
         cgi_ext: .php
     location: 
 		route: /
-        root: /hola
+        root: /
         autoindex: on 
         allow_methods: GET POST DELETE 
         cgi_ext: .php
@@ -26,7 +26,7 @@ server:
 		route: /tours
         root: /
         index: time.py
-        autoindex: off 
+        autoindex: on 
         allow_methods: GET
     location: 
 		route: /test

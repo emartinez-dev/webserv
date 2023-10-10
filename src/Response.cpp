@@ -65,7 +65,8 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 	}
 	else
 	{
-		getSize();
+		if (body_len == 0)
+			getSize();
 		setStatusCode(HTTP_STATUS_OK);
 		setHeader("Content-Length", itoa(body_len));
 		setHeader("Content-Type", getContentType(httpPath.getExtension()));
@@ -104,14 +105,12 @@ void Response::controlStatus(const HttpRequest &request, const Location *locatio
 		setStatusCode(HTTP_STATUS_OK);
 	else {
 		std::cout << "-------------------------Es un directorio----------------------------" << std::endl;
-		// std::cout << "index = " <<  location->getValue("index") << std::endl;
-		// std::cout << "real_root = " <<  real_root + "/" + location->getValue("index") << std::endl;
+		location->printConfig();
 
-		
 		if (location->getValue("index") != "")
 		{
 			std::cout << "es index" << std::endl;
-			index(location->getValue("index"));
+			index(location->getValue("index"), location->getValue("autoindex"));
 		}
 		else if (location->getValue("autoindex") == "on") {
 			autoindex();
@@ -371,12 +370,23 @@ bool Response::isFile() const{
 	return false;
 }
 
-void Response::index(std::string index_file) {
-	std::cout << "controlStatus:" << real_root << std::endl;
-	real_root = real_root + index_file;
-	std::cout << "ruta despues:" << real_root << std::endl;
-	if (status_code == HTTP_STATUS_OK)
+void Response::index(std::string index_file, std::string auto_index) {
+	std::string original_root = real_root;
+	real_root = real_root + "/" + index_file;
+	if (readFileAndsetBody())
 		std::cout << "salio bien el body" << std::endl;
+	else {
+		if (auto_index == "on")
+		{
+			std::cout << "ERROR AL ABRIR EL INDEX, pero tiene autoindex" << std::endl;
+			real_root = original_root;
+			autoindex();
+		}
+		else {
+			std::cout << "ERROR AL ABRIR EL INDEX, FALTA SACAR BIEN EL ERROR" << std::endl;
+			setStatusCode(404);
+		}
+	}
 	
 }
 
@@ -391,26 +401,23 @@ void Response::autoindex() {
     auto_body += "<h1>Contenido del directorio:</h1>\n";
     auto_body += "<ul>\n";
 
-     DIR* directory = opendir(real_root.c_str());
+	std::cout << "este es real_root  " << real_root << std::endl;
+	std::cout << "este es full_route_relative  " << full_route_relative << std::endl;
+	std::string base_url = removeSubstring(real_root, "/example");
+	std::cout << "este es base_url  " << base_url << std::endl;
+    DIR* directory = opendir(real_root.c_str());
     if (!isFile()) {
         struct dirent* entry;
         while ((entry = readdir(directory)) != nullptr) {
             std::string name = entry->d_name;
             if (name != "." && name != "..") {
+				auto_body += "<li><a href=\"" + base_url + name + "\">" + name + "</a></li>\n";
 
-                if (entry->d_type == DT_REG) {
-                     auto_body += "<li><a href=\"" + name + "\">" + name + "</a></li>\n";
-                } else if (entry->d_type == DT_DIR) {
-                     auto_body += "<li><a href=\"" + name + "\">" + name + "</a></li>\n";
-                }
-
-				// auto_body += "<li><a href=\"" + name + "\" class=\"";
-                // if (entry->d_type == DT_DIR) {
-                //     auto_body += "folder";
-                // } else {
-                //     auto_body += "file";
+                // if (entry->d_type == DT_REG) {
+                //      auto_body += "<li><a href=\"" + base_url + name + "\">" + name + "</a></li>\n";
+                // } else if (entry->d_type == DT_DIR) {
+                //      auto_body += "<li><a href=\"" + name + "\">" + name + "</a></li>\n";
                 // }
-                // auto_body += "\">" + name + "</a></li>\n";
             }
         }
 		auto_body += "</ul>\n";

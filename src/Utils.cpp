@@ -69,3 +69,15 @@ std::string itoa(std::streampos number) {
 	strNumber << number;
 	return (strNumber.str());
 }
+
+std::string removeSubstring(const std::string& original, const std::string& toRemove) {
+    std::string result = original;
+    size_t found = result.find(toRemove);
+
+    if (found != std::string::npos) {
+        result.erase(found, toRemove.length());
+    }
+	result += "/";
+
+    return result;
+}
