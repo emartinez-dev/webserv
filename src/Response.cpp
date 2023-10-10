@@ -372,8 +372,8 @@ bool Response::isFile() const{
 }
 
 void Response::index(std::string index_file) {
-	std::cout << "ruta antes:" << real_root << std::endl;
-	real_root = real_root + "/" + index_file;
+	std::cout << "controlStatus:" << real_root << std::endl;
+	real_root = real_root + index_file;
 	std::cout << "ruta despues:" << real_root << std::endl;
 	if (status_code == HTTP_STATUS_OK)
 		std::cout << "salio bien el body" << std::endl;
