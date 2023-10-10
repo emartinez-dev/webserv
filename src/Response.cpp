@@ -115,15 +115,12 @@ bool Response::errorroute_relative(const HttpRequest &request, const Location *l
 		status_code = HTTP_STATUS_OK;
 	else {
 		std::cout << "-------------------------Es un directorio----------------------------" << std::endl;
-		std::cout << "tiene el directorio root = " <<  location->getValue("root") << std::endl;
-		// std::cout << "real_root = " <<  real_root + "/" + location->getValue("index") << std::endl;
 		location->printConfig();
 
-		
 		if (location->getValue("index") != "")
 		{
 			std::cout << "es index" << std::endl;
-			index(location->getValue("index"));
+			index(location->getValue("index"), location->getValue("autoindex"));
 		}
 		else if (location->getValue("autoindex") == "on") {
 			autoindex();
@@ -383,12 +380,23 @@ bool Response::isFile() const{
 	return false;
 }
 
-void Response::index(std::string index_file) {
-	std::cout << "ruta antes:" << real_root << std::endl;
+void Response::index(std::string index_file, std::string auto_index) {
+	std::string original_root = real_root;
 	real_root = real_root + "/" + index_file;
-	std::cout << "ruta despues:" << real_root << std::endl;
 	if (readFileAndsetBody())
 		std::cout << "salio bien el body" << std::endl;
+	else {
+		if (auto_index == "on")
+		{
+			std::cout << "ERROR AL ABRIR EL INDEX, pero tiene autoindex" << std::endl;
+			real_root = original_root;
+			autoindex();
+		}
+		else {
+			std::cout << "ERROR AL ABRIR EL INDEX, FALTA SACAR BIEN EL ERROR" << std::endl;
+			status_code = 404;
+		}
+	}
 	
 }
 
@@ -403,7 +411,8 @@ void Response::autoindex() {
     auto_body += "<h1>Contenido del directorio:</h1>\n";
     auto_body += "<ul>\n";
 
-     DIR* directory = opendir(real_root.c_str());
+	std::cout << "este es real_root" << real_root << std::endl;
+    DIR* directory = opendir(real_root.c_str());
     if (!isFile()) {
         struct dirent* entry;
         while ((entry = readdir(directory)) != nullptr) {
