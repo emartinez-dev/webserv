@@ -18,15 +18,15 @@ server:
         cgi_ext: .php
     location: 
 		route: /
-        root: /hola
+        root: /
         autoindex: on 
         allow_methods: GET POST DELETE 
         cgi_ext: .php
     location: 
 		route: /tours
-        root: ./
+        root: /
         index: time.py
-        autoindex: off 
+        autoindex: on 
         allow_methods: GET
     location: 
 		route: /test
