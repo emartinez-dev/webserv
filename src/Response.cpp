@@ -284,7 +284,7 @@ const std::string Response::getContent(void) const
 	response_text += headers_text;
 	response_text += "\r\n";
 	response_text += body;
-	printResponse();
+	//printResponse();
 	return (response_text);
 }
 
@@ -419,9 +419,9 @@ void Response::autoindex() {
 				//auto_body += "<li><a href=\"" + base_url + name + "\">" + name + "</a></li>\n";
 
                 if (entry->d_type == DT_REG) {
-                      auto_body += "<li><a href=\"" + base_url + name + "\">" + name + "</a></li>\n";
+                      auto_body += "<li><a href=\"" + name + "\">" + name + "</a></li>\n";
                 } else if (entry->d_type == DT_DIR) {
-                      auto_body += "<li><a href=\"" + base_url + name + "/\">" + name + "</a></li>\n";
+                      auto_body += "<li><a href=\"" + name + "/\">" + name + "</a></li>\n";
                 }
             }
         }

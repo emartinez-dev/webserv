@@ -12,8 +12,8 @@ server:
   location:
         route: /
         root: /alberto
-        index:  index.html
-        autoindex: off
+        index:  aaindex.html
+        autoindex: on
         allow_methods: GET POST
         cgi_ext: .php
     location: 
