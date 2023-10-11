@@ -2,6 +2,7 @@ obj/
 .vscode/
 webserv
 compile_commands.json
+.cache/
 
 # Prerequisites
 *.d

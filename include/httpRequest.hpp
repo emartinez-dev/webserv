@@ -21,7 +21,7 @@ class HttpRequest {
 
     public:
 		HttpRequest();
-        HttpRequest(const std::string& request_str);
+        HttpRequest(const std::vector<char>& request_buffer);
         HttpRequest(const HttpRequest& other);
         HttpRequest& operator=(const HttpRequest& other);
         ~HttpRequest();

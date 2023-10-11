@@ -77,17 +77,19 @@ Response::~Response()
 {
 }
 
-Response::Response(Response const &copy):status_code(copy.status_code),
-	body(copy.body), route_relative(copy.route_relative), headers(copy.headers)
+Response::Response(Response const &copy):version(copy.version),status_code(copy.status_code),
+	body(copy.body), body_len(copy.body_len),headers(copy.headers)
 {
 }
 
 Response	&Response::operator=(const Response &copy)
 {
 	if (this != &copy) {
+		version = copy.version;
 		status_code = copy.status_code;
-		headers = copy.headers;
 		body = copy.body;
+		body_len = copy.body_len;
+		headers = copy.headers;
 	}
 	return *this;
 }
@@ -217,7 +219,7 @@ void Response::setContentLength(std::string& key) {
 }
 
 
-void Response::printResponse() const{
+void Response::printResponse() const {
 	std::cout << "version: " << version << std::endl;
 	std::cout << "status_code: " << status_code << std::endl;
 	std::cout << "body_len: " << body_len << std::endl;

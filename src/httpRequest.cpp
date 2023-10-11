@@ -7,7 +7,9 @@
 HttpRequest::HttpRequest() {
 }
 
-HttpRequest::HttpRequest(const std::string& request_str) {
+HttpRequest::HttpRequest(const std::vector<char>& request_buffer)
+{
+	std::string request_str = std::string(request_buffer.begin(), request_buffer.end());
 	size_t pos = request_str.find("\r\n\r\n");
     if (request_str.find("\r\n") != std::string::npos) {
         std::string first_line = request_str.substr(0, request_str.find("\r\n"));

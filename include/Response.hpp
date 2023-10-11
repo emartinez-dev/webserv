@@ -96,9 +96,9 @@ class Response
 		std::string 	full_route_relative;
 		std::string 	real_root;
 		std::map<std::string, std::string> headers;
-		Response();
 	public:
 		size_t			size_body;
+		Response();
 		Response(const HttpRequest &request, const Config &config);
 		~Response();
 		Response(Response const &copy);
