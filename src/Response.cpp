@@ -160,7 +160,7 @@ std::string Response::getStatusMessage() const {
     }
 }
 
-void Response::readFileAndsetBody() {
+bool Response::readFileAndsetBody() {
 	std::ifstream file(real_root);
 	if (file.is_open()) {
 		char character;
@@ -168,8 +168,10 @@ void Response::readFileAndsetBody() {
 			body += character;
 		}
 		file.close();
+		return (true);
 	} else {
 		setStatusCode(HTTP_STATUS_NOT_FOUND);
+		return (false);
 	}
 
 }
@@ -325,10 +327,12 @@ void Response::isAllowedMethod(int method_conf, std::string met_req) {
 			if (method_conf == 1 || method_conf == 4 || method_conf == 6 ||method_conf == 9)
 				break;
 			setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
+			break;
 		case 3:
 			if (method_conf == 3 || method_conf == 4 || method_conf == 8 ||method_conf == 9)
 				break;
 			setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
+			break;
 		case 5:
 			if (method_conf == 5 || method_conf == 6 || method_conf == 8 ||method_conf == 9)
 				break;
@@ -336,6 +340,7 @@ void Response::isAllowedMethod(int method_conf, std::string met_req) {
 			break;
 		default:
 			setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
+			break;
     }
 }
 

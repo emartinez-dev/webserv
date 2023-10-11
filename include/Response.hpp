@@ -113,7 +113,7 @@ class Response
 		void				setRouteRelative(const std::string& root_cnf);
 
 		const std::string 	getContent(void) const;
-		void 				readFileAndsetBody();
+		bool 				readFileAndsetBody();
 		const std::string& 	getroute_relative() const;
 		const std::string&	getfull_route_relative() const;
 		std::string 		getFirstLine() const;
