@@ -88,11 +88,14 @@ void HttpPath::initFile(){
 void HttpPath::initVector() {
     std::istringstream stream(path_);
     std::string token;
-
+    std::cout << "path = " << path_ << std::endl;
+    std::cout << "token = " << token << std::endl;
     while (std::getline(stream, token, '/')) {
         if (!token.empty()) {
             splitRoute_.push_back("/" + token);
         }
+        else
+            splitRoute_.push_back("/");
     }
 }
 
@@ -111,8 +114,6 @@ bool HttpPath::isCharValid() {
 
 std::string HttpPath::concatRoot(const Location *location) {
     bool root = false;
-
-    splitRoot_.clear();
 
     for (size_t i = 0; i < splitRoute_.size(); i++) {
         std::string valueToAdd;

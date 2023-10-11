@@ -50,10 +50,13 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 
 	isAllowedMethod(location->getAllowMethods(), request.getMethod());
 	setRootFinish(server_config->getValue("root"), httpPath.getRoot());
+	std::cout << "real_root " << real_root << std::endl; 
 	readFileAndsetBody();
 	//request.printRequest();
 
 	controlStatus(request, location, server_config);
+	std::cout << "real_root 2" << real_root << std::endl; 
+	std::cout << "status_code despues controlStatus -> " << status_code << std::endl;
 
 	if (location == NULL || status_code != 200)
 	{
@@ -103,7 +106,7 @@ void Response::controlStatus(const HttpRequest &request, const Location *locatio
 		if (!isFile()) {
 			std::cout << "-------------------------Es un directorio----------------------------" << std::endl;
 			location->printConfig();
-
+			std::cout << "location en index " << location->getValue("index") << std::endl;
 			if (location->getValue("index") != "")
 			{
 				std::cout << "es index" << std::endl;
@@ -167,7 +170,7 @@ bool Response::readFileAndsetBody() {
 		file.close();
 		return (true);
 	} else {
-		setStatusCode(HTTP_STATUS_NOT_FOUND);
+		//setStatusCode(HTTP_STATUS_NOT_FOUND);
 		return (false);
 	}
 
@@ -186,9 +189,9 @@ bool Response::getSize() {
 
 /*SETTERS*/
 
-void  Response::setStatusCode(const int status_code)
+void  Response::setStatusCode(const int status)
 {
-	this->status_code = status_code;
+	this->status_code = status;
 }
 
 void  Response::setHeader(const std::string &key, const std::string &value)
@@ -375,8 +378,8 @@ void Response::index(std::string index_file, std::string auto_index) {
 	std::cout << "status_code en index = " << status_code << std::endl;
 	std::string original_root = real_root;
 	real_root = real_root + "/" + index_file;
-	readFileAndsetBody();
-	if (status_code == 200) {
+	
+	if (readFileAndsetBody()) {
 		std::cout << "salio bien el body" << std::endl;
 		//setBody();
 	}
