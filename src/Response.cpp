@@ -95,27 +95,22 @@ Response	&Response::operator=(const Response &copy)
 void Response::controlStatus(const HttpRequest &request, const Location *location, const ServerConfig* server_config) {
 	// ¿La ruta es Accesible?
 	isAccessible(server_config->getValue("root"));
-	// si sattus code es  200
-
 	if (status_code == HTTP_STATUS_OK) {
-	setRouteRelative(request.getPath());
-	setfull_route_relative(request.getPath(), server_config->getValue("root"));
-	// ¿Es un archivo?
-	if (isFile())
-		setStatusCode(HTTP_STATUS_OK);
-	else {
-		std::cout << "-------------------------Es un directorio----------------------------" << std::endl;
-		location->printConfig();
+		setRouteRelative(request.getPath());
+		setfull_route_relative(request.getPath(), server_config->getValue("root"));
+		if (!isFile()) {
+			std::cout << "-------------------------Es un directorio----------------------------" << std::endl;
+			location->printConfig();
 
-		if (location->getValue("index") != "")
-		{
-			std::cout << "es index" << std::endl;
-			index(location->getValue("index"), location->getValue("autoindex"));
+			if (location->getValue("index") != "")
+			{
+				std::cout << "es index" << std::endl;
+				index(location->getValue("index"), location->getValue("autoindex"));
+			}
+			else if (location->getValue("autoindex") == "on") {
+				autoindex();
+			}
 		}
-		else if (location->getValue("autoindex") == "on") {
-			autoindex();
-		}
-	}
 	}	
 }
 
@@ -175,7 +170,6 @@ void Response::readFileAndsetBody() {
 }
 
 bool Response::getSize() {
-	std::cout << "real_root -> " << real_root << std::endl;
 	std::ifstream file(getRealRoot(), std::ios::binary);
 	if (!file.is_open()) {
 		return false;
@@ -371,18 +365,24 @@ bool Response::isFile() const{
 }
 
 void Response::index(std::string index_file, std::string auto_index) {
+	std::cout << "status_code en index = " << status_code << std::endl;
 	std::string original_root = real_root;
 	real_root = real_root + "/" + index_file;
-	if (readFileAndsetBody())
+	readFileAndsetBody();
+	if (status_code == 200) {
 		std::cout << "salio bien el body" << std::endl;
+		//setBody();
+	}
 	else {
 		if (auto_index == "on")
 		{
+		std::cout << "Entra en autoindex on" << std::endl;
 			std::cout << "ERROR AL ABRIR EL INDEX, pero tiene autoindex" << std::endl;
 			real_root = original_root;
 			autoindex();
 		}
 		else {
+		std::cout << "Entra en autoindex off" << std::endl;
 			std::cout << "ERROR AL ABRIR EL INDEX, FALTA SACAR BIEN EL ERROR" << std::endl;
 			setStatusCode(404);
 		}

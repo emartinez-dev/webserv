@@ -10,12 +10,10 @@ HttpPath::HttpPath(std::string path, const Location *location): path_(path), isF
         initVector();
         isFile_ = (getFile() != "" && getExtension() != "") ? true : false;
         root_ = concatRoot(location);
-        std::cout << "root_ -> " << root_ << std::endl;
     } else {
         status_code = HTTP_STATUS_BAD_REQUEST;
         std::cout << "aqui Hay que controlar el error" << std::endl;
     }
-    //printHttpPath();
 }
 
 
@@ -137,10 +135,6 @@ std::string HttpPath::concatRoot(const Location *location) {
     for (size_t i = 0; i < splitRoot_.size(); i++) {
         root_complet += splitRoot_[i];
     }
-    std::cout << "**/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*" << std::endl;
-    printHttpPath();
-    std::cout << "**/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*/*" << std::endl;
-
     return root_complet;
 }
 

@@ -111,6 +111,7 @@ class Response
 		void  				setContentLength(std::string& key);
 		void				setfull_route_relative(const std::string& request_route_relative, const std::string& root_cnf);
 		void				setRouteRelative(const std::string& root_cnf);
+		void				setResponseMethods(std::string met_req);
 
 		const std::string 	getContent(void) const;
 		void 				readFileAndsetBody();
@@ -125,7 +126,6 @@ class Response
 		void 				printResponse()const;
 
 		void				isAllowedMethod(int method_conf, std::string met_req);
-		void				setResponseMethods(std::string met_req);
 		bool 				isFile() const;
 		void 				isAccessible(const std::string& root_cnf);
 		void 				controlStatus(const HttpRequest &request, const Location *location, const ServerConfig* server_config);
