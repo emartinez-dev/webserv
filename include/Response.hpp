@@ -114,7 +114,7 @@ class Response
 		void				setResponseMethods(std::string met_req);
 
 		const std::string 	getContent(void) const;
-		void 				readFileAndsetBody();
+		bool 				readFileAndsetBody();
 		const std::string& 	getroute_relative() const;
 		const std::string&	getfull_route_relative() const;
 		std::string 		getFirstLine() const;
