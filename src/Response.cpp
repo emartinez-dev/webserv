@@ -416,13 +416,13 @@ void Response::autoindex() {
         while ((entry = readdir(directory)) != nullptr) {
             std::string name = entry->d_name;
             if (name != "." && name != "..") {
-				auto_body += "<li><a href=\"" + base_url + name + "\">" + name + "</a></li>\n";
+				//auto_body += "<li><a href=\"" + base_url + name + "\">" + name + "</a></li>\n";
 
-                // if (entry->d_type == DT_REG) {
-                //      auto_body += "<li><a href=\"" + base_url + name + "\">" + name + "</a></li>\n";
-                // } else if (entry->d_type == DT_DIR) {
-                //      auto_body += "<li><a href=\"" + name + "\">" + name + "</a></li>\n";
-                // }
+                if (entry->d_type == DT_REG) {
+                      auto_body += "<li><a href=\"" + base_url + name + "\">" + name + "</a></li>\n";
+                } else if (entry->d_type == DT_DIR) {
+                      auto_body += "<li><a href=\"" + base_url + name + "/\">" + name + "</a></li>\n";
+                }
             }
         }
 		auto_body += "</ul>\n";
