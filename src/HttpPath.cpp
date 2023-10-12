@@ -12,7 +12,6 @@ HttpPath::HttpPath(std::string path, const Location *location): path_(path), isF
         root_ = concatRoot(location);
     } else {
         status_code = HTTP_STATUS_BAD_REQUEST;
-        std::cout << "aqui Hay que controlar el error" << std::endl;
     }
 }
 
@@ -49,6 +48,9 @@ std::string HttpPath::getExtension() const{
 }
 std::string HttpPath::getRoot() const{
     return (root_);
+}
+int HttpPath::getStatusCode() const{
+    return (status_code);
 }
 
 /*SETTERS*/
@@ -88,8 +90,6 @@ void HttpPath::initFile(){
 void HttpPath::initVector() {
     std::istringstream stream(path_);
     std::string token;
-    std::cout << "path = " << path_ << std::endl;
-    std::cout << "token = " << token << std::endl;
     while (std::getline(stream, token, '/')) {
         if (!token.empty()) {
             splitRoute_.push_back("/" + token);

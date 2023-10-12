@@ -46,29 +46,27 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 {
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
 	Location const *location = server_config->getLocation(request.getPath());
-	HttpPath httpPath(request.getPath(), location);
-
-	isAllowedMethod(location->getAllowMethods(), request.getMethod());
-	setRootFinish(server_config->getValue("root"), httpPath.getRoot());
-	std::cout << "real_root " << real_root << std::endl; 
-	readFileAndsetBody();
-	//request.printRequest();
-
-	controlStatus(request, location, server_config);
-	if (location == NULL || status_code != 200)
-	{
+	if (location == NULL) {
+		setStatusCode(500);
 		createErrorPage();
-		getSize();
-		setHeader("Content-Length", itoa(body_len));
-		setHeader("Content-Type", getContentType(httpPath.getExtension()));
-	}
-	else
-	{
-		if (body_len == 0)
-			getSize();
-		setStatusCode(HTTP_STATUS_OK);
-		setHeader("Content-Length", itoa(body_len));
-		setHeader("Content-Type", getContentType(httpPath.getExtension()));
+	} else if (location != NULL) {
+		HttpPath httpPath(request.getPath(), location);
+		setStatusCode(httpPath.getStatusCode());
+			if (status_code == 200) {
+				isAllowedMethod(location->getAllowMethods(), request.getMethod());
+				setRootFinish(server_config->getValue("root"), httpPath.getRoot());
+				readFileAndsetBody();
+				controlStatus(request, location, server_config);
+				if (body_len == 0)
+					getSize();
+				setHeader("Content-Length", itoa(body_len));
+				setHeader("Content-Type", getContentType(httpPath.getExtension())); 
+			} else {
+				createErrorPage();
+				getSize();
+				setHeader("Content-Length", itoa(body_len));
+				setHeader("Content-Type", getContentType(httpPath.getExtension()));
+		}
 	}
 }
 
@@ -95,12 +93,13 @@ Response	&Response::operator=(const Response &copy)
 
 void Response::controlStatus(const HttpRequest &request, const Location *location, const ServerConfig* server_config) {
 	// ¿La ruta es Accesible?
-	isAccessible(server_config->getValue("root"));
+	
+	if (status_code == HTTP_STATUS_OK)
+		isAccessible(server_config->getValue("root"));
 	if (status_code == HTTP_STATUS_OK) {
 		setRouteRelative(request.getPath());
 		setfull_route_relative(request.getPath(), server_config->getValue("root"));
 		if (!isFile()) {
-			location->printConfig();
 			if (location->getValue("index") != "")
 			{
 				index(location->getValue("index"), location->getValue("autoindex"));
@@ -197,7 +196,6 @@ std::string Response::getContentType(const std::string& fileExtension) {
                 break;
         }
     }
-	std::cout << "contentType: " << contentType << std::endl;
     return contentType;
 }
 
@@ -363,16 +361,10 @@ void Response::index(std::string index_file, std::string auto_index) {
 	real_root = real_root + "/" + index_file;
 	
 	if (!readFileAndsetBody()) {
-		if (auto_index == "on")
-		{
-		std::cout << "Entra en autoindex on" << std::endl;
+		if (auto_index == "on") {
 			real_root = original_root;
-			std::cout << "ERROR AL ABRIR EL INDEX, pero tiene autoindex" << std::endl;
 			autoindex();
-		}
-		else {
-		std::cout << "Entra en autoindex off" << std::endl;
-			std::cout << "ERROR AL ABRIR EL INDEX, FALTA SACAR BIEN EL ERROR" << std::endl;
+		} else {
 			setStatusCode(404);
 		}
 	}
@@ -403,7 +395,6 @@ void Response::autoindex() {
 
 	std::string base_url = removeSubstring(real_root, "/example");
     DIR* directory = opendir(real_root.c_str());
-	std::cout << "real_root" << real_root << std::endl;
     if (!isFile() && directory) {
         struct dirent* entry;
 		addBody(createHeadHtml("autoindex"));
@@ -428,6 +419,7 @@ void Response::autoindex() {
     } 
 	else {
         setStatusCode(403);
+		createErrorPage();
     }
 }
 

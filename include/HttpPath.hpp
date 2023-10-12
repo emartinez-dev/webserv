@@ -38,6 +38,7 @@ class HttpPath
         std::string getFile() const;
         std::string getRoot() const;
         std::string getIsFile() const;
+        int         getStatusCode() const;
 
         void setPath(std::string& newPath);
         void setFile(std::string& newFile);
