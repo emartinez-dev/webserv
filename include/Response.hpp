@@ -95,6 +95,7 @@ class Response
 		std::string 	route_relative;
 		std::string 	full_route_relative;
 		std::string 	real_root;
+
 		std::map<std::string, std::string> headers;
 	public:
 		size_t			size_body;
@@ -132,6 +133,11 @@ class Response
 		void				autoindex();
 		void				index(std::string index_file, std::string auto_index);
 		void 				setBodylen(std::string &body);
+
+		void 				addBody(std::string addString);
+		std::string			createHeadHtml(std::string title);
+		std::string			createClousureHtml();
+		void				createErrorPage();
 };
 
 #endif

@@ -55,13 +55,9 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 	//request.printRequest();
 
 	controlStatus(request, location, server_config);
-	std::cout << "real_root 2" << real_root << std::endl; 
-	std::cout << "status_code despues controlStatus -> " << status_code << std::endl;
-
 	if (location == NULL || status_code != 200)
 	{
-		setRootFinish("./example/", "errorPages/404.html");
-		readFileAndsetBody();
+		createErrorPage();
 		getSize();
 		setHeader("Content-Length", itoa(body_len));
 		setHeader("Content-Type", getContentType(httpPath.getExtension()));
@@ -104,12 +100,9 @@ void Response::controlStatus(const HttpRequest &request, const Location *locatio
 		setRouteRelative(request.getPath());
 		setfull_route_relative(request.getPath(), server_config->getValue("root"));
 		if (!isFile()) {
-			std::cout << "-------------------------Es un directorio----------------------------" << std::endl;
 			location->printConfig();
-			std::cout << "location en index " << location->getValue("index") << std::endl;
 			if (location->getValue("index") != "")
 			{
-				std::cout << "es index" << std::endl;
 				index(location->getValue("index"), location->getValue("autoindex"));
 			}
 			else if (location->getValue("autoindex") == "on") {
@@ -158,76 +151,6 @@ std::string Response::getStatusMessage() const {
         default:
             return "Unknown Status";
     }
-}
-
-bool Response::readFileAndsetBody() {
-	std::ifstream file(real_root);
-	if (file.is_open()) {
-		char character;
-		while (file.get(character)) {
-			body += character;
-		}
-		file.close();
-		return (true);
-	} else {
-		//setStatusCode(HTTP_STATUS_NOT_FOUND);
-		return (false);
-	}
-
-}
-
-bool Response::getSize() {
-	std::ifstream file(getRealRoot(), std::ios::binary);
-	if (!file.is_open()) {
-		return false;
-	}
-	file.seekg(0, std::ios::end);
-	body_len = file.tellg();
-	file.close();
-	return true;
-}
-
-/*SETTERS*/
-
-void  Response::setStatusCode(const int status)
-{
-	this->status_code = status;
-}
-
-void  Response::setHeader(const std::string &key, const std::string &value)
-{
-	headers[key] = value;
-}
-
-void  Response::setBody(const std::string &body)
-{
-	this->body = body;
-}
-
-void Response::setRootFinish(std::string root_main, std::string add_root) {
-	real_root = (root_main + add_root);
-}
-
-void Response::setfull_route_relative(const std::string& request_route_relative, const std::string& root) {
-	full_route_relative = (root + request_route_relative);
-}
-
-void Response::setRouteRelative(const std::string& root_cnf) {
-	route_relative = root_cnf;
-}
-
-void Response::setContentLength(std::string& key) {
-	std::cout << "-------------------------" << getMapValue(key, headers) << std::endl;
-	std::cout << "key: " << key << std::endl;
-}
-
-
-void Response::printResponse() const {
-	std::cout << "version: " << version << std::endl;
-	std::cout << "status_code: " << status_code << std::endl;
-	std::cout << "body_len: " << body_len << std::endl;
-	std::cout << "body: " << body << std::endl;
-	std::cout << "route_relative: " << route_relative << std::endl;
 }
 
 std::string Response::getRealRoot() const{
@@ -292,6 +215,39 @@ const std::string Response::getContent(void) const
 	//printResponse();
 	return (response_text);
 }
+/*SETTERS*/
+
+void  Response::setStatusCode(const int status)
+{
+	this->status_code = status;
+}
+
+void  Response::setHeader(const std::string &key, const std::string &value)
+{
+	headers[key] = value;
+}
+
+void  Response::setBody(const std::string &body)
+{
+	this->body = body;
+}
+
+void Response::setRootFinish(std::string root_main, std::string add_root) {
+	real_root = (root_main + add_root);
+}
+
+void Response::setfull_route_relative(const std::string& request_route_relative, const std::string& root) {
+	full_route_relative = (root + request_route_relative);
+}
+
+void Response::setRouteRelative(const std::string& root_cnf) {
+	route_relative = root_cnf;
+}
+
+void Response::setContentLength(std::string& key) {
+	std::cout << "-------------------------" << getMapValue(key, headers) << std::endl;
+	std::cout << "key: " << key << std::endl;
+}
 
 /**
  * @brief Assigns a number to the request method.
@@ -310,6 +266,34 @@ void	Response::setResponseMethods(std::string met_req) {
 		methods = 0;
 		setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
 	}
+}
+
+
+bool Response::readFileAndsetBody() {
+	std::ifstream file(real_root);
+	if (file.is_open()) {
+		char character;
+		while (file.get(character)) {
+			body += character;
+		}
+		file.close();
+		return (true);
+	} else {
+		//setStatusCode(HTTP_STATUS_NOT_FOUND);
+		return (false);
+	}
+
+}
+
+bool Response::getSize() {
+	std::ifstream file(getRealRoot(), std::ios::binary);
+	if (!file.is_open()) {
+		return false;
+	}
+	file.seekg(0, std::ios::end);
+	body_len = file.tellg();
+	file.close();
+	return true;
 }
 
 /**
@@ -375,20 +359,15 @@ bool Response::isFile() const{
 }
 
 void Response::index(std::string index_file, std::string auto_index) {
-	std::cout << "status_code en index = " << status_code << std::endl;
 	std::string original_root = real_root;
 	real_root = real_root + "/" + index_file;
 	
-	if (readFileAndsetBody()) {
-		std::cout << "salio bien el body" << std::endl;
-		//setBody();
-	}
-	else {
+	if (!readFileAndsetBody()) {
 		if (auto_index == "on")
 		{
 		std::cout << "Entra en autoindex on" << std::endl;
-			std::cout << "ERROR AL ABRIR EL INDEX, pero tiene autoindex" << std::endl;
 			real_root = original_root;
+			std::cout << "ERROR AL ABRIR EL INDEX, pero tiene autoindex" << std::endl;
 			autoindex();
 		}
 		else {
@@ -404,39 +383,67 @@ void Response::setBodylen(std::string &body){
 	body_len = body.size();
 }
 
-void Response::autoindex() {
-	std::string auto_body = "<!DOCTYPE html>\n<html>\n<head>\n";
-    auto_body += "<title>Autoindex</title>\n";
-    auto_body += "</head>\n<body>\n";
-    auto_body += "<h1>Contenido del directorio:</h1>\n";
-    auto_body += "<ul>\n";
+void Response::addBody(std::string addString) {
+	body += addString;
+}
 
-	std::cout << "este es real_root  " << real_root << std::endl;
-	std::cout << "este es full_route_relative  " << full_route_relative << std::endl;
+std::string Response::createHeadHtml(std::string title) {
+	return (
+		"<!DOCTYPE html>\n<html>\n<head>\n" \
+		"<title>" + title + "</title>\n" \
+		"</head>\n<body>\n");
+}
+
+std::string Response::createClousureHtml() {
+	return("</body>\n</html>\n");
+}
+
+void Response::autoindex() {
+
+
 	std::string base_url = removeSubstring(real_root, "/example");
-	std::cout << "este es base_url  " << base_url << std::endl;
     DIR* directory = opendir(real_root.c_str());
-    if (!isFile()) {
+	std::cout << "real_root" << real_root << std::endl;
+    if (!isFile() && directory) {
         struct dirent* entry;
+		addBody(createHeadHtml("autoindex"));
+		addBody("<h1>Contenido del directorio:</h1>\n");
+		addBody("<ul>\n");
         while ((entry = readdir(directory)) != nullptr) {
             std::string name = entry->d_name;
             if (name != "." && name != "..") {
 				//auto_body += "<li><a href=\"" + base_url + name + "\">" + name + "</a></li>\n";
 
                 if (entry->d_type == DT_REG) {
-                      auto_body += "<li><a href=\"" + name + "\">" + name + "</a></li>\n";
+                      addBody("<li><a href=\"" + name + "\">" + name + "</a></li>\n");
                 } else if (entry->d_type == DT_DIR) {
-                      auto_body += "<li><a href=\"" + name + "/\">" + name + "</a></li>\n";
+                      addBody("<li><a href=\"" + name + "/\">" + name + "</a></li>\n");
                 }
             }
         }
-		auto_body += "</ul>\n";
-		auto_body += "</body>\n</html>\n";
+		addBody("</ul>\n");
+		createClousureHtml();
         closedir(directory);
-		setBodylen(auto_body);
-		setBody(auto_body);
+		setBodylen(body);
     } 
 	else {
-        std::cerr << "Error al abrir el directorio autoindex." << std::endl;
+        setStatusCode(403);
     }
+}
+
+void Response::createErrorPage() {
+	createHeadHtml("Error");
+	addBody("<h1 style=\"text-align: center; font-size: 24px;\">" + itoa(status_code) + "</h1>");
+	addBody("<h1 style=\"text-align: center; font-size: 24px;\">" + getStatusMessage() + "</h1>");
+	//addBody("<img src=" + "\"" + img + "\"" + " alt=\"Imagen Centrada\" style=\"display: block; margin: 0 auto;\">");
+	createClousureHtml();
+	setBodylen(body);
+}
+
+void Response::printResponse() const {
+	std::cout << "version: " << version << std::endl;
+	std::cout << "status_code: " << status_code << std::endl;
+	std::cout << "body_len: " << body_len << std::endl;
+	std::cout << "body: " << body << std::endl;
+	std::cout << "route_relative: " << route_relative << std::endl;
 }
