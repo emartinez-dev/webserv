@@ -8,6 +8,7 @@
 # include <cstdlib>
 # include <dirent.h>
 # include "Config.hpp"
+# include "ServerConfig.hpp"
 # include "httpRequest.hpp"
 # include "HttpPath.hpp"
 # include "Utils.hpp"
@@ -128,6 +129,8 @@ class Response
 		std::string			createHeadHtml(const std::string &title);
 		std::string			createClousureHtml();
 		void				createErrorPage();
+
+		bool				belowBodySizeLimit(const ServerConfig &server, const HttpRequest &request);
 };
 
 #endif

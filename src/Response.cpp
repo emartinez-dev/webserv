@@ -1,4 +1,6 @@
 #include "Response.hpp"
+#include <cstdlib>
+#include <xlocale/_stdlib.h>
 
 Response::Response()
 {
@@ -49,29 +51,35 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 	if (server_location)
 	{
 		HttpPath request_path(request.getPath(), server_location);
-		if (request_path.URLisValid())
+		if (belowBodySizeLimit(*server_config, request))
 		{
-			if (isAllowedMethod(server_location->getAllowMethods(), request.getMethod()))
+			if (request_path.URLisValid())
 			{
-				setFilePath(server_config->getValue("root"), request_path.getRoot());
-				if (request.getMethod() == "GET")
+				if (isAllowedMethod(server_location->getAllowMethods(), request.getMethod()))
 				{
-					if (isFolder(file_path))
-						index(server_location);
-					else if (isFile(file_path) && isAccessible(file_path))
-						readFileAndsetBody(file_path);
+					setFilePath(server_config->getValue("root"), request_path.getRoot());
+					if (request.getMethod() == "GET")
+					{
+						if (isFolder(file_path))
+							index(server_location);
+						else if (isFile(file_path) && isAccessible(file_path))
+							readFileAndsetBody(file_path);
+						else
+							setStatusCode(HTTP_STATUS_NOT_FOUND);
+						/* HADOOOUKEN ༼つಠ益ಠ༽つ ─=≡ΣO)) (no se como hacer esto de otra forma) */
+					}
+					else if (request.getMethod() == "POST")
+					{}
+					else if (request.getMethod() == "DELETE")
+					{}
 					else
-						setStatusCode(HTTP_STATUS_NOT_FOUND);
+						setStatusCode(HTTP_STATUS_NOT_IMPLEMENTED);
 				}
-				else if (request.getMethod() == "POST")
-				{}
-				else if (request.getMethod() == "DELETE")
-				{}
 				else
-					setStatusCode(HTTP_STATUS_NOT_IMPLEMENTED);
+					setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
 			}
 			else
-				setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
+				setStatusCode(HTTP_STATUS_PAYLOAD_TOO_LARGE);
 		}
 		else
 			setStatusCode(HTTP_STATUS_BAD_REQUEST);
@@ -341,6 +349,17 @@ void Response::createErrorPage() {
 	addBody("<h1 style=\"text-align: center; font-size: 24px;\">" + itoa(status_code) + "</h1>");
 	addBody("<h1 style=\"text-align: center; font-size: 24px;\">" + getStatusMessage() + "</h1>");
 	createClousureHtml();
+}
+
+bool  Response::belowBodySizeLimit(const ServerConfig &server, const HttpRequest &request)
+{
+	char **ptr = NULL;
+	if (server.getValue("client_max_body_size") == "")
+		return (true);
+	unsigned long max_body_size = strtoul(server.getValue("client_max_body_size").c_str(), ptr, 10);
+	if (request.getBody().size() > max_body_size)
+		return (false);
+	return (true);
 }
 
 void Response::printResponse() const {
