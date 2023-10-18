@@ -96,8 +96,8 @@ class Response
 
 		std::map<std::string, std::string> headers;
 		size_t			size_body;
-	public:
 		Response();
+	public:
 		Response(const HttpRequest &request, const Config &config);
 		~Response();
 		Response(Response const &copy);
@@ -120,15 +120,12 @@ class Response
 		void 				printResponse()const;
 
 		bool				isAllowedMethod(int allowed_methods, const std::string &request_method);
-		bool 				isFile() const;
-		bool 				isFolder() const;
-		bool 				isAccessible(const std::string &file);
 		void				autoindex();
 		void				index(const Location *location);
 		void 				bodyToBodyLength();
 
-		void 				addBody(std::string addString);
-		std::string			createHeadHtml(std::string title);
+		void 				addBody(std::string const &addString);
+		std::string			createHeadHtml(const std::string &title);
 		std::string			createClousureHtml();
 		void				createErrorPage();
 };

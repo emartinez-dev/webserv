@@ -56,9 +56,9 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 				setFilePath(server_config->getValue("root"), request_path.getRoot());
 				if (request.getMethod() == "GET")
 				{
-					if (isFolder())
+					if (isFolder(file_path))
 						index(server_location);
-					else if (isFile() && isAccessible(file_path))
+					else if (isFile(file_path) && isAccessible(file_path))
 						readFileAndsetBody(file_path);
 					else
 						setStatusCode(HTTP_STATUS_NOT_FOUND);
@@ -239,6 +239,8 @@ int	Response::getRequestMethod(const std::string &request_method) {
 
 bool Response::readFileAndsetBody(const std::string &path) {
 	std::ifstream file(path);
+	if (isFolder(path))
+		return (false);
 	if (file.is_open()) {
 		char character;
 		while (file.get(character)) {
@@ -278,40 +280,12 @@ bool Response::isAllowedMethod(int allowed_methods, const std::string &request_m
     }
 }
 
-/**
- * @brief determines whether a route_relative is accessible or not.
- *
- * @param request_route_relative request_route_relative
- * @param root_cnf
- * @return true
- * @return false
- */
-bool Response::isAccessible(const std::string &file) {
-	if (access(file.c_str(), O_RDONLY) == F_OK)
-		return (true);
-	return (false);
-}
-
-bool Response::isFile() const{
-	struct stat statbuf;
-
-	stat(file_path.c_str(), &statbuf);
-	return S_ISREG(statbuf.st_mode);
-}
-
-bool Response::isFolder() const{
-	struct stat statbuf;
-
-	stat(file_path.c_str(), &statbuf);
-	return S_ISDIR(statbuf.st_mode);
-}
-
 void Response::index(const Location *location) {
-	std::string index_file = location->getValue("index");
-	std::string auto_index = location->getValue("autoindex");
+	std::string const &index_file = location->getValue("index");
+	std::string const &auto_index = location->getValue("autoindex");
 	std::string index_path = file_path + index_file;
 
-	if (!readFileAndsetBody(index_path)) {
+	if (isFolder(index_path) || !readFileAndsetBody(index_path)) {
 		if (auto_index == "on")
 			autoindex();
 		else
@@ -323,11 +297,11 @@ void Response::bodyToBodyLength(void){
 	body_len = body.size();
 }
 
-void Response::addBody(std::string addString) {
+void Response::addBody(std::string const &addString) {
 	body += addString;
 }
 
-std::string Response::createHeadHtml(std::string title) {
+std::string Response::createHeadHtml(std::string const &title) {
 	return (
 		"<!DOCTYPE html>\n<html>\n<head>\n" \
 		"<title>" + title + "</title>\n" \
@@ -340,7 +314,7 @@ std::string Response::createClousureHtml() {
 
 void Response::autoindex() {
     DIR* directory = opendir(file_path.c_str());
-    if (!isFile() && directory) {
+    if (isFolder(file_path) && directory) {
 		setHeader("Content-Type", "text/html");
         struct dirent* entry;
 		addBody(createHeadHtml("autoindex"));

@@ -84,7 +84,27 @@ std::string removeSubstring(const std::string& original, const std::string& toRe
 
 void replaceFirstSubstring(std::string& str, const std::string& oldSubstr, const std::string& newSubstr) {
     size_t pos = str.find(oldSubstr);
-    if (pos != std::string::npos) {
+    if (pos != std::string::npos)
         str.replace(pos, oldSubstr.length(), newSubstr);
-    }
 }
+
+bool isAccessible(const std::string &file) {
+	if (access(file.c_str(), O_RDONLY) == F_OK)
+		return (true);
+	return (false);
+}
+
+bool isFile(const std::string &path) {
+	struct stat statbuf;
+
+	stat(path.c_str(), &statbuf);
+	return S_ISREG(statbuf.st_mode);
+}
+
+bool isFolder(const std::string &path) {
+	struct stat statbuf;
+
+	stat(path.c_str(), &statbuf);
+	return S_ISDIR(statbuf.st_mode);
+}
+
