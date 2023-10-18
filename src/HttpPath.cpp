@@ -1,5 +1,6 @@
-#include "../include/HttpPath.hpp"
+#include "HttpPath.hpp"
 #include <_ctype.h>
+#include "Utils.hpp"
 
 
 /*the extension or empty if it does not have an extension.Methods 
@@ -77,8 +78,7 @@ bool HttpPath::URLisValid() {
 
 std::string HttpPath::concatRoot(const Location *location)
 {
-	if (location->getValue("root") != "/")
-		return (location->getValue("root") + path_);
+    replaceFirstSubstring(path_, location->getValue("route"), location->getValue("root"));
 	return (path_);
 }
 

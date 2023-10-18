@@ -81,3 +81,10 @@ std::string removeSubstring(const std::string& original, const std::string& toRe
 
     return result;
 }
+
+void replaceFirstSubstring(std::string& str, const std::string& oldSubstr, const std::string& newSubstr) {
+    size_t pos = str.find(oldSubstr);
+    if (pos != std::string::npos) {
+        str.replace(pos, oldSubstr.length(), newSubstr);
+    }
+}

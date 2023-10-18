@@ -11,32 +11,32 @@ server:
         port: 8080
   location:
         route: /
-        root: /alberto
+        root: /alberto/
         index:  index.html
         autoindex: on
         allow_methods: GET POST
         cgi_ext: .php
     location: 
-		route: /index
+		route: /index/
         root: /
         autoindex: on 
         allow_methods: GET POST DELETE 
         cgi_ext: .php
     location: 
-		route: /tours
+		route: /tours/
         root: /
         index: time.py
         autoindex: on 
         allow_methods: GET
     location: 
-		route: /test
-        root: test/
+		route: /test/
+        root: /test/
         index: time.py
         autoindex: off 
         allow_methods: GET
     location: 
-        route: /red
-        return: /tours
+        route: /red/
+        return: /tours/
 server:
     root:  docs/sweet_cake/
     server_name:  localhost
