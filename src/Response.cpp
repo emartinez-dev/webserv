@@ -1,4 +1,5 @@
 #include "Response.hpp"
+#include "Utils.hpp"
 #include <cstdlib>
 #include <xlocale/_stdlib.h>
 
@@ -58,7 +59,12 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 				if (isAllowedMethod(server_location->getAllowMethods(), request.getMethod()))
 				{
 					setFilePath(server_config->getValue("root"), request_path.getRoot());
-					if (request.getMethod() == "GET")
+					if (server_location->getValue("return") != "")
+					{
+						setStatusCode(HTTP_STATUS_MOVED_PERMANENTLY);
+						setHeader("Location", redirectAddress(request.getPath(), *server_location));
+					}
+					else if (request.getMethod() == "GET")
 					{
 						if (isFolder(file_path))
 							index(server_location);
@@ -86,7 +92,7 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 	}
 	else
 		setStatusCode(HTTP_STATUS_NOT_FOUND);
-	if (status_code != HTTP_STATUS_OK)
+	if (status_code >= 400)
 		createErrorPage();
 	bodyToBodyLength();
 	setHeader("Content-Length", itoa(body_len));
@@ -138,6 +144,8 @@ std::string Response::getStatusMessage() const {
             return "Not Found";
         case HTTP_STATUS_INTERNAL_SERVER_ERROR:
             return "Internal Server Error";
+		case HTTP_STATUS_MOVED_PERMANENTLY:
+			return "Moved permanently";
         case HTTP_STATUS_NOT_IMPLEMENTED:
             return "Not Implemented";
         default:
@@ -360,6 +368,14 @@ bool  Response::belowBodySizeLimit(const ServerConfig &server, const HttpRequest
 	if (request.getBody().size() > max_body_size)
 		return (false);
 	return (true);
+}
+
+std::string Response::redirectAddress(const std::string &url, const Location &location)
+{
+	std::string new_url(url);
+
+	replaceFirstSubstring(new_url, location.getValue("route"), location.getValue("return"));
+	return (new_url);
 }
 
 void Response::printResponse() const {

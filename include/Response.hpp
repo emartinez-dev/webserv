@@ -97,8 +97,8 @@ class Response
 
 		std::map<std::string, std::string> headers;
 		size_t			size_body;
-		Response();
 	public:
+		Response();
 		Response(const HttpRequest &request, const Config &config);
 		~Response();
 		Response(Response const &copy);
@@ -131,6 +131,7 @@ class Response
 		void				createErrorPage();
 
 		bool				belowBodySizeLimit(const ServerConfig &server, const HttpRequest &request);
+		std::string			redirectAddress(const std::string &url, const Location &location);
 };
 
 #endif
