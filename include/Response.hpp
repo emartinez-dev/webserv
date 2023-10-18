@@ -11,6 +11,7 @@
 # include "httpRequest.hpp"
 # include "HttpPath.hpp"
 # include "Utils.hpp"
+# include <sys/stat.h>
 
 // Informacionales (1xx)
 #define HTTP_STATUS_CONTINUE 100              // 100 Continue
@@ -89,16 +90,13 @@ class Response
 	private:
 		std::string		version;
 		int			 	status_code;
-		int			 	methods;
 		std::string	  	body;
 		std::streampos	body_len;
-		std::string 	route_relative;
-		std::string 	full_route_relative;
-		std::string 	real_root;
+		std::string 	file_path;
 
 		std::map<std::string, std::string> headers;
-	public:
 		size_t			size_body;
+	public:
 		Response();
 		Response(const HttpRequest &request, const Config &config);
 		~Response();
@@ -108,31 +106,26 @@ class Response
 		void  				setStatusCode(const int status_code);
 		void  				setHeader(const std::string &key, const std::string &value);
 		void  				setBody(const std::string &body);
-		void  				setRootFinish(std::string root_main, std::string add_root);
+		void  				setFilePath(const std::string &root_main, const std::string &add_root);
 		void  				setContentLength(std::string& key);
-		void				setfull_route_relative(const std::string& request_route_relative, const std::string& root_cnf);
-		void				setRouteRelative(const std::string& root_cnf);
-		void				setResponseMethods(std::string met_req);
+		int					getRequestMethod(const std::string &method_str);
 
 		const std::string 	getContent(void) const;
-		bool 				readFileAndsetBody();
-		const std::string& 	getroute_relative() const;
-		const std::string&	getfull_route_relative() const;
+		bool 				readFileAndsetBody(const std::string &path);
 		std::string 		getFirstLine() const;
 		std::string 		getStatusMessage() const;
 		bool 				getSize();
 		std::string 		getContentType(const std::string& fileExtension);
-        std::string 		getRealRoot() const;
 
 		void 				printResponse()const;
 
-		void				isAllowedMethod(int method_conf, std::string met_req);
+		bool				isAllowedMethod(int allowed_methods, const std::string &request_method);
 		bool 				isFile() const;
-		void 				isAccessible(const std::string& root_cnf);
-		void 				controlStatus(const HttpRequest &request, const Location *location, const ServerConfig* server_config);
+		bool 				isFolder() const;
+		bool 				isAccessible(const std::string &file);
 		void				autoindex();
-		void				index(std::string index_file, std::string auto_index);
-		void 				setBodylen(std::string &body);
+		void				index(const Location *location);
+		void 				bodyToBodyLength();
 
 		void 				addBody(std::string addString);
 		std::string			createHeadHtml(std::string title);

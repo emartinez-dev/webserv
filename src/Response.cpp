@@ -6,9 +6,9 @@ Response::Response()
 
 	/* Server Response process diagram:
 	 * 1. Get the server and location of the given request, we should add
-	 *	  a route_relative or something like this concatenating the 'server_root' 
+	 *	  a route_relative or something like this concatenating the 'server_root'
 	 *	  with the route_relative 'root'
-	 * 2. If the location is NULL or the file is not found, set status 
+	 * 2. If the location is NULL or the file is not found, set status
 	 *	  code to 404.
 	 * 3. Check if the method of a request is allowed, set status code
 	 *	  to 405.
@@ -16,7 +16,7 @@ Response::Response()
 	 *	  the params of the request and return the string to the body
 	 * METHOD GET
 	 * 1. If the location has /return, return 301 with new location
-	 * 2. If the location is a folder, return the index if given 
+	 * 2. If the location is a folder, return the index if given
 	 * 3. If no index and autoindex is on, generate html with listdir
 	 * 4. If the location is found, open file and write text to the body
 	 * METHOD POST
@@ -30,11 +30,11 @@ Response::Response()
 	 *	2. Delete the file with unlink and return 200
 	 * GENERAL
 	 * 1. After having status code, insert it to the response. If it's an
-	 *	  error code and the config file has error page, add it to the	
+	 *	  error code and the config file has error page, add it to the
 	 *	  body of the request, else return default error page
 	 * 2. Set response headers to HTTP/1.1 <STATUS> <MESSAGE>.
 	 * 3. Add the body to the response, separated by '\r\n\r\n'
-	 * 4. Check the body length and add it to header with Content-Lenght 
+	 * 4. Check the body length and add it to header with Content-Lenght
 	 *	  = len
 	 * 5. Check the body type and add it with Content-Type = text/html,
 	 *	  json, etc
@@ -42,32 +42,46 @@ Response::Response()
 
 
 Response::Response(const HttpRequest &request, const Config &config):version(request.getVersion()), \
-	status_code(HTTP_STATUS_OK), route_relative(request.getHeader("path"))
+	status_code(HTTP_STATUS_OK)
 {
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
-	Location const *location = server_config->getLocation(request.getPath());
-	if (location == NULL) {
-		setStatusCode(500);
-		createErrorPage();
-	} else if (location != NULL) {
-		HttpPath httpPath(request.getPath(), location);
-		setStatusCode(httpPath.getStatusCode());
-			if (status_code == 200) {
-				isAllowedMethod(location->getAllowMethods(), request.getMethod());
-				setRootFinish(server_config->getValue("root"), httpPath.getRoot());
-				readFileAndsetBody();
-				controlStatus(request, location, server_config);
-				if (body_len == 0)
-					getSize();
-				setHeader("Content-Length", itoa(body_len));
-				setHeader("Content-Type", getContentType(httpPath.getExtension())); 
-			} else {
-				createErrorPage();
-				getSize();
-				setHeader("Content-Length", itoa(body_len));
-				setHeader("Content-Type", getContentType(httpPath.getExtension()));
+	Location const *server_location = server_config->getLocation(request.getPath());
+	if (server_location)
+	{
+		HttpPath request_path(request.getPath(), server_location);
+		if (request_path.URLisValid())
+		{
+			if (isAllowedMethod(server_location->getAllowMethods(), request.getMethod()))
+			{
+				setFilePath(server_config->getValue("root"), request_path.getRoot());
+				if (request.getMethod() == "GET")
+				{
+					if (isFolder())
+						index(server_location);
+					else if (isFile() && isAccessible(file_path))
+						readFileAndsetBody(file_path);
+					else
+						setStatusCode(HTTP_STATUS_NOT_FOUND);
+				}
+				else if (request.getMethod() == "POST")
+				{}
+				else if (request.getMethod() == "DELETE")
+				{}
+				else
+					setStatusCode(HTTP_STATUS_NOT_IMPLEMENTED);
+			}
+			else
+				setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
 		}
+		else
+			setStatusCode(HTTP_STATUS_BAD_REQUEST);
 	}
+	else
+		setStatusCode(HTTP_STATUS_NOT_FOUND);
+	if (status_code != HTTP_STATUS_OK)
+		createErrorPage();
+	bodyToBodyLength();
+	setHeader("Content-Length", itoa(body_len));
 }
 
 Response::~Response()
@@ -91,40 +105,11 @@ Response	&Response::operator=(const Response &copy)
 	return *this;
 }
 
-void Response::controlStatus(const HttpRequest &request, const Location *location, const ServerConfig* server_config) {
-	// ¿La ruta es Accesible?
-	
-	if (status_code == HTTP_STATUS_OK)
-		isAccessible(server_config->getValue("root"));
-	if (status_code == HTTP_STATUS_OK) {
-		setRouteRelative(request.getPath());
-		setfull_route_relative(request.getPath(), server_config->getValue("root"));
-		if (!isFile()) {
-			if (location->getValue("index") != "")
-			{
-				index(location->getValue("index"), location->getValue("autoindex"));
-			}
-			else if (location->getValue("autoindex") == "on") {
-				autoindex();
-			}
-		}
-	}	
-}
-
 /*GETTERS*/
-
-const std::string& Response::getroute_relative() const {
-	return (this->route_relative);
-}
-
-const std::string& Response::getfull_route_relative() const {
-	return (this->full_route_relative);
-}
 
 std::string Response::getFirstLine () const {
 	return (version + " " + itoa(status_code) + " " + getStatusMessage() + "\r\n");
 }
-
 
 std::string Response::getStatusMessage() const {
 
@@ -152,21 +137,18 @@ std::string Response::getStatusMessage() const {
     }
 }
 
-std::string Response::getRealRoot() const{
-	return real_root;
-}
-
 /**
  * @brief Determines the content type of the response.
- * 
+ *
  * @param fileExtension receives the file extension of the path.
  * @return std::string string with the assigned content type.
  */
-std::string Response::getContentType(const std::string& fileExtension) {
-    std::string contentType = "unknown-type"; // Valor predeterminado
+std::string Response::getContentType(const std::string& file_path) {
+    std::string contentType = "unknown-type";
+	size_t pos = file_path.rfind(".");
 
-    if (!fileExtension.empty()) {
-        std::string ext = fileExtension.substr(1); // Elimina el punto inicial de la extensión
+    if (pos != std::string::npos && file_path[pos + 1]) {
+        std::string ext = file_path.substr(pos + 1);
 
         switch (ext[0]) {
             case 't':
@@ -210,7 +192,6 @@ const std::string Response::getContent(void) const
 	response_text += headers_text;
 	response_text += "\r\n";
 	response_text += body;
-	//printResponse();
 	return (response_text);
 }
 /*SETTERS*/
@@ -230,16 +211,8 @@ void  Response::setBody(const std::string &body)
 	this->body = body;
 }
 
-void Response::setRootFinish(std::string root_main, std::string add_root) {
-	real_root = (root_main + add_root);
-}
-
-void Response::setfull_route_relative(const std::string& request_route_relative, const std::string& root) {
-	full_route_relative = (root + request_route_relative);
-}
-
-void Response::setRouteRelative(const std::string& root_cnf) {
-	route_relative = root_cnf;
+void Response::setFilePath(const std::string &root_main, const std::string &add_root) {
+	file_path = (root_main + add_root);
 }
 
 void Response::setContentLength(std::string& key) {
@@ -249,129 +222,104 @@ void Response::setContentLength(std::string& key) {
 
 /**
  * @brief Assigns a number to the request method.
- * 
+ *
  * @param met_req Receives the request method of type string.
  * @return int with the number assigned after checking it.
  */
-void	Response::setResponseMethods(std::string met_req) {
-	if (met_req.find("GET") != std::string::npos) 
-		methods = 1;
-	else if (met_req.find("POST") != std::string::npos)
-		methods = 3;
-	else if (met_req.find("DELETE") != std::string::npos)
-		methods = 5;
-	else {
-		methods = 0;
-		setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
-	}
+int	Response::getRequestMethod(const std::string &request_method) {
+	if (request_method.find("GET") != std::string::npos)
+		return 1;
+	else if (request_method.find("POST") != std::string::npos)
+		return 3;
+	else if (request_method.find("DELETE") != std::string::npos)
+		return 5;
+	else
+		return 0;
 }
 
-
-bool Response::readFileAndsetBody() {
-	std::ifstream file(real_root);
+bool Response::readFileAndsetBody(const std::string &path) {
+	std::ifstream file(path);
 	if (file.is_open()) {
 		char character;
 		while (file.get(character)) {
 			body += character;
 		}
 		file.close();
+		setHeader("Content-Type", getContentType(path));
 		return (true);
-	} else {
-		//setStatusCode(HTTP_STATUS_NOT_FOUND);
-		return (false);
 	}
-
-}
-
-bool Response::getSize() {
-	std::ifstream file(getRealRoot(), std::ios::binary);
-	if (!file.is_open()) {
-		return false;
-	}
-	file.seekg(0, std::ios::end);
-	body_len = file.tellg();
-	file.close();
-	return true;
+	return (false);
 }
 
 /**
  * @brief This function determines if the method is allowed
- * 
+ *
  * @param method_conf receives an integer that determines the methods allowed by the configuration file.
  * @param met_req Receive the method that the request requires.
  * @return std::string Returns the status code after checking the allowed methods.
  */
-void Response::isAllowedMethod(int method_conf, std::string met_req) {
-	setResponseMethods(met_req);
-	switch (methods) {
+bool Response::isAllowedMethod(int allowed_methods, const std::string &request_method) {
+	int method = getRequestMethod(request_method);
+	switch (method) {
 		case 1:
-			if (method_conf == 1 || method_conf == 4 || method_conf == 6 ||method_conf == 9)
-				break;
-			setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
-			break;
+			if (allowed_methods == 1 || allowed_methods == 4 || allowed_methods == 6 ||allowed_methods == 9)
+				return (true);
+			return (false);
 		case 3:
-			if (method_conf == 3 || method_conf == 4 || method_conf == 8 ||method_conf == 9)
-				break;
-			setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
-			break;
+			if (allowed_methods == 3 || allowed_methods == 4 || allowed_methods == 8 ||allowed_methods == 9)
+				return (true);
+			return (false);
 		case 5:
-			if (method_conf == 5 || method_conf == 6 || method_conf == 8 ||method_conf == 9)
-				break;
-			setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
-			break;
+			if (allowed_methods == 5 || allowed_methods == 6 || allowed_methods == 8 ||allowed_methods == 9)
+				return (true);
+			return (false);
 		default:
-			setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
-			break;
+			return (true);
     }
 }
 
 /**
  * @brief determines whether a route_relative is accessible or not.
- * 
+ *
  * @param request_route_relative request_route_relative
- * @param root_cnf 
- * @return true 
- * @return false 
+ * @param root_cnf
+ * @return true
+ * @return false
  */
-void Response::isAccessible(const std::string& root_cnf) {
-	if (access((route_relative + root_cnf).c_str(), F_OK) != 0) {
-		setStatusCode(HTTP_STATUS_FORBIDDEN);
-	}
+bool Response::isAccessible(const std::string &file) {
+	if (access(file.c_str(), O_RDONLY) == F_OK)
+		return (true);
+	return (false);
 }
 
-/**
- * @brief determines whether a path reaches a file or a directory.
- * 
- * @return true if it is a file.
- * @return false if it is a directory.
- */
 bool Response::isFile() const{
-	size_t pos = route_relative.rfind('.');
+	struct stat statbuf;
 
-	if (pos != std::string::npos) {
-		if (pos < route_relative.length() - 1) {
-			return true;
-		}
-    }
-	return false;
+	stat(file_path.c_str(), &statbuf);
+	return S_ISREG(statbuf.st_mode);
 }
 
-void Response::index(std::string index_file, std::string auto_index) {
-	std::string original_root = real_root;
-	real_root = real_root + "/" + index_file;
-	
-	if (!readFileAndsetBody()) {
-		if (auto_index == "on") {
-			real_root = original_root;
+bool Response::isFolder() const{
+	struct stat statbuf;
+
+	stat(file_path.c_str(), &statbuf);
+	return S_ISDIR(statbuf.st_mode);
+}
+
+void Response::index(const Location *location) {
+	std::string index_file = location->getValue("index");
+	std::string auto_index = location->getValue("autoindex");
+	std::string index_path = file_path + index_file;
+
+	if (!readFileAndsetBody(index_path)) {
+		if (auto_index == "on")
 			autoindex();
-		} else {
-			setStatusCode(404);
-		}
+		else
+			setStatusCode(HTTP_STATUS_NOT_FOUND);
 	}
-	
 }
 
-void Response::setBodylen(std::string &body){
+void Response::bodyToBodyLength(void){
 	body_len = body.size();
 }
 
@@ -391,11 +339,9 @@ std::string Response::createClousureHtml() {
 }
 
 void Response::autoindex() {
-
-
-	std::string base_url = removeSubstring(real_root, "/example");
-    DIR* directory = opendir(real_root.c_str());
+    DIR* directory = opendir(file_path.c_str());
     if (!isFile() && directory) {
+		setHeader("Content-Type", "text/html");
         struct dirent* entry;
 		addBody(createHeadHtml("autoindex"));
 		addBody("<h1>Contenido del directorio:</h1>\n");
@@ -403,8 +349,6 @@ void Response::autoindex() {
         while ((entry = readdir(directory)) != nullptr) {
             std::string name = entry->d_name;
             if (name != "." && name != "..") {
-				//auto_body += "<li><a href=\"" + base_url + name + "\">" + name + "</a></li>\n";
-
                 if (entry->d_type == DT_REG) {
                       addBody("<li><a href=\"" + name + "\">" + name + "</a></li>\n");
                 } else if (entry->d_type == DT_DIR) {
@@ -415,11 +359,6 @@ void Response::autoindex() {
 		addBody("</ul>\n");
 		createClousureHtml();
         closedir(directory);
-		setBodylen(body);
-    } 
-	else {
-        setStatusCode(403);
-		createErrorPage();
     }
 }
 
@@ -427,9 +366,7 @@ void Response::createErrorPage() {
 	createHeadHtml("Error");
 	addBody("<h1 style=\"text-align: center; font-size: 24px;\">" + itoa(status_code) + "</h1>");
 	addBody("<h1 style=\"text-align: center; font-size: 24px;\">" + getStatusMessage() + "</h1>");
-	//addBody("<img src=" + "\"" + img + "\"" + " alt=\"Imagen Centrada\" style=\"display: block; margin: 0 auto;\">");
 	createClousureHtml();
-	setBodylen(body);
 }
 
 void Response::printResponse() const {
@@ -437,5 +374,4 @@ void Response::printResponse() const {
 	std::cout << "status_code: " << status_code << std::endl;
 	std::cout << "body_len: " << body_len << std::endl;
 	std::cout << "body: " << body << std::endl;
-	std::cout << "route_relative: " << route_relative << std::endl;
 }

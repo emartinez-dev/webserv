@@ -1,18 +1,12 @@
 #include "../include/HttpPath.hpp"
+#include <_ctype.h>
 
 
 /*the extension or empty if it does not have an extension.Methods 
     for orthodox canonical class.*/
-HttpPath::HttpPath(std::string path, const Location *location): path_(path), isFile_(true), status_code(HTTP_STATUS_OK) {
-    if (isCharValid()) {
-        initFile();
-        initExtension();
-        initVector();
-        isFile_ = (getFile() != "" && getExtension() != "") ? true : false;
-        root_ = concatRoot(location);
-    } else {
-        status_code = HTTP_STATUS_BAD_REQUEST;
-    }
+HttpPath::HttpPath(const std::string &path, const Location *location): path_(path) {
+    initExtension();
+    root_ = concatRoot(location);
 }
 
 
@@ -20,11 +14,9 @@ HttpPath::HttpPath(std::string path, const Location *location): path_(path), isF
 HttpPath::~HttpPath() {
 }
 
-HttpPath::HttpPath(HttpPath const &copy): splitRoute_(copy.splitRoute_), splitRoot_(copy.splitRoot_) {
+HttpPath::HttpPath(HttpPath const &copy) {
     path_ = copy.path_;
-    file_ = copy.file_;
     extension_ = copy.extension_;
-    isFile_ = copy.isFile_;
     root_ = copy.root_;
     
 }
@@ -40,26 +32,18 @@ HttpPath	&HttpPath::operator=(const HttpPath &copy) {
 std::string HttpPath::getPath() const{
     return (path_);
 }
-std::string HttpPath::getFile() const{
-    return (file_);
-}
 std::string HttpPath::getExtension() const{
     return (extension_);
 }
 std::string HttpPath::getRoot() const{
     return (root_);
 }
-int HttpPath::getStatusCode() const{
-    return (status_code);
-}
 
 /*SETTERS*/
 void HttpPath::setPath(std::string& newPath){
     path_ = newPath;
 }
-void HttpPath::setFile(std::string& newFile){
-    file_ = newFile;
-}
+
 void HttpPath::setExtension(std::string& newExtension){
     extension_ = newExtension;
 }
@@ -70,90 +54,38 @@ void HttpPath::setExtension(std::string& newExtension){
  * @return std::string the extension or empty if it does not have an extension.
  */
 void HttpPath::initExtension(){
-    size_t pos = file_.rfind(".");
-    if (pos != std::string::npos) {
-        extension_ = file_.substr(pos, file_.length());
+    size_t pos = path_.rfind(".");
+    size_t slash_pos = path_.rfind("/");
+    if (pos > slash_pos && pos != std::string::npos) {
+        extension_ = path_.substr(pos, path_.length());
     } else {
         extension_ = "";
     }
 }
 
-void HttpPath::initFile(){
-    size_t pos = path_.rfind("/");
-    if (pos != std::string::npos) {
-        file_ = path_.substr(pos, path_.length());
-    } else {
-        file_ = "";
-    }
-}
-
-void HttpPath::initVector() {
-    std::istringstream stream(path_);
-    std::string token;
-    while (std::getline(stream, token, '/')) {
-        if (!token.empty()) {
-            splitRoute_.push_back("/" + token);
-        }
-        else
-            splitRoute_.push_back("/");
-    }
-}
-
-/*PARSER PATH*/
-
-bool HttpPath::isCharValid() {
+bool HttpPath::URLisValid() {
+	std::string valid_chars = "-._~:/?#[]@!$&'()*+,;%=";
     for (size_t i = 0; i < path_.length(); ++i) {
-        if(path_[i] != '.' && path_[i] != '_' && path_[i] != '-' && path_[i] != '/' && !isalnum(path_[i])) {
-            return false;
-        }
+		if (valid_chars.find(path_[i]) == std::string::npos && !isalnum(path_[i])) {
+			return false;
+		}
     }
     return true;
 }
 
 /* SPLIT ROOT AND CONCATENATE */
 
-std::string HttpPath::concatRoot(const Location *location) {
-    bool root = false;
-
-    for (size_t i = 0; i < splitRoute_.size(); i++) {
-        std::string valueToAdd;
-
-        if (location->getValue("route") == "/" && splitRoute_.size() < 2 && root == false) {
-           
-            root = true;
-            valueToAdd = location->getValue("root");
-        }
-        else if (location->getValue("route") != location->getValue("root") && location->getValue("route") == splitRoute_[i]) {
-            valueToAdd = location->getValue("root");
-        }
-        else {
-            valueToAdd = splitRoute_[i];
-        }
-        splitRoot_.push_back(valueToAdd);
-    }
-    std::string root_complet;
-
-    for (size_t i = 0; i < splitRoot_.size(); i++) {
-        root_complet += splitRoot_[i];
-    }
-    return root_complet;
+std::string HttpPath::concatRoot(const Location *location)
+{
+	if (location->getValue("root") != "/")
+		return (location->getValue("root") + path_);
+	return (path_);
 }
-
-
-
 
 void HttpPath::printHttpPath() {
     std::cout << std::endl;
     std::cout << "path_: " << path_ << std::endl;
     std::cout << "extension_: " << extension_ << std::endl;
-    std::cout << "file_: " << file_ << std::endl;
-    std::cout << "isFile_: " << isFile_ << std::endl;
-    for (size_t i = 0; i < splitRoute_.size(); ++i) {
-        std::cout << "splitRoute: " << splitRoute_[i] << std::endl;
-    }
-    for (size_t i = 0; i < splitRoot_.size(); ++i) {
-        std::cout << "splitRoot: " << splitRoot_[i] << std::endl;
-    }
     std::cout << "root_: " << root_ << std::endl;
     std::cout << std::endl;
 }
