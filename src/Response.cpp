@@ -99,6 +99,13 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 	setHeader("Connection", "close");
 }
 
+Response::Response(int error_code)
+{
+	status_code = error_code;
+	if (status_code >= 400)
+		createErrorPage();
+}
+
 Response::~Response()
 {
 }
@@ -149,6 +156,8 @@ std::string Response::getStatusMessage() const {
 			return "Moved permanently";
         case HTTP_STATUS_NOT_IMPLEMENTED:
             return "Not Implemented";
+		case HTTP_STATUS_REQUEST_TIMEOUT:
+            return "Request Timeout";
         default:
             return "Unknown Status";
     }

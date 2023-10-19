@@ -100,6 +100,7 @@ class Response
 	public:
 		Response();
 		Response(const HttpRequest &request, const Config &config);
+		Response(int error_code);
 		~Response();
 		Response(Response const &copy);
 		Response	&operator=(Response const &copy);

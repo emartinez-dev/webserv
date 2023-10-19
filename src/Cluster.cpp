@@ -41,8 +41,8 @@ void  Cluster::run(void)
 			{
 				if (!is_server(connections[i].fd) && is_timeout(connections[i].fd))
 				{
-					std::cout << "Closing connection due to timeout on fd " << connections[i].fd << std::endl;
-					close_and_remove_connection(i, initial_size);
+					responses[i] = Response(HTTP_STATUS_REQUEST_TIMEOUT);
+					connections[i].events = POLLOUT;
 				}
 				if (connections[i].revents & POLLIN)
 				{
