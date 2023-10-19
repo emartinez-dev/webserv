@@ -18,6 +18,7 @@ class HttpRequest {
         void parseFirstLine(const std::string& first_line);
         void parseHeaders(const std::string& line);
         void parseParameters(const std::string& body);
+		std::string parseURL(const std::string &path);
 
     public:
 		HttpRequest();

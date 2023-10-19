@@ -16,6 +16,8 @@ HttpRequest::HttpRequest(const std::vector<char>& request_buffer)
 		std::string headers = request_str.substr(0, pos);
         parseFirstLine(first_line);
         parseHeaders(headers);
+		std::string url_parameters = parseURL(path_);
+		parseParameters(url_parameters);
     }
 
     // Encuentra el inicio del cuerpo de la solicitud
@@ -48,6 +50,19 @@ void HttpRequest::parseFirstLine(const std::string& first_line) {
         path_ = first_line.substr(pos1 + 1, pos2 - pos1 - 1);
         version_ = first_line.substr(pos2 + 1);
     }
+}
+
+
+std::string HttpRequest::parseURL(const std::string &path)
+{
+	std::string	  parameters;
+	size_t	pos = path.find("?");
+
+	if (pos == std::string::npos)
+		return "";
+	parameters = path.substr(pos + 1);
+	path_ = path.substr(0, pos);
+	return parameters;
 }
 
 // Constructor de copia de la clase HttpRequest
