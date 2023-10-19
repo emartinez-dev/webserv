@@ -35,7 +35,7 @@ void  Cluster::run(void)
 		int events = ::poll(connections.data(), connections.size(), TIMEOUT_MS);
 		if (events < 0)
 			throw SocketPollingError();
-		if (events > 0)
+		else
 		{
 			for (size_t i = 0; i < initial_size; i++)
 			{

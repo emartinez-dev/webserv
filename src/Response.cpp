@@ -96,6 +96,7 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 		createErrorPage();
 	bodyToBodyLength();
 	setHeader("Content-Length", itoa(body_len));
+	setHeader("Connection", "close");
 }
 
 Response::~Response()
