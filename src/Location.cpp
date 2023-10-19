@@ -60,3 +60,8 @@ const std::string Location::getValue(std::string const &key) const
 {
 	return (getMapValue(key, this->conf));
 }
+
+bool  Location::hasRedirect(void) const
+{
+	return (getValue("return") != "");
+}

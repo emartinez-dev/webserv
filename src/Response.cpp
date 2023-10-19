@@ -52,32 +52,21 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 	if (server_location)
 	{
 		HttpPath request_path(request.getPath(), server_location);
+		setFilePath(server_config->getValue("root"), request_path.getRoot());
 		if (belowBodySizeLimit(*server_config, request))
 		{
 			if (request_path.URLisValid())
 			{
 				if (isAllowedMethod(server_location->getAllowMethods(), request.getMethod()))
 				{
-					setFilePath(server_config->getValue("root"), request_path.getRoot());
-					if (server_location->getValue("return") != "")
-					{
-						setStatusCode(HTTP_STATUS_MOVED_PERMANENTLY);
-						setHeader("Location", redirectAddress(request.getPath(), *server_location));
-					}
+					if (server_location->hasRedirect())
+						redirectionHandler(request, *server_location);
 					else if (request.getMethod() == "GET")
-					{
-						if (isFolder(file_path))
-							index(server_location);
-						else if (isFile(file_path) && isAccessible(file_path))
-							readFileAndsetBody(file_path);
-						else
-							setStatusCode(HTTP_STATUS_NOT_FOUND);
-						/* HADOOOUKEN ༼つಠ益ಠ༽つ ─=≡ΣO)) (no se como hacer esto de otra forma) */
-					}
+						getHandler(request, *server_location);
 					else if (request.getMethod() == "POST")
-					{}
+						postHandler(request, *server_location);
 					else if (request.getMethod() == "DELETE")
-					{}
+						deleteHandler(request, *server_location);
 					else
 						setStatusCode(HTTP_STATUS_NOT_IMPLEMENTED);
 				}
@@ -97,6 +86,37 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 	bodyToBodyLength();
 	setHeader("Content-Length", itoa(body_len));
 	setHeader("Connection", "close");
+}
+
+void Response::redirectionHandler(const HttpRequest &request, const Location &location)
+{
+	setStatusCode(HTTP_STATUS_MOVED_PERMANENTLY);
+	setHeader("Location", redirectAddress(request.getPath(), location));
+}
+
+void Response::getHandler(const HttpRequest &request, const Location &location)
+{
+	// We will need the request for the CGI I think
+	(void) request;
+	if (isFolder(file_path))
+		index(location);
+	else if (isFile(file_path) && isAccessible(file_path))
+		readFileAndsetBody(file_path);
+	else
+		setStatusCode(HTTP_STATUS_NOT_FOUND);
+}
+
+
+void Response::postHandler(const HttpRequest &request, const Location &location)
+{
+	(void) request;
+	(void) location;
+}
+
+void Response::deleteHandler(const HttpRequest &request, const Location &location)
+{
+	(void) request;
+	(void) location;
 }
 
 Response::Response(int error_code)
@@ -306,9 +326,9 @@ bool Response::isAllowedMethod(int allowed_methods, const std::string &request_m
     }
 }
 
-void Response::index(const Location *location) {
-	std::string const &index_file = location->getValue("index");
-	std::string const &auto_index = location->getValue("autoindex");
+void Response::index(const Location &location) {
+	std::string const &index_file = location.getValue("index");
+	std::string const &auto_index = location.getValue("autoindex");
 	std::string index_path = file_path + index_file;
 
 	if (isFolder(index_path) || !readFileAndsetBody(index_path)) {

@@ -27,6 +27,7 @@ class Location
 		bool  matches(const std::string &path);
 		int	  getAllowMethods() const;
 		const std::string getValue(std::string const &key) const;
+		bool  hasRedirect(void) const;
 };
 
 #endif

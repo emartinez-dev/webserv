@@ -123,7 +123,7 @@ class Response
 
 		bool				isAllowedMethod(int allowed_methods, const std::string &request_method);
 		void				autoindex();
-		void				index(const Location *location);
+		void				index(const Location &location);
 		void 				bodyToBodyLength();
 
 		void 				addBody(std::string const &addString);
@@ -133,6 +133,11 @@ class Response
 
 		bool				belowBodySizeLimit(const ServerConfig &server, const HttpRequest &request);
 		std::string			redirectAddress(const std::string &url, const Location &location);
+
+		void				redirectionHandler(const HttpRequest &request, const Location &location);
+		void				getHandler(const HttpRequest &request, const Location &location);
+		void				postHandler(const HttpRequest &request, const Location &location);
+		void				deleteHandler(const HttpRequest &request, const Location &location);
 };
 
 #endif
