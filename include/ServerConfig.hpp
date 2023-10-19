@@ -28,8 +28,6 @@ class ServerConfig
 
 		void printConfig(void) const;
 		void splitKeyValue(std::string &line, std::ifstream &config_file);
-		// std::string splitKey(std::string const &line);
-		// std::string splitValue(std::string const &line);
 
 		std::map<std::string, std::string> getConf();
 		std::vector<Location> getLocations();
