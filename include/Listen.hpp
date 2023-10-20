@@ -18,8 +18,8 @@ class Listen
 		void setHost(std::string value);
 		void setPort(std::string value);
 		
-		std::string getHost();
-		int getPort();
+		const std::string getHost() const;
+		int getPort() const;
 };
 
 #endif

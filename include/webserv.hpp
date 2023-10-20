@@ -1,7 +1,7 @@
 #ifndef WEBSERV_HPP
 #define WEBSERV_HPP
 
-# include <iostream>
+# include "Config.hpp"
 # include "Server.hpp"
 # include "Utils.hpp"
 # include "Cluster.hpp"

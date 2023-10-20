@@ -24,10 +24,10 @@ class Config
 
 		int	check_file(std::ifstream &config_file);
 
-		std::vector<ServerConfig> getServerConfigs();
+		const std::vector<ServerConfig> getServerConfigs() const;
 
 		void add_server(std::ifstream &config_file, std::string line);
-
+		const ServerConfig *getServer(std::string const &host) const;
 };
 
 #endif

@@ -1,0 +1,22 @@
+server:
+    root: example/host_tests/
+    server_name: johnnyserver.com 
+    listen:
+        host: 127.0.0.1
+        port: 8080
+  location:
+        route: /
+        index: fallback.html
+        allow_methods: GET
+server:
+    root: example/host_tests/ 
+    server_name: google.com
+    listen:
+        host: 127.0.0.1
+        port: 7070
+    location: 
+		route: /
+        root: /
+        index:  index.html
+        autoindex: off 
+        allow_methods: GET

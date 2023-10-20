@@ -21,10 +21,13 @@ class Location
 		Location(Location const &copy);
 		Location	&operator=(Location const &copy);
 
-		void printConfig(void);
-		void setConf(std::string key, std::string value);
+		void printConfig(void) const;
+		void	setConf(const std::string &key, const std::string &value);
 		std::map<std::string, std::string>	getConf();
-		int	getAllowMethods();
+		bool  matches(const std::string &path);
+		int	  getAllowMethods() const;
+		const std::string getValue(std::string const &key) const;
+		bool  hasRedirect(void) const;
 };
 
 #endif

@@ -1,4 +1,6 @@
 #include "ServerConfig.hpp"
+#include "Utils.hpp"
+#include <string>
 
 ServerConfig::ServerConfig()
 {
@@ -25,9 +27,9 @@ ServerConfig	&ServerConfig::operator=(const ServerConfig &copy)
 	return *this;
 }
 
-void	ServerConfig::printConfig(void)
+void	ServerConfig::printConfig(void) const
 {
-	for(std::map<std::string, std::string>::iterator it=conf.begin(); it != conf.end(); ++it)
+	for(std::map<std::string, std::string>::const_iterator it=conf.begin(); it != conf.end(); ++it)
 		std::cout << "Clave: " << it->first << " valor: " << it->second << std::endl;
 	for (size_t i = 0; i < locations.size(); i++)
 	{
@@ -39,13 +41,11 @@ void	ServerConfig::printConfig(void)
 
 void	ServerConfig::splitKeyValue(std::string &line, std::ifstream &config_file) {
 	size_t pointsPos = line.find(":");
-	//std::cout << line << std::endl;
-	if (line.find("server") != std::string::npos)
+	if (line.find("server:") != std::string::npos)
 		return ;
 	if (pointsPos != LAST) {
 		std::string key = splitKey(line);
 		std::string value = splitValue(line);
-		//std::cout << "key: " << key << " value: " << value << std::endl;
 		if (key == "listen")
 		{
 			Listen listen;
@@ -91,27 +91,11 @@ void	ServerConfig::splitKeyValue(std::string &line, std::ifstream &config_file) 
 			}
 			locations.push_back(location);
 		}
-		else if (key == "server")
+		else if (key == "server:")
 			return ;
 		else
 			conf[key] = value;
 	}
-}
-
-std::string ServerConfig::splitKey(std::string const &line) {
-	size_t pointsPos = line.find(":");
-	std::string key = line.substr(0, pointsPos);
-    key.erase(0, key.find_first_not_of(" \t"));
-    key.erase(key.find_last_not_of(" \t") + 1);
-	return key;
-}
-
-std::string ServerConfig::splitValue(std::string const &line) {
-	size_t pointsPos = line.find(":");
-	std::string value = line.substr(pointsPos + 1);
-    value.erase(0, value.find_first_not_of(" \t"));
-    value.erase(value.find_last_not_of(" \t") + 1);
-	return value;
 }
 
 std::map<std::string, std::string> ServerConfig::getConf() {
@@ -128,4 +112,83 @@ std::vector<Listen> ServerConfig::getListens() {
 
 std::vector<ErrorPage> ServerConfig::getErrorPages() {
 	return error_pages;
+}
+
+// TODO: abstract this to a function or something, we repeat this a lot
+const std::string ServerConfig::getValue(std::string const &key) const
+{
+	return (getMapValue(key, this->conf));
+}
+
+
+// This functions also remove the trailing \r
+// TODO: abstract this to a function or something
+static const std::string getHostname(std::string const &host)
+{
+	if (host.find(":") == std::string::npos)
+		return (host.substr(0, host.length() - 1));
+	std::string	hostname = host.substr(0, host.find(":"));
+	return (hostname);
+}
+
+static const std::string getPort(std::string const &host)
+{
+	if (host.find(":") == std::string::npos)
+		return ("");
+	std::string	hostname = host.substr(host.find(":") + 1, host.length() - 1);
+	return (hostname);
+
+}
+
+bool  ServerConfig::matches(std::string const &host) const
+{
+	std::string hostname = getHostname(host);
+	std::string port = getPort(host);
+
+	int	int_port = atoi(port.c_str());
+	for (size_t i = 0; i < listens.size(); i++)
+	{
+		if (listens[i].getPort() == int_port && listens[i].getHost() == hostname)
+			return (true);
+		if (hostname == getValue("server_name") && int_port == listens[i].getPort())
+			return (true);
+	}
+	return (false);
+}
+
+/* In our webserver context, we have to match the URL given with the prefixes on
+ * the config file. Example:
+ * We have a URL like /projects/alumni and a route with /projects and other with 
+ * /projects/alumni on the configuration file. We have to redirect the browser to
+ * the most specific one, being it the longest one */
+
+static int prefixMatch(std::string const &str, std::string const &prefix)
+{
+	if (str.length() < prefix.length())
+		return (0);
+	if (str.compare(0, prefix.length(), prefix) == 0)
+		return (prefix.length());
+	return (0);
+}
+
+const Location *ServerConfig::getLocation(std::string const &url) const
+{
+	Location const	*best_match = NULL;
+	int				best_match_len = -1;
+	int				temp_len;
+
+	for (size_t i = 0; i < locations.size(); i++)
+	{
+		std::string const &route = locations[i].getValue("route");
+		temp_len = prefixMatch(url, route);
+		if (temp_len > best_match_len)
+		{
+			best_match_len = temp_len;
+			best_match = &locations[i];
+		}
+	}
+	if (best_match_len > 0)
+		return best_match;
+	else
+		return (NULL);
 }

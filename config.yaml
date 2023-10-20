@@ -1,7 +1,7 @@
 server:
-    root:  docs/fusion_web/
-    name:  localhost
-    cgi_path: /usr/bin/python3 /bin/bash
+    root: ./example
+    server_name: johnnyserver.com 
+    cgi_path: /usr/bin/php
     client_max_body_size: 3000  
     error_page: 
         path: ./4xx.html
@@ -9,48 +9,44 @@ server:
     listen:
         host: 127.0.0.1
         port: 8080
-    location: 
-		route: /test
-        root: ./
+  location:
+        route: /
+        root: /alberto/
         index:  index.html
-        autoindex: off 
-        allow_methods: GET POST DELETE 
-        cgi_ext: .php    
+        autoindex: on
+        allow_methods: GET POST
+        cgi_ext: .php
     location: 
-		route: /tours
-        root: ./
+		route: /index/
+        root: /
+        autoindex: on 
+        allow_methods: GET POST DELETE 
+        cgi_ext: .php
+    location: 
+		route: /tours/
+        root: /
+        index: time.py
+        autoindex: on 
+        allow_methods: GET
+    location: 
+		route: /test/
+        root: /test/
         index: time.py
         autoindex: off 
         allow_methods: GET
     location: 
-        route: /red
-        root: ./
-        return: /tours
+        allow_methods: GET
+        route: /red/
+        return: /tours/
 server:
-    root:
-    name:  alberto
-    cgi_path:   (11)
-    client_max_body_size: 3000  (4)
-    error_page:    (3)
-        path:
-        status_code:
-    listen:       (1)
-        host: 0.0.0.0
-        port: 8081
-    location:  
-		route: 
-        root:  
-        index:  
-        autoindex: off
-        allow_methods: GET POST DELETE
-        cgi_ext: .php     (11)
-    location:   (5)
-		route:  (5)
-        root:   (8)
-        index:  (10)
-        autoindex: off   (9)
-        allow_methods: GET  (6)
-    location:   (5)
-        route:  (5)
-        root:   (8)
-        return: /tours (7)
+    root: example/host_tests/ 
+    server_name: google.com
+    listen:
+        host: 127.0.0.1
+        port: 7070
+    location: 
+		route: /
+        root: /
+        index:  index.html
+        autoindex: off 
+        allow_methods: GET

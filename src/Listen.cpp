@@ -16,8 +16,10 @@ Listen::Listen(Listen const &copy)
 
 Listen	&Listen::operator=(const Listen &copy)
 {
-	this->host = copy.host;
-	this->port = copy.port;
+	if (this != &copy) {
+		this->host = copy.host;
+		this->port = copy.port;
+	}
 	return *this;
 }
 
@@ -30,10 +32,10 @@ void Listen::setPort(std::string value) {
 
 }
 
-std::string Listen::getHost() {
-	return(host);
+const std::string Listen::getHost() const {
+	return (host);
 }
 
-int Listen::getPort() {
-	return(port);
+int Listen::getPort() const {
+	return (port);
 }

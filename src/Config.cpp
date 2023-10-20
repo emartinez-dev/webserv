@@ -17,7 +17,9 @@ Config::Config(Config const &copy) {
 }
 
 Config	&Config::operator=(Config const &copy) {
-	(void)copy;
+	if (this != &copy) {
+		this->servers = copy.servers;
+	}
 	return *this;
 }
 
@@ -29,7 +31,7 @@ int	Config::check_file(std::ifstream &config_file)	{
 		return 0;
 	}
 	std::getline(config_file, line);
-	if (line.find("server") == std::string::npos) {
+	if (line.find("server:") == std::string::npos) {
 		std::cerr << "error: file" << std::endl;
 		return 0;
 	}
@@ -38,7 +40,7 @@ int	Config::check_file(std::ifstream &config_file)	{
 return 0;
 }
 
-std::vector<ServerConfig> Config::getServerConfigs() {
+const std::vector<ServerConfig> Config::getServerConfigs() const {
 	return servers;
 }
 
@@ -50,8 +52,21 @@ void Config::add_server(std::ifstream &config_file, std::string line)
 	{
 		if (line.empty()) continue;
 		conf.splitKeyValue(line, config_file);
-		if (line.find("server") != std::string::npos)
+		if (line.find("server:") != std::string::npos)
 			add_server(config_file, line);
 	}
 	servers.push_back(conf);
+}
+
+/* As the subject says, the first server will be the default if the request 
+doesn't belong to another server. In our vector, the first server is the last 
+one */
+const ServerConfig *Config::getServer(std::string const &host) const
+{
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		if (servers[i].matches(host))
+			return (&servers[i]);
+	}
+	return (&servers[servers.size() - 1]);
 }
