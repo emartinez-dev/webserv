@@ -8,8 +8,14 @@
 #include "Cgi.hpp"
 #include "httpRequest.hpp"
 
-std::string runCGI(const std::string& cgi_path, const std::string& cgi_file, char **envp, const HttpRequest &request) {
+extern char** environ;
+/* Should a server be able to access every variable from the environment? I don't think so, 
+ * but working at the moment, we will fix it later*/
+
+std::string runCGI(const std::string& cgi_path, const std::string& cgi_file, char **envp, const HttpRequest &request) 
+{
     int pipe_fd[2];
+	(void) envp;
 
     if (pipe(pipe_fd) == -1) {
         perror("pipe");
@@ -18,7 +24,8 @@ std::string runCGI(const std::string& cgi_path, const std::string& cgi_file, cha
 
 	const std::map<std::string, std::string> params = request.getParameters();
 	for (std::map<std::string, std::string>::const_iterator it = params.begin(); it != params.end(); ++it)
-			setenv(it->first.c_str(), it->second.c_str(), 0);
+			setenv(it->first.c_str(), it->second.c_str(), 1);
+	// We should probably use like a local environment just for parameters variables
     pid_t child_pid = fork();
 
     if (child_pid == -1) {
@@ -32,7 +39,7 @@ std::string runCGI(const std::string& cgi_path, const std::string& cgi_file, cha
         close(pipe_fd[1]);
 
         char* script_args[] = {(char*)cgi_path.c_str(), (char*)cgi_file.c_str(), nullptr};
-        execve(cgi_path.c_str(), script_args, envp);
+        execve(cgi_path.c_str(), script_args, environ);
         perror("execve");
         exit(1);
     } 
