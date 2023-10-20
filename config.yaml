@@ -1,7 +1,7 @@
 server:
-    root: ./example
+    root: example
     server_name: johnnyserver.com 
-    cgi_path: /usr/bin/php
+    cgi_path: /usr/bin/python3
     client_max_body_size: 3000  
     error_page: 
         path: ./4xx.html
@@ -24,9 +24,10 @@ server:
         cgi_ext: .php
     location: 
 		route: /tours/
-        root: /
+        root: /tours/
         index: time.py
         autoindex: on 
+        cgi_ext: .py
         allow_methods: GET
     location: 
 		route: /test/

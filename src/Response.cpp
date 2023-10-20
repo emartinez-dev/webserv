@@ -1,4 +1,5 @@
 #include "Response.hpp"
+#include "ServerConfig.hpp"
 #include "Utils.hpp"
 #include <cstdlib>
 #include <xlocale/_stdlib.h>
@@ -44,7 +45,7 @@ Response::Response()
 	 * */
 
 
-Response::Response(const HttpRequest &request, const Config &config):version(request.getVersion()), \
+Response::Response(const HttpRequest &request, const Config &config, char **env):version(request.getVersion()), \
 	status_code(HTTP_STATUS_OK)
 {
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
@@ -62,7 +63,7 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 					if (server_location->hasRedirect())
 						redirectionHandler(request, *server_location);
 					else if (request.getMethod() == "GET")
-						getHandler(request, *server_location);
+						getHandler(request, *server_location, *server_config, env);
 					else if (request.getMethod() == "POST")
 						postHandler(request, *server_location);
 					else if (request.getMethod() == "DELETE")
@@ -94,11 +95,11 @@ void Response::redirectionHandler(const HttpRequest &request, const Location &lo
 	setHeader("Location", redirectAddress(request.getPath(), location));
 }
 
-void Response::getHandler(const HttpRequest &request, const Location &location)
+void Response::getHandler(const HttpRequest &request, const Location &location, const ServerConfig &config, char **env)
 {
-	// We will need the request for the CGI I think
-	(void) request;
-	if (isFolder(file_path))
+	if (location.getValue("cgi_ext") != "" && getFileExtension(file_path) == location.getValue("cgi_ext"))
+		body = runCGI(config.getValue("cgi_path"), file_path, env, request);
+	else if (isFolder(file_path))
 		index(location);
 	else if (isFile(file_path) && isAccessible(file_path))
 		readFileAndsetBody(file_path);

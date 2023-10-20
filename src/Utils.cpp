@@ -82,6 +82,15 @@ std::string removeSubstring(const std::string& original, const std::string& toRe
     return result;
 }
 
+std::string getFileExtension(const std::string &file)
+{
+	size_t pos = file.rfind(".");
+
+	if (pos != std::string::npos && file[pos + 1])
+		return (file.substr(pos));
+	return ("");
+}
+
 void replaceFirstSubstring(std::string& str, const std::string& oldSubstr, const std::string& newSubstr) {
     size_t pos = str.find(oldSubstr);
     if (pos != std::string::npos)
