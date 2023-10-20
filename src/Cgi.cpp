@@ -16,11 +16,9 @@ std::string runCGI(const std::string& cgi_path, const std::string& cgi_file, cha
         return "Error en la creación del pipe.";
     }
 
-	(void) request;
-	/*
-	for (std::map<std::string, std::string>::const_iterator it; it != request.getParameters().end(); ++it)
+	const std::map<std::string, std::string> params = request.getParameters();
+	for (std::map<std::string, std::string>::const_iterator it = params.begin(); it != params.end(); ++it)
 			setenv(it->first.c_str(), it->second.c_str(), 0);
-	*/
     pid_t child_pid = fork();
 
     if (child_pid == -1) {
