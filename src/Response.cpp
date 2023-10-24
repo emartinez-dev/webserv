@@ -29,7 +29,7 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 					else if (request.getMethod() == "GET")
 						getHandler(request, *server_location, *server_config);
 					else if (request.getMethod() == "POST")
-						postHandler(request, *server_location);
+						postHandler(request, *server_location, *server_config);
 					else if (request.getMethod() == "DELETE")
 						deleteHandler(request, *server_location);
 					else
@@ -39,10 +39,10 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 					setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
 			}
 			else
-				setStatusCode(HTTP_STATUS_PAYLOAD_TOO_LARGE);
+				setStatusCode(HTTP_STATUS_BAD_REQUEST);
 		}
 		else
-			setStatusCode(HTTP_STATUS_BAD_REQUEST);
+			setStatusCode(HTTP_STATUS_PAYLOAD_TOO_LARGE);
 	}
 	else
 		setStatusCode(HTTP_STATUS_NOT_FOUND);
@@ -74,10 +74,12 @@ void Response::getHandler(const HttpRequest &request, const Location &location, 
 }
 
 
-void Response::postHandler(const HttpRequest &request, const Location &location)
+void Response::postHandler(const HttpRequest &request, const Location &location, const ServerConfig &config)
 {
-	(void) request;
-	(void) location;
+	if (location.getValue("cgi_ext") != "" && getFileExtension(file_path) == location.getValue("cgi_ext"))
+		runCGI(config.getValue("cgi_path"), file_path, request);
+	else if (isFolder(file_path) && location.getValue("cgi_ext") != "" && getFileExtension(location.getValue("index")) == location.getValue("cgi_ext"))
+		runCGI(config.getValue("cgi_path"), file_path + location.getValue("index"), request);
 }
 
 void Response::deleteHandler(const HttpRequest &request, const Location &location)
@@ -142,11 +144,15 @@ std::string Response::getStatusMessage() const {
         case HTTP_STATUS_INTERNAL_SERVER_ERROR:
             return "Internal Server Error";
 		case HTTP_STATUS_MOVED_PERMANENTLY:
-			return "Moved permanently";
+			return "Moved Permanently";
         case HTTP_STATUS_NOT_IMPLEMENTED:
             return "Not Implemented";
 		case HTTP_STATUS_REQUEST_TIMEOUT:
             return "Request Timeout";
+		case HTTP_STATUS_METHOD_NOT_ALLOWED:
+            return "Method Not Allowed";
+		case HTTP_STATUS_PAYLOAD_TOO_LARGE:
+            return "Payload Too Large";
         default:
             return "Unknown Status";
     }

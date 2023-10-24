@@ -28,7 +28,7 @@ server:
         index: time.py
         autoindex: on 
         cgi_ext: .py
-        allow_methods: GET
+        allow_methods: GET POST
     location: 
 		route: /test/
         root: /test/

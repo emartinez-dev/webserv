@@ -65,6 +65,8 @@ void HttpPath::initExtension(){
 }
 
 bool HttpPath::URLisValid() {
+	if (path_.length() > URL_MAX_LENGTH)
+		return (false);
 	std::string valid_chars = "-._~:/?#[]@!$&'()*+,;%=";
     for (size_t i = 0; i < path_.length(); ++i) {
 		if (valid_chars.find(path_[i]) == std::string::npos && !isalnum(path_[i])) {

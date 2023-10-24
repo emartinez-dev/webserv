@@ -9,6 +9,8 @@
 # include <string>
 # include "Location.hpp"
 
+# define URL_MAX_LENGTH 2000
+
 class HttpPath
 {
     private:
