@@ -44,7 +44,7 @@ server:
     server_name: google.com
     listen:
         host: 127.0.0.1
-        port: 7070
+        port: 8080
     location: 
 		route: /
         root: /

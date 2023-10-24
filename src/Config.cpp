@@ -65,7 +65,12 @@ const ServerConfig *Config::getServer(std::string const &host) const
 {
 	for (size_t i = 0; i < servers.size(); i++)
 	{
-		if (servers[i].matches(host))
+		if (servers[i].matchesHostname(host))
+			return (&servers[i]);
+	}
+	for (size_t i = servers.size(); i >= 0; i--)
+	{
+		if (servers[i].matchesIP(host))
 			return (&servers[i]);
 	}
 	return (&servers[servers.size() - 1]);

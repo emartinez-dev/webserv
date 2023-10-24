@@ -1,6 +1,7 @@
 #include "Server.hpp"
 #include "Utils.hpp"
 #include "WebServerExceptions.hpp"
+#include <errno.h>
 
 Server::Server()
 {
@@ -17,7 +18,7 @@ Server::Server(std::string const &ip_address, int port)
 		throw SocketCreationException();
 	if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0)
 		throw SocketOptionsException();
-	if (bind(server_socket, (const struct sockaddr *)&server_address, sizeof(server_address)) < 0)
+	if (bind(server_socket, (const struct sockaddr *)&server_address, sizeof(server_address)) < 0 && errno != EADDRINUSE)
 		throw BindingException();
 	if (listen(server_socket, MAX_BACKLOG) < 0)
 		throw ListeningException();

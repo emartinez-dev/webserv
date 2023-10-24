@@ -36,7 +36,8 @@ class ServerConfig
 		const std::string getValue(std::string const &key) const;
 
 		ServerConfig parseServer(std::string &line, std::ifstream &config_file);
-		bool  matches(std::string const &host) const;
+		bool  matchesHostname(std::string const &host) const;
+		bool  matchesIP(std::string const &host) const;
 		const Location *getLocation(std::string const &url) const;
 };
 

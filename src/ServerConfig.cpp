@@ -140,7 +140,21 @@ static const std::string getPort(std::string const &host)
 
 }
 
-bool  ServerConfig::matches(std::string const &host) const
+bool  ServerConfig::matchesHostname(std::string const &host) const
+{
+	std::string hostname = getHostname(host);
+	std::string port = getPort(host);
+
+	int	int_port = atoi(port.c_str());
+	for (size_t i = 0; i < listens.size(); i++)
+	{
+		if (hostname == getValue("server_name") && int_port == listens[i].getPort())
+			return (true);
+	}
+	return (false);
+}
+
+bool  ServerConfig::matchesIP(std::string const &host) const
 {
 	std::string hostname = getHostname(host);
 	std::string port = getPort(host);
@@ -150,11 +164,11 @@ bool  ServerConfig::matches(std::string const &host) const
 	{
 		if (listens[i].getPort() == int_port && listens[i].getHost() == hostname)
 			return (true);
-		if (hostname == getValue("server_name") && int_port == listens[i].getPort())
-			return (true);
 	}
 	return (false);
 }
+
+
 
 /* In our webserver context, we have to match the URL given with the prefixes on
  * the config file. Example:
