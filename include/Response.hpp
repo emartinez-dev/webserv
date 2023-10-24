@@ -12,7 +12,6 @@
 # include "httpRequest.hpp"
 # include "HttpPath.hpp"
 # include "Utils.hpp"
-# include "Cgi.hpp"
 # include <sys/stat.h>
 
 // Informacionales (1xx)
@@ -100,7 +99,7 @@ class Response
 		size_t			size_body;
 	public:
 		Response();
-		Response(const HttpRequest &request, const Config &config, char **env);
+		Response(const HttpRequest &request, const Config &config);
 		Response(int error_code);
 		~Response();
 		Response(Response const &copy);
@@ -136,9 +135,10 @@ class Response
 		std::string			redirectAddress(const std::string &url, const Location &location);
 
 		void				redirectionHandler(const HttpRequest &request, const Location &location);
-		void				getHandler(const HttpRequest &request, const Location &location, const ServerConfig &config, char **env);
+		void				getHandler(const HttpRequest &request, const Location &location, const ServerConfig &config);
 		void				postHandler(const HttpRequest &request, const Location &location);
 		void				deleteHandler(const HttpRequest &request, const Location &location);
+		void				runCGI(const std::string& cgi_path, const std::string& cgi_file, const HttpRequest &request);
 };
 
 #endif

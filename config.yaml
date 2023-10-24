@@ -1,7 +1,7 @@
 server:
     root: example
     server_name: johnnyserver.com 
-    cgi_path: /usr/bin/python3
+    cgi_path: /usr/local/bin/python3
     client_max_body_size: 3000  
     error_page: 
         path: ./4xx.html

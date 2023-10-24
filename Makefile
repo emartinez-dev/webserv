@@ -17,7 +17,6 @@ _SRC 		=	main.cpp\
 				Cluster.cpp\
 				Server.cpp\
 				httpRequest.cpp\
-				Cgi.cpp\
 				Response.cpp\
 				HttpPath.cpp\
 				Utils.cpp

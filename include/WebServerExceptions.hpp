@@ -53,4 +53,32 @@ class InvalidIPException: public std::exception {
 	}
 };
 
+class PipeException: public std::exception {
+	virtual const char *what() const throw()
+	{
+		return ("Failed to create a pipe.");
+	}
+};
+
+class ForkException: public std::exception {
+	virtual const char *what() const throw()
+	{
+		return ("Failed to fork a new process.");
+	}
+};
+
+class ChildReturnError: public std::exception {
+	virtual const char *what() const throw()
+	{
+		return ("Child process returned an error status.");
+	}
+};
+
+class ChildProcessException: public std::exception {
+	virtual const char *what() const throw()
+	{
+		return ("An exception occurred in the child process.");
+	}
+};
+
 #endif

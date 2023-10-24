@@ -1,4 +1,5 @@
 #include "webserv.hpp"
+#include <cstring>
 
 unsigned long parse_ip(const std::string &ip_address)
 {
@@ -115,5 +116,30 @@ bool isFolder(const std::string &path) {
 
 	stat(path.c_str(), &statbuf);
 	return S_ISDIR(statbuf.st_mode);
+}
+
+char **createEnv(const std::map<std::string, std::string> &parameters)
+{
+	char **env = new char*[parameters.size() + 1];
+
+	int i = 0;
+	env[parameters.size()] = NULL;
+	for (std::map<std::string, std::string>::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
+	{
+		std::string param = it->first + "=" + it->second;
+		env[i] = new char[param.size() + 1];
+		strcpy(env[i], param.c_str());
+		env[i][param.size()] = '\0';
+		i++;
+	}
+	return env;
+}
+
+void freeEnv(char **env)
+{
+	int i = -1;
+	while (env[++i])
+		free(env[i]);
+	free(env);
 }
 

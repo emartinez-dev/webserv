@@ -14,7 +14,7 @@ std::string		  splitValue(std::string const &line);
 const std::string &getMapKey(const std::string& name, const std::map<std::string, std::string>& map);
 const std::string &getMapValue(const std::string& name, const std::map<std::string, std::string>& map);
 
-std::string getFileExtension(const std::string &file);
+std::string		  getFileExtension(const std::string &file);
 
 std::string		  itoa(std::streampos number);
 
@@ -24,5 +24,8 @@ void			  replaceFirstSubstring(std::string& str, const std::string& oldSubstr, c
 bool			  isFile(const std::string &path);
 bool			  isFolder(const std::string &path);
 bool			  isAccessible(const std::string &file);
+
+char			  **createEnv(const std::map<std::string, std::string> &parameters);
+void			  freeEnv(char **env);
 
 #endif

@@ -27,7 +27,7 @@ void	Cluster::add_server(std::string const &address, int port)
 	std::cout << "Server listening at http://" << address << ":" << port << "/" << std::endl;
 }
 
-void  Cluster::run(char **env)
+void  Cluster::run(void)
 {
 	while (true)
 	{
@@ -59,7 +59,7 @@ void  Cluster::run(char **env)
 							connections[i].events = POLLOUT;
 							bytes_sent[fd] = 0;
 							requests[fd] = HttpRequest(connection_buffers[fd]);
-							responses[fd] = Response(requests[fd], cluster_config, env);
+							responses[fd] = Response(requests[fd], cluster_config);
 						}
 						else if (finish == -1)
 							close_and_remove_connection(i, initial_size);

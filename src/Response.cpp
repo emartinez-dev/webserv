@@ -1,6 +1,7 @@
 #include "Response.hpp"
 #include "ServerConfig.hpp"
 #include "Utils.hpp"
+#include "WebServerExceptions.hpp"
 #include <cstdlib>
 #include <xlocale/_stdlib.h>
 
@@ -8,7 +9,7 @@ Response::Response()
 {
 }
 
-Response::Response(const HttpRequest &request, const Config &config, char **env):version(request.getVersion()), \
+Response::Response(const HttpRequest &request, const Config &config):version(request.getVersion()), \
 	status_code(HTTP_STATUS_OK)
 {
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
@@ -26,7 +27,7 @@ Response::Response(const HttpRequest &request, const Config &config, char **env)
 					if (server_location->hasRedirect())
 						redirectionHandler(request, *server_location);
 					else if (request.getMethod() == "GET")
-						getHandler(request, *server_location, *server_config, env);
+						getHandler(request, *server_location, *server_config);
 					else if (request.getMethod() == "POST")
 						postHandler(request, *server_location);
 					else if (request.getMethod() == "DELETE")
@@ -58,12 +59,12 @@ void Response::redirectionHandler(const HttpRequest &request, const Location &lo
 	setHeader("Location", redirectAddress(request.getPath(), location));
 }
 
-void Response::getHandler(const HttpRequest &request, const Location &location, const ServerConfig &config, char **env)
+void Response::getHandler(const HttpRequest &request, const Location &location, const ServerConfig &config)
 {
 	if (location.getValue("cgi_ext") != "" && getFileExtension(file_path) == location.getValue("cgi_ext"))
-		body = runCGI(config.getValue("cgi_path"), file_path, env, request);
+		runCGI(config.getValue("cgi_path"), file_path, request);
 	else if (isFolder(file_path) && location.getValue("cgi_ext") != "" && getFileExtension(location.getValue("index")) == location.getValue("cgi_ext"))
-		body = runCGI(config.getValue("cgi_path"), file_path + location.getValue("index"), env, request);
+		runCGI(config.getValue("cgi_path"), file_path + location.getValue("index"), request);
 	else if (isFolder(file_path))
 		index(location);
 	else if (isFile(file_path) && isAccessible(file_path))
@@ -381,4 +382,65 @@ void Response::printResponse() const {
 	std::cout << "status_code: " << status_code << std::endl;
 	std::cout << "body_len: " << body_len << std::endl;
 	std::cout << "body: " << body << std::endl;
+}
+
+void Response::runCGI(const std::string& cgi_path, const std::string& cgi_file, const HttpRequest &request) 
+{
+    int pipe_fd[2];
+	char **env = createEnv(request.getParameters());
+
+	try
+	{
+		if (pipe(pipe_fd) == -1)
+			throw PipeException();
+
+		// We should probably use like a local environment just for parameters variables
+		pid_t child_pid = fork();
+
+		if (child_pid == -1)
+			throw ForkException();
+		else if (child_pid == 0)
+		{
+			dup2(pipe_fd[1], STDOUT_FILENO);
+			close(pipe_fd[0]);
+			close(pipe_fd[1]);
+
+			char* script_args[] = {(char*)cgi_path.c_str(), (char*)cgi_file.c_str(), nullptr};
+			execve(cgi_path.c_str(), script_args, env);
+			exit(1);
+		}
+		else
+		{
+			dup2(pipe_fd[0], STDIN_FILENO);
+			close(pipe_fd[1]);
+
+			std::string result;
+			char buffer[1024];
+			ssize_t bytes_read;
+
+			while ((bytes_read = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
+				result.append(buffer, bytes_read);
+			close(pipe_fd[0]);
+
+			int status;
+			waitpid(child_pid, &status, 0);
+
+			if (WIFEXITED(status))
+			{
+				int exit_status = WEXITSTATUS(status);
+				if (exit_status != 0)
+					throw ChildReturnError();
+			}
+			else
+				throw ChildProcessException();
+			body = result;
+			setStatusCode(HTTP_STATUS_OK);
+		}
+	}
+	catch (std::exception &e)
+	{
+		std::cerr << e.what() << std::endl;
+		setStatusCode(HTTP_STATUS_INTERNAL_SERVER_ERROR);
+	}
+	freeEnv(env);
 }

@@ -45,7 +45,7 @@ class Cluster
 		Cluster	&operator=(Cluster const &copy);
 
 		void	add_server(std::string const &address, int port);
-		void	run(char **env);
+		void	run(void);
 		};
 
 #endif

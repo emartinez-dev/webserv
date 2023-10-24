@@ -1,5 +1,4 @@
 #include "webserv.hpp"
-#include "Cgi.hpp"
 
 int	main(int argc, char **argv, char **envp)
 {
@@ -13,7 +12,7 @@ int	main(int argc, char **argv, char **envp)
 	Config configuration(str);
 	try {
 		Cluster	webserv(configuration);
-		webserv.run(envp);
+		webserv.run();
 	} catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		return (1);
