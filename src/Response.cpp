@@ -88,7 +88,7 @@ void Response::deleteHandler(const HttpRequest &request, const Location &locatio
 	(void) location;
 }
 
-Response::Response(int error_code):version("HTTP/1.1\r\n"), status_code(error_code)
+Response::Response(int error_code):version("HTTP/1.1\r"), status_code(error_code)
 {
 	if (status_code >= 400)
 		createErrorPage();
