@@ -1,4 +1,5 @@
 #include "ServerConfig.hpp"
+#include "ErrorPage.hpp"
 #include "Utils.hpp"
 #include <string>
 
@@ -204,4 +205,14 @@ const Location *ServerConfig::getLocation(std::string const &url) const
 		return best_match;
 	else
 		return (NULL);
+}
+
+std::string ServerConfig::getErrorPage(int status_code) const
+{
+	for (std::vector<ErrorPage>::const_iterator it = error_pages.begin(); it != error_pages.end(); ++it)
+	{
+		if (status_code == it->getCode())
+			return it->getPath();
+	}
+	return "";
 }

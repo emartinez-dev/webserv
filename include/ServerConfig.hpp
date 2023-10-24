@@ -39,6 +39,7 @@ class ServerConfig
 		bool  matchesHostname(std::string const &host) const;
 		bool  matchesIP(std::string const &host) const;
 		const Location *getLocation(std::string const &url) const;
+		std::string getErrorPage(int status_code) const;
 };
 
 #endif

@@ -130,6 +130,7 @@ class Response
 		std::string			createHeadHtml(const std::string &title);
 		std::string			createClousureHtml();
 		void				createErrorPage();
+		void				getErrorPage(const ServerConfig &server);
 
 		bool				belowBodySizeLimit(const ServerConfig &server, const HttpRequest &request);
 		std::string			redirectAddress(const std::string &url, const Location &location);

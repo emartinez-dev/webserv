@@ -50,7 +50,7 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 	else
 		setStatusCode(HTTP_STATUS_NOT_FOUND);
 	if (status_code >= 400)
-		createErrorPage();
+		getErrorPage(*server_config);
 	bodyToBodyLength();
 	setHeader("Content-Length", itoa(body_len));
 	setHeader("Connection", "close");
@@ -375,6 +375,16 @@ void Response::createErrorPage() {
 	addBody("<h1 style=\"text-align: center; font-size: 24px;\">" + itoa(status_code) + "</h1>");
 	addBody("<h1 style=\"text-align: center; font-size: 24px;\">" + getStatusMessage() + "</h1>");
 	createClousureHtml();
+}
+
+void Response::getErrorPage(const ServerConfig &server)
+{
+	std::string	error_path = server.getValue("root") + server.getErrorPage(status_code);
+
+	if (error_path != "" && isFile(error_path) && isAccessible(error_path))
+		readFileAndsetBody(error_path);
+	else
+		createErrorPage();
 }
 
 bool  Response::belowBodySizeLimit(const ServerConfig &server, const HttpRequest &request)
