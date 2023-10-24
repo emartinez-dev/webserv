@@ -11,9 +11,9 @@
 # include <algorithm>
 # include <sys/time.h>
 
-# define TIMEOUT_MS 2500
+# define TIMEOUT_MS 30000
 # define BUFFER_SIZE 1024
-# define TIMEOUT_SEC 3
+# define TIMEOUT_SEC 30
 
 class Cluster
 {
