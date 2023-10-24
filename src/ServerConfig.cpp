@@ -10,20 +10,19 @@ ServerConfig::~ServerConfig()
 {
 }
 
-ServerConfig::ServerConfig(ServerConfig const &copy)
+ServerConfig::ServerConfig(ServerConfig const &copy):conf(copy.conf),locations(copy.locations),listens(copy.listens),error_pages(copy.error_pages)
 {
-	this->conf = copy.conf;
-	this->locations = copy.locations;
-	this->listens = copy.listens;
-	this->error_pages = copy.error_pages;
 }
 
 ServerConfig	&ServerConfig::operator=(const ServerConfig &copy)
 {
-	this->conf = copy.conf;
-	this->locations = copy.locations;
-	this->listens = copy.listens;
-	this->error_pages = copy.error_pages;
+	if (this != &copy)
+	{
+		conf = copy.conf;
+		locations = copy.locations;
+		listens = copy.listens;
+		error_pages = copy.error_pages;
+	}
 	return *this;
 }
 
@@ -61,7 +60,7 @@ void	ServerConfig::splitKeyValue(std::string &line, std::ifstream &config_file) 
 			}
 			listens.push_back(listen);
 		}
-		else if (key == "error page")
+		else if (key == "error_page")
 		{
 			ErrorPage error;
 			int i = 2;
@@ -131,7 +130,7 @@ static const std::string getHostname(std::string const &host)
 	return (hostname);
 }
 
-static const std::string getPort(std::string const &host)
+std::string getPort(std::string const &host)
 {
 	if (host.find(":") == std::string::npos)
 		return ("");

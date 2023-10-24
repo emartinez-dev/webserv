@@ -8,17 +8,15 @@ Listen::~Listen()
 {
 }
 
-Listen::Listen(Listen const &copy)
+Listen::Listen(Listen const &copy):host(copy.host),port(copy.port)
 {	
-	this->host = copy.host;
-	this->port = copy.port;
 }
 
 Listen	&Listen::operator=(const Listen &copy)
 {
 	if (this != &copy) {
-		this->host = copy.host;
-		this->port = copy.port;
+		host = copy.host;
+		port = copy.port;
 	}
 	return *this;
 }

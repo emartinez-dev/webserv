@@ -8,17 +8,15 @@ ErrorPage::~ErrorPage()
 {
 }
 
-ErrorPage::ErrorPage(ErrorPage const &copy)
+ErrorPage::ErrorPage(ErrorPage const &copy):status_code(copy.status_code), path(copy.path)
 {	
-	this->status_code = copy.status_code;
-	this->path = copy.status_code;
 }
 
 ErrorPage	&ErrorPage::operator=(const ErrorPage &copy)
 {
 	if (this != &copy) {
-		this->status_code = copy.status_code;
-		this->path = copy.status_code;
+		status_code = copy.status_code;
+		path = copy.status_code;
 	}
 	return *this;
 }
@@ -31,10 +29,11 @@ void ErrorPage::setCode(std::string value) {
 	status_code = atoi(value.c_str());
 }
 
-int ErrorPage::getCode() {
+int ErrorPage::getCode() const
+{
 	return status_code;
 }
 
-std::string ErrorPage::getPath() {
+const std::string &ErrorPage::getPath() const {
 	return path;
 }

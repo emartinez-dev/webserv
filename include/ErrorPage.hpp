@@ -18,8 +18,8 @@ class ErrorPage
 		void setPath(std::string value);
 		void setCode(std::string value);
 
-		int getCode();
-		std::string getPath();
+		int getCode() const;
+		const std::string &getPath() const;
 };
 
 #endif

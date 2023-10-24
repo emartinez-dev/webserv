@@ -12,13 +12,12 @@ Config::~Config() {
 
 }
 
-Config::Config(Config const &copy) {
-	*this = copy;
+Config::Config(Config const &copy):servers(copy.servers){
 }
 
 Config	&Config::operator=(Config const &copy) {
 	if (this != &copy) {
-		this->servers = copy.servers;
+		servers = copy.servers;
 	}
 	return *this;
 }
