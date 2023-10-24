@@ -137,7 +137,7 @@ class Response
 		void				redirectionHandler(const HttpRequest &request, const Location &location);
 		void				getHandler(const HttpRequest &request, const Location &location, const ServerConfig &config);
 		void				postHandler(const HttpRequest &request, const Location &location, const ServerConfig &config);
-		void				deleteHandler(const HttpRequest &request, const Location &location);
+		void				deleteHandler(void);
 		void				runCGI(const std::string& cgi_path, const std::string& cgi_file, const HttpRequest &request);
 };
 

@@ -14,13 +14,13 @@ server:
         root: /alberto/
         index:  index.html
         autoindex: on
-        allow_methods: GET POST
+        allow_methods: GET
         cgi_ext: .php
     location: 
 		route: /index/
         root: /
         autoindex: on 
-        allow_methods: GET POST DELETE 
+        allow_methods: GET POST
         cgi_ext: .php
     location: 
 		route: /tours/
@@ -35,6 +35,11 @@ server:
         index: time.py
         autoindex: off 
         allow_methods: GET
+  location: 
+		route: /can-delete/
+        root: /can-delete/
+        autoindex: on 
+        allow_methods: GET DELETE
     location: 
         allow_methods: GET
         route: /red/

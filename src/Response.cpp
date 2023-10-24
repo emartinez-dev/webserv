@@ -2,7 +2,10 @@
 #include "ServerConfig.hpp"
 #include "Utils.hpp"
 #include "WebServerExceptions.hpp"
+#include <cstdio>
 #include <cstdlib>
+#include <sys/fcntl.h>
+#include <unistd.h>
 #include <xlocale/_stdlib.h>
 
 Response::Response()
@@ -31,7 +34,7 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 					else if (request.getMethod() == "POST")
 						postHandler(request, *server_location, *server_config);
 					else if (request.getMethod() == "DELETE")
-						deleteHandler(request, *server_location);
+						deleteHandler();
 					else
 						setStatusCode(HTTP_STATUS_NOT_IMPLEMENTED);
 				}
@@ -82,10 +85,20 @@ void Response::postHandler(const HttpRequest &request, const Location &location,
 		runCGI(config.getValue("cgi_path"), file_path + location.getValue("index"), request);
 }
 
-void Response::deleteHandler(const HttpRequest &request, const Location &location)
+void Response::deleteHandler(void)
 {
-	(void) request;
-	(void) location;
+	if (isFolder(file_path))
+		setStatusCode(HTTP_STATUS_NOT_FOUND);
+	else if (isFile(file_path) && access(file_path.c_str(), F_OK) == 0)
+	{
+		if (remove(file_path.c_str()) == 0)
+			setStatusCode(HTTP_STATUS_NO_CONTENT);
+		else
+			setStatusCode(HTTP_STATUS_INTERNAL_SERVER_ERROR);
+	}
+	else
+		setStatusCode(HTTP_STATUS_NOT_FOUND);
+
 }
 
 Response::Response(int error_code):version("HTTP/1.1\r"), status_code(error_code)
