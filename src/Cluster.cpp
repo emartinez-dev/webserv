@@ -39,15 +39,16 @@ void  Cluster::run(char **env)
 		{
 			for (size_t i = 0; i < initial_size; i++)
 			{
-				if (!is_server(connections[i].fd) && is_timeout(connections[i].fd))
+				int fd = connections[i].fd;
+				if (!is_server(fd) && is_timeout(fd))
 				{
-					responses[i] = Response(HTTP_STATUS_REQUEST_TIMEOUT);
+					responses[fd] = Response(HTTP_STATUS_REQUEST_TIMEOUT);
 					connections[i].events = POLLOUT;
 				}
 				if (connections[i].revents & POLLIN)
 				{
-					if (is_server(connections[i].fd))
-						 add_client(connections[i].fd);
+					if (is_server(fd))
+						 add_client(fd);
 					else
 					{
 						int finish = receive(connections[i]);
@@ -56,9 +57,9 @@ void  Cluster::run(char **env)
 						if (finish == 1)
 						{
 							connections[i].events = POLLOUT;
-							bytes_sent[connections[i].fd] = 0;
-							requests[i] = HttpRequest(connection_buffers[connections[i].fd]);
-							responses[i] = Response(requests[i], cluster_config, env);
+							bytes_sent[fd] = 0;
+							requests[fd] = HttpRequest(connection_buffers[fd]);
+							responses[fd] = Response(requests[fd], cluster_config, env);
 						}
 						else if (finish == -1)
 							close_and_remove_connection(i, initial_size);
@@ -66,11 +67,13 @@ void  Cluster::run(char **env)
 				}
 				if ((connections[i].revents & POLLOUT))
 				{
-					int finish = send(connections[i], responses[i]);
+					int finish = 0;
+					if (responses.find(fd) != responses.end())
+						finish = send(connections[i], responses[fd]);
 					if (finish == 1 || finish == -1)
 					{
-						requests.erase(i);
-						responses.erase(i);
+						requests.erase(fd);
+						responses.erase(fd);
 						close_and_remove_connection(i, initial_size);
 					}
 				}
