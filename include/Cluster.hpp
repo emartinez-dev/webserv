@@ -2,7 +2,7 @@
 #define CLUSTER_HPP
 
 # include "Server.hpp"
-# include "httpRequest.hpp"
+# include "Request.hpp"
 # include "Config.hpp"
 # include "Response.hpp"
 # include "webserv.hpp"
@@ -16,7 +16,7 @@ class Cluster
 		std::vector<pollfd>	connections;
 		std::unordered_map<int, std::vector<char> > connection_buffers;
 		std::unordered_map<int, ssize_t> bytes_sent;
-		std::unordered_map<int, HttpRequest> requests;
+		std::unordered_map<int, Request> requests;
 		std::unordered_map<int, Response> responses;
 		std::unordered_map<int, time_t> timeouts;
 

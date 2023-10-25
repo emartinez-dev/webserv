@@ -1,11 +1,11 @@
-#include "httpRequest.hpp"
+#include "Request.hpp"
 #include "Utils.hpp"
 
 // Constructor de la clase HttpRequest
-HttpRequest::HttpRequest() {
+Request::Request() {
 }
 
-HttpRequest::HttpRequest(const std::vector<char>& request_buffer)
+Request::Request(const std::vector<char>& request_buffer)
 {
 	std::string request_str = std::string(request_buffer.begin(), request_buffer.end());
 	size_t pos = request_str.find("\r\n\r\n");
@@ -26,7 +26,7 @@ HttpRequest::HttpRequest(const std::vector<char>& request_buffer)
     }
 }
 
-void HttpRequest::parseHeaders(const std::string& _headers) {
+void Request::parseHeaders(const std::string& _headers) {
     std::istringstream ss(_headers);
     std::string header;
     while (std::getline(ss, header)) {
@@ -40,7 +40,7 @@ void HttpRequest::parseHeaders(const std::string& _headers) {
 }
 
 // Función privada para analizar la primera línea de la solicitud HTTP
-void HttpRequest::parseFirstLine(const std::string& first_line) {
+void Request::parseFirstLine(const std::string& first_line) {
     size_t pos1 = first_line.find(' ');
     size_t pos2 = first_line.find(' ', pos1 + 1);
     if (pos1 != std::string::npos && pos2 != std::string::npos) {
@@ -51,7 +51,7 @@ void HttpRequest::parseFirstLine(const std::string& first_line) {
 }
 
 
-std::string HttpRequest::parseURL(const std::string &path)
+std::string Request::parseURL(const std::string &path)
 {
 	std::string	  parameters;
 	size_t	pos = path.find("?");
@@ -64,7 +64,7 @@ std::string HttpRequest::parseURL(const std::string &path)
 }
 
 // Constructor de copia de la clase HttpRequest
-HttpRequest::HttpRequest(const HttpRequest& other) {
+Request::Request(const Request& other) {
 	received_headers = other.received_headers;
     method_ = other.method_;
 	body = other.body;
@@ -75,7 +75,7 @@ HttpRequest::HttpRequest(const HttpRequest& other) {
 }
 
 // Operador de asignación de la clase HttpRequest
-HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
+Request& Request::operator=(const Request& other) {
     if (this == &other) {
         return *this;
     }
@@ -91,50 +91,50 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& other) {
 }
 
 // Destructor de la clase HttpRequest
-HttpRequest::~HttpRequest() {
+Request::~Request() {
     // No se requiere ninguna operación especial de limpieza
 }
 
 // Función para obtener el método HTTP
-std::string HttpRequest::getMethod() const {
+std::string Request::getMethod() const {
     return method_;
 }
 
 // Función para obtener la ruta
-std::string HttpRequest::getPath() const {
+std::string Request::getPath() const {
     return path_;
 }
 
-const std::string &HttpRequest::getBody() const {
+const std::string &Request::getBody() const {
     return body;
 }
 
 // Función para obtener la versión HTTP
-std::string HttpRequest::getVersion() const {
+std::string Request::getVersion() const {
     return version_;
 }
 
 // Función para obtener un encabezado específico por su nombre
-std::string HttpRequest::getHeader(const std::string& name) const {
+std::string Request::getHeader(const std::string& name) const {
     return (getMapValue(name, this->headers));
 }
 
-std::string HttpRequest::getHeaderKey(const std::string& name) const {
+std::string Request::getHeaderKey(const std::string& name) const {
     return (getMapKey(name, this->headers));
 }
 
 // Función para obtener todos los encabezados
-std::map<std::string, std::string> HttpRequest::getHeaders() const {
+std::map<std::string, std::string> Request::getHeaders() const {
     return headers;
 }
 
 // Función para obtener todos los parámetros
-std::map<std::string, std::string> HttpRequest::getParameters() const {
+std::map<std::string, std::string> Request::getParameters() const {
     return parameters;
 }
 
 // Función privada para analizar los parámetros del cuerpo de la solicitud HTTP
-void HttpRequest::parseParameters(const std::string& body) {
+void Request::parseParameters(const std::string& body) {
     std::istringstream ss(body);
     std::string param;
 	if (getHeader("Content-Type").find("multipart/form-data") != std::string::npos)
@@ -149,7 +149,7 @@ void HttpRequest::parseParameters(const std::string& body) {
     }
 }
 
-void  HttpRequest::printRequest(void) const
+void  Request::printRequest(void) const
 {
 	std::cout << "\n\n------------------start Request--------------------\n";
 	std::cout << "Método: " << getMethod() << std::endl;
@@ -173,12 +173,12 @@ void  HttpRequest::printRequest(void) const
     }
 }
 
-bool  HttpRequest::receivedHeaders(void) const
+bool  Request::receivedHeaders(void) const
 {
 	return received_headers;
 }
 
-bool  HttpRequest::receivedBody(void) const
+bool  Request::receivedBody(void) const
 {
 	unsigned int  content_length = 0;
 

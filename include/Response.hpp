@@ -3,7 +3,7 @@
 
 # include "Config.hpp"
 # include "ServerConfig.hpp"
-# include "httpRequest.hpp"
+# include "Request.hpp"
 # include "HttpPath.hpp"
 # include "Utils.hpp"
 # include "webserv.hpp"
@@ -93,7 +93,7 @@ class Response
 		size_t			size_body;
 	public:
 		Response();
-		Response(const HttpRequest &request, const Config &config);
+		Response(const Request &request, const Config &config);
 		Response(int error_code);
 		~Response();
 		Response(Response const &copy);
@@ -126,14 +126,14 @@ class Response
 		void				createErrorPage();
 		void				getErrorPage(const ServerConfig &server);
 
-		bool				belowBodySizeLimit(const ServerConfig &server, const HttpRequest &request);
+		bool				belowBodySizeLimit(const ServerConfig &server, const Request &request);
 		std::string			redirectAddress(const std::string &url, const Location &location);
 
-		void				redirectionHandler(const HttpRequest &request, const Location &location);
-		void				getHandler(const HttpRequest &request, const Location &location, const ServerConfig &config);
-		void				postHandler(const HttpRequest &request, const Location &location, const ServerConfig &config);
+		void				redirectionHandler(const Request &request, const Location &location);
+		void				getHandler(const Request &request, const Location &location, const ServerConfig &config);
+		void				postHandler(const Request &request, const Location &location, const ServerConfig &config);
 		void				deleteHandler(void);
-		void				runCGI(const std::string& cgi_path, const std::string& cgi_file, const HttpRequest &request);
+		void				runCGI(const std::string& cgi_path, const std::string& cgi_file, const Request &request);
 };
 
 #endif

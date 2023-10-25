@@ -8,7 +8,7 @@ Response::Response()
 {
 }
 
-Response::Response(const HttpRequest &request, const Config &config):version(request.getVersion()), \
+Response::Response(const Request &request, const Config &config):version(request.getVersion()), \
 	status_code(HTTP_STATUS_OK)
 {
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
@@ -52,13 +52,13 @@ Response::Response(const HttpRequest &request, const Config &config):version(req
 	setHeader("Connection", "close");
 }
 
-void Response::redirectionHandler(const HttpRequest &request, const Location &location)
+void Response::redirectionHandler(const Request &request, const Location &location)
 {
 	setStatusCode(HTTP_STATUS_MOVED_PERMANENTLY);
 	setHeader("Location", redirectAddress(request.getPath(), location));
 }
 
-void Response::getHandler(const HttpRequest &request, const Location &location, const ServerConfig &config)
+void Response::getHandler(const Request &request, const Location &location, const ServerConfig &config)
 {
 	if (location.getValue("cgi_ext") != "" && getFileExtension(file_path) == location.getValue("cgi_ext"))
 		runCGI(config.getValue("cgi_path"), file_path, request);
@@ -73,7 +73,7 @@ void Response::getHandler(const HttpRequest &request, const Location &location, 
 }
 
 
-void Response::postHandler(const HttpRequest &request, const Location &location, const ServerConfig &config)
+void Response::postHandler(const Request &request, const Location &location, const ServerConfig &config)
 {
 	if (location.getValue("cgi_ext") != "" && getFileExtension(file_path) == location.getValue("cgi_ext"))
 		runCGI(config.getValue("cgi_path"), file_path, request);
@@ -383,7 +383,7 @@ void Response::getErrorPage(const ServerConfig &server)
 		createErrorPage();
 }
 
-bool  Response::belowBodySizeLimit(const ServerConfig &server, const HttpRequest &request)
+bool  Response::belowBodySizeLimit(const ServerConfig &server, const Request &request)
 {
 	char **ptr = NULL;
 	if (server.getValue("client_max_body_size") == "")
@@ -409,7 +409,7 @@ void Response::printResponse() const {
 	std::cout << "body: " << body << std::endl;
 }
 
-void Response::runCGI(const std::string& cgi_path, const std::string& cgi_file, const HttpRequest &request) 
+void Response::runCGI(const std::string& cgi_path, const std::string& cgi_file, const Request &request) 
 {
     int pipe_fd[2];
 	char **env = createEnv(request.getParameters());

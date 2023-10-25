@@ -1,9 +1,9 @@
-#ifndef HTTPREQUEST_HPP
-#define HTTPREQUEST_HPP
+#ifndef REQUEST_HPP
+#define REQUEST_HPP
 
 # include "webserv.hpp"
 
-class HttpRequest {
+class Request {
     private:
 		bool		received_headers;
         std::string method_;
@@ -19,11 +19,11 @@ class HttpRequest {
 		std::string parseURL(const std::string &path);
 
     public:
-		HttpRequest();
-        HttpRequest(const std::vector<char>& request_buffer);
-        HttpRequest(const HttpRequest& other);
-        HttpRequest& operator=(const HttpRequest& other);
-        ~HttpRequest();
+		Request();
+        Request(const std::vector<char>& request_buffer);
+        Request(const Request& other);
+        Request& operator=(const Request& other);
+        ~Request();
 
 		bool  receivedHeaders() const;
 		bool  receivedBody() const;
@@ -38,4 +38,4 @@ class HttpRequest {
         void  printRequest(void) const;
 };
 
-#endif // HTTPREQUEST_HPP
+#endif

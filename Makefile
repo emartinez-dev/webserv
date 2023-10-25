@@ -8,17 +8,17 @@ SRC_DIR 	= src/
 
 OBJ_DIR		= obj/
 
-_SRC 		=	main.cpp\
+_SRC 		=	main.cpp \
 				Config.cpp \
-				ServerConfig.cpp \
-				Listen.cpp \
+				Cluster.cpp \
 				ErrorPage.cpp \
+				HttpPath.cpp \
 				Location.cpp \
-				Cluster.cpp\
-				Server.cpp\
-				httpRequest.cpp\
-				Response.cpp\
-				HttpPath.cpp\
+				Listen.cpp \
+				Request.cpp \
+				Response.cpp \
+				Server.cpp \
+				ServerConfig.cpp \
 				Utils.cpp
 
 OBJ_FOLDERS =	obj/

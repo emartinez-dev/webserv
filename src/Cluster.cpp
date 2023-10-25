@@ -1,6 +1,6 @@
 #include "Cluster.hpp"
 #include "Response.hpp"
-#include "httpRequest.hpp"
+#include "Request.hpp"
 
 Cluster::Cluster(const Config &config): cluster_config(config)
 {
@@ -58,7 +58,7 @@ void  Cluster::run(void)
 						{
 							connections[i].events = POLLOUT;
 							bytes_sent[fd] = 0;
-							requests[fd] = HttpRequest(connection_buffers[fd]);
+							requests[fd] = Request(connection_buffers[fd]);
 							responses[fd] = Response(requests[fd], cluster_config);
 						}
 						else if (finish == -1)
@@ -162,7 +162,7 @@ int  Cluster::receive(pollfd const &connection)
 	}
 	else
 	{
-		HttpRequest	readRequest(connection_buffers[connection.fd]);
+		Request	readRequest(connection_buffers[connection.fd]);
 		if (readRequest.receivedHeaders() && readRequest.receivedBody())
 			return 1;
 	}
