@@ -6,7 +6,6 @@
 #include <cstdlib>
 #include <sys/fcntl.h>
 #include <unistd.h>
-#include <xlocale/_stdlib.h>
 
 Response::Response()
 {

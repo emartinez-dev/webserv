@@ -13,6 +13,8 @@
 # include "HttpPath.hpp"
 # include "Utils.hpp"
 # include <sys/stat.h>
+# include <sys/types.h>
+# include <sys/wait.h>
 
 // Informacionales (1xx)
 #define HTTP_STATUS_CONTINUE 100              // 100 Continue
