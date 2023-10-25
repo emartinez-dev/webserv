@@ -47,6 +47,7 @@ server:
 server:
     root: example/host_tests/ 
     server_name: google.com
+    cgi_path: /usr/bin/php
     listen:
         host: 127.0.0.1
         port: 8080

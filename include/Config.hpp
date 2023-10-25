@@ -28,6 +28,7 @@ class Config
 
 		void add_server(std::ifstream &config_file, std::string line);
 		const ServerConfig *getServer(std::string const &host) const;
+		int checkValues();
 };
 
 #endif

@@ -216,3 +216,19 @@ std::string ServerConfig::getErrorPage(int status_code) const
 	}
 	return "";
 }
+
+int ServerConfig::checkServerConfig() {
+	if (getValue("root") == "")
+		return 1;
+	if (!isAccessible(getValue("cgi_path")))
+		return 1;
+	for (size_t i = 0; i < locations.size(); i++) {
+		if ((locations[i].getValue("root") == "" && locations[i].getValue("return") == "" ) || locations[i].getValue("route") == "")
+				return 1;
+	}
+	for (size_t i = 0; i < listens.size(); i++) {
+		if (listens[i].getPort() <= 0 || listens[i].getPort() >= 65535)
+			return 1;
+	}
+	return 0;
+} 

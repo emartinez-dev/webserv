@@ -7,6 +7,9 @@ Config::Config(std::string &inputfile)
 
 	if (check_file(config_file))
 		throw ConfigurationFileException();
+	if (checkValues())
+		throw IncorrectConfigurationFileException();
+
 }
 
 Config::~Config() {
@@ -72,4 +75,13 @@ const ServerConfig *Config::getServer(std::string const &host) const
 			return (&servers[i]);
 	}
 	return (&servers[servers.size() - 1]);
+}
+
+int Config::checkValues() {
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		if (servers[i].checkServerConfig())
+			return 1;
+	}
+	return 0;
 }

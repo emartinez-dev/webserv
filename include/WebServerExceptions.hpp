@@ -60,6 +60,13 @@ class ConfigurationFileException: public std::exception {
 	}
 };
 
+class IncorrectConfigurationFileException: public std::exception {
+	virtual const char *what() const throw()
+	{
+		return ("Bad configuration file.");
+	}
+};
+
 class PipeException: public std::exception {
 	virtual const char *what() const throw()
 	{
