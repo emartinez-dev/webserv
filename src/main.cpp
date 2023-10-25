@@ -9,8 +9,8 @@ int	main(int argc, char **argv, char **envp)
 		return (1);
 	}
 	std::string str(argv[1]);
-	Config configuration(str);
 	try {
+		Config configuration(str);
 		Cluster	webserv(configuration);
 		webserv.run();
 	} catch (std::exception &e) {

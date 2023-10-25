@@ -5,7 +5,8 @@ Config::Config(std::string &inputfile)
 {
 	std::ifstream config_file(inputfile);
 
-	check_file(config_file);
+	if (check_file(config_file))
+		throw ConfigurationFileException();
 }
 
 Config::~Config() {
@@ -25,14 +26,12 @@ Config	&Config::operator=(Config const &copy) {
 int	Config::check_file(std::ifstream &config_file)	{
 	
 	std::string line;
-	if (!config_file.is_open()) {
-		std::cerr << "The input file can't be open" << std::endl;
-		return 0;
-	}
+	if (!config_file.is_open())
+		return 1;
 	std::getline(config_file, line);
 	if (line.find("server:") == std::string::npos) {
 		std::cerr << "error: file" << std::endl;
-		return 0;
+		return 1;
 	}
 	else
 		add_server(config_file, line);

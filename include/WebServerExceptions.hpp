@@ -53,6 +53,13 @@ class InvalidIPException: public std::exception {
 	}
 };
 
+class ConfigurationFileException: public std::exception {
+	virtual const char *what() const throw()
+	{
+		return ("Failed to open the given configuration file.");
+	}
+};
+
 class PipeException: public std::exception {
 	virtual const char *what() const throw()
 	{
