@@ -1,15 +1,8 @@
 #ifndef HTTPPATH_HPP
 #define HTTPPATH_HPP
 
-# include <iostream>
-# include <sys/stat.h>
-# include <fstream>
-# include <sstream>
-# include <vector>
-# include <string>
 # include "Location.hpp"
-
-# define URL_MAX_LENGTH 2000
+# include "webserv.hpp"
 
 class HttpPath
 {

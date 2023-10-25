@@ -1,14 +1,14 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-# include <iostream>
-# include <fstream>
 # include "ServerConfig.hpp"
 # include "ErrorPage.hpp"
 # include "Listen.hpp"
 # include "Location.hpp"
+# include "webserv.hpp"
 
 # define LAST std::string::npos
+
 class ServerConfig;
 
 class Config

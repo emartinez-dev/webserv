@@ -3,11 +3,6 @@
 #include "ServerConfig.hpp"
 #include "Utils.hpp"
 #include "WebServerExceptions.hpp"
-#include <cstdio>
-#include <cstdlib>
-#include <sys/fcntl.h>
-#include <unistd.h>
-#include <sys/resource.h>
 
 Response::Response()
 {

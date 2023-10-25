@@ -1,4 +1,6 @@
 #include "webserv.hpp"
+#include "Config.hpp"
+#include "Cluster.hpp"
 
 int	main(int argc, char **argv, char **envp)
 {

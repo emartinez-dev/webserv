@@ -1,20 +1,12 @@
 #ifndef RESPONSE_HPP
 #define RESPONSE_HPP
 
-# include <iostream>
-# include <string>
-# include <fstream>
-# include <unordered_map>
-# include <cstdlib>
-# include <dirent.h>
 # include "Config.hpp"
 # include "ServerConfig.hpp"
 # include "httpRequest.hpp"
 # include "HttpPath.hpp"
 # include "Utils.hpp"
-# include <sys/stat.h>
-# include <sys/types.h>
-# include <sys/wait.h>
+# include "webserv.hpp"
 
 // Informacionales (1xx)
 #define HTTP_STATUS_CONTINUE 100              // 100 Continue

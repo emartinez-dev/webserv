@@ -1,8 +1,7 @@
 #ifndef ERRORPAGE_HPP
 #define ERRORPAGE_HPP
 
-# include <iostream>
-#include <cstdlib>
+# include "webserv.hpp"
 
 class ErrorPage
 {

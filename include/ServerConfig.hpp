@@ -1,16 +1,10 @@
 #ifndef SERVERCONFIG_HPP
 #define SERVERCONFIG_HPP
 
-# include <iostream>
-# include <string>
-# include <map>
-# include <vector>
 # include "ErrorPage.hpp"
-# include "Config.hpp"
 # include "Listen.hpp"
 # include "Location.hpp"
-# include "Utils.hpp"
-# include <iostream>
+# include "webserv.hpp"
 
 class ServerConfig
 {

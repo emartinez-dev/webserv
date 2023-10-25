@@ -3,18 +3,9 @@
 
 # include "Server.hpp"
 # include "httpRequest.hpp"
-# include <iostream>
-# include <unordered_map>
 # include "Config.hpp"
 # include "Response.hpp"
-# include <cstring>
-# include <algorithm>
-# include <sys/time.h>
-
-# define TIMEOUT_MS 30000
-# define BUFFER_SIZE 1024
-# define TIMEOUT_SEC 30
-# define CGI_TIMEOUT 5
+# include "webserv.hpp"
 
 class Cluster
 {

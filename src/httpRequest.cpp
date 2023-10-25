@@ -1,7 +1,5 @@
 #include "httpRequest.hpp"
-#include <cstdlib>
-#include <iostream>
-#include <sstream>
+#include "Utils.hpp"
 
 // Constructor de la clase HttpRequest
 HttpRequest::HttpRequest() {

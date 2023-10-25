@@ -1,7 +1,6 @@
 #include "Server.hpp"
 #include "Utils.hpp"
 #include "WebServerExceptions.hpp"
-#include <errno.h>
 
 Server::Server()
 {

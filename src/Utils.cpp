@@ -1,5 +1,4 @@
 #include "webserv.hpp"
-#include <cstring>
 
 unsigned long parse_ip(const std::string &ip_address)
 {
