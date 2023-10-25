@@ -32,7 +32,7 @@ void  Cluster::run(void)
 	while (true)
 	{
 		size_t initial_size = connections.size();
-		int events = ::poll(connections.data(), connections.size(), TIMEOUT_MS);
+		int events = ::poll(connections.data(), connections.size(), POLL_TIMEOUT_MS);
 		if (events < 0)
 			throw SocketPollingError();
 		else
@@ -120,7 +120,7 @@ int		Cluster::add_client(int server_fd)
 	{
 		connections.push_back(create_pollfd(client_socket, POLLIN));
 		connection_buffers[client_socket] = std::vector<char>();
-		timeouts[client_socket] = time(NULL) + TIMEOUT_SEC;
+		timeouts[client_socket] = time(NULL) + CLIENT_TIMEOUT_S;
 	}
 	else
 	{
@@ -144,9 +144,9 @@ int	Cluster::accept_client(int server_fd)
 int  Cluster::receive(pollfd const &connection)
 {
 	ssize_t	  bytes_read;
-	char	  buff[BUFFER_SIZE];
+	char	  buff[READ_BUFFER_SIZE];
 
-	bytes_read = read_socket(connection, buff, BUFFER_SIZE);
+	bytes_read = read_socket(connection, buff, READ_BUFFER_SIZE);
 	if (bytes_read > 0)
 	{
 		connection_buffers[connection.fd].insert(

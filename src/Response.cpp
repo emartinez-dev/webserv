@@ -446,10 +446,10 @@ void Response::runCGI(const std::string& cgi_path, const std::string& cgi_file, 
 			close(pipe_fd[1]);
 
 			std::string result;
-			char buffer[1024];
+			char buffer[READ_BUFFER_SIZE];
 			ssize_t bytes_read;
 
-			while ((bytes_read = read(pipe_fd[0], buffer, sizeof(buffer))) > 0)
+			while ((bytes_read = read(pipe_fd[0], buffer, READ_BUFFER_SIZE)) > 0)
 				result.append(buffer, bytes_read);
 			close(pipe_fd[0]);
 

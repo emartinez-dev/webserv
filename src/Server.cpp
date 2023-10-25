@@ -19,7 +19,7 @@ Server::Server(std::string const &ip_address, int port)
 		throw SocketOptionsException();
 	if (bind(server_socket, (const struct sockaddr *)&server_address, sizeof(server_address)) < 0 && errno != EADDRINUSE)
 		throw BindingException();
-	if (listen(server_socket, MAX_BACKLOG) < 0)
+	if (listen(server_socket, LISTEN_MAX_BACKLOG) < 0)
 		throw ListeningException();
 	if (fcntl(server_socket, F_SETFL, O_NONBLOCK) < 0)
 		throw SocketOptionsException();

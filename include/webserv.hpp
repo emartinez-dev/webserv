@@ -29,11 +29,11 @@
 
 # include "WebServerExceptions.hpp"
 
-# define MAX_BACKLOG 128
-# define TIMEOUT_MS 30000
-# define BUFFER_SIZE 1024
-# define TIMEOUT_SEC 30
+# define LISTEN_MAX_BACKLOG 128
+# define POLL_TIMEOUT_MS 30000
+# define CLIENT_TIMEOUT_S 30
 # define CGI_TIMEOUT 5
 # define URL_MAX_LENGTH 2000
+# define READ_BUFFER_SIZE 1024
 
 #endif
