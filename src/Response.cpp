@@ -1,4 +1,5 @@
 #include "Response.hpp"
+#include "Cluster.hpp"
 #include "ServerConfig.hpp"
 #include "Utils.hpp"
 #include "WebServerExceptions.hpp"
@@ -6,7 +7,7 @@
 #include <cstdlib>
 #include <sys/fcntl.h>
 #include <unistd.h>
-#include <xlocale/_stdlib.h>
+#include <sys/resource.h>
 
 Response::Response()
 {
@@ -423,13 +424,19 @@ void Response::runCGI(const std::string& cgi_path, const std::string& cgi_file, 
 		if (pipe(pipe_fd) == -1)
 			throw PipeException();
 
-		// We should probably use like a local environment just for parameters variables
 		pid_t child_pid = fork();
 
 		if (child_pid == -1)
 			throw ForkException();
 		else if (child_pid == 0)
 		{
+			rlimit limit;
+			limit.rlim_cur = CGI_TIMEOUT;
+			limit.rlim_max = CGI_TIMEOUT;
+
+			if (setrlimit(RLIMIT_CPU, &limit) == -1)
+				exit(1);
+
 			dup2(pipe_fd[1], STDOUT_FILENO);
 			close(pipe_fd[0]);
 			close(pipe_fd[1]);

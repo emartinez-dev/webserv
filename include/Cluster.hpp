@@ -14,6 +14,7 @@
 # define TIMEOUT_MS 30000
 # define BUFFER_SIZE 1024
 # define TIMEOUT_SEC 30
+# define CGI_TIMEOUT 5
 
 class Cluster
 {
