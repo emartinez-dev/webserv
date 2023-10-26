@@ -218,16 +218,28 @@ std::string ServerConfig::getErrorPage(int status_code) const
 
 int ServerConfig::checkServerConfig() {
 	if (getValue("root") == "")
+	{
+		std::cerr << "The server " << getValue("server_name") << " don't have a root" << std::endl;
 		return 1;
+	}
 	if (!isAccessible(getValue("cgi_path")))
+	{
+		std::cerr << "The server " << getValue("server_name") << " don't have a cgi_path" << std::endl;
 		return 1;
+	}
 	for (size_t i = 0; i < locations.size(); i++) {
 		if ((locations[i].getValue("root") == "" && locations[i].getValue("return") == "" ) || locations[i].getValue("route") == "")
-				return 1;
+		{
+			std::cerr << "The server " << getValue("server_name") << " in the location " << locations.size() - i << " don't have a root or route" << std::endl;
+			return 1;
+		}
 	}
 	for (size_t i = 0; i < listens.size(); i++) {
 		if (listens[i].getPort() <= 0 || listens[i].getPort() >= 65535)
+		{
+			std::cerr << "The server " << getValue("server_name") << " in the listen " << listens.size() - i << " don't have a valid port" << std::endl;
 			return 1;
+		}
 	}
 	return 0;
 } 
