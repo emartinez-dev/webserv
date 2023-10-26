@@ -134,6 +134,7 @@ class Response
 		void				postHandler(const Request &request, const Location &location, const ServerConfig &config);
 		void				deleteHandler(void);
 		void				runCGI(const std::string& cgi_path, const std::string& cgi_file, const Request &request);
+	void					uploadFile(const Location &location, const Request &request);
 };
 
 #endif

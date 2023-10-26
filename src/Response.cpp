@@ -3,6 +3,7 @@
 #include "ServerConfig.hpp"
 #include "Utils.hpp"
 #include "WebServerExceptions.hpp"
+#include "webserv.hpp"
 
 Response::Response()
 {
@@ -79,6 +80,10 @@ void Response::postHandler(const Request &request, const Location &location, con
 		runCGI(config.getValue("cgi_path"), file_path, request);
 	else if (isFolder(file_path) && location.getValue("cgi_ext") != "" && getFileExtension(location.getValue("index")) == location.getValue("cgi_ext"))
 		runCGI(config.getValue("cgi_path"), file_path + location.getValue("index"), request);
+	else if (location.getValue("allow_uploads") == "on" && request.getHeader("Content-Type").find("multipart/form-data") != std::string::npos)
+		uploadFile(location, request);
+	else
+		setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
 }
 
 void Response::deleteHandler(void)
@@ -474,4 +479,56 @@ void Response::runCGI(const std::string& cgi_path, const std::string& cgi_file, 
 		setStatusCode(HTTP_STATUS_INTERNAL_SERVER_ERROR);
 	}
 	freeEnv(env);
+}
+
+std::string getFileName(const std::string &request_body)
+{
+	size_t head_pos = request_body.find("\r\n\r\n");
+	if (head_pos != std::string::npos)
+	{
+		std::string headers = request_body.substr(0, head_pos);
+		size_t filename_pos = headers.find("filename=\"");
+		std::string file = headers.substr(filename_pos + 10);
+		return file.substr(0, file.find("\""));
+	}
+	return "";
+}
+
+// TODO: I think URL-encoded POST requests aren't getting accepted
+// TODO: refactor this
+// TODO: we should also check for chunked files
+void Response::uploadFile(const Location &location, const Request &request)
+{
+	std::string upload_path = file_path;
+
+	if (location.getValue("uploads_path") == "")
+		upload_path += DEFAULT_UPLOAD_PATH;
+	else
+		upload_path += location.getValue("uploads_path");
+	if (upload_path[upload_path.length() - 1] != '/')
+		upload_path += '/';
+
+	std::string filename = getFileName(request.getBody());
+	size_t body_separator = request.getBody().find("\r\n\r\n");
+
+	if (filename != "" && body_separator != std::string::npos)
+	{
+		struct stat st;
+		if (stat(upload_path.c_str(), &st) == -1)
+			mkdir(upload_path.c_str(), 0700);
+
+		std::string _file_path = upload_path + filename;
+		int outfile = open(_file_path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		if (outfile > 0)
+		{
+			const std::string &file_content = request.getBody().substr(body_separator + 4);
+			write(outfile, file_content.c_str(), file_content.length());
+			close(outfile);
+			setStatusCode(HTTP_STATUS_CREATED);
+		}
+		else
+			setStatusCode(HTTP_STATUS_INTERNAL_SERVER_ERROR);
+	}
+	else
+		setStatusCode(HTTP_STATUS_BAD_REQUEST);
 }

@@ -10,7 +10,7 @@ class Request {
         std::string path_;
         std::string version_;
         std::string body;
-        std::map<std::string, std::string> headers;
+        std::map<std::string, std::string> _headers;
         std::map<std::string, std::string> parameters;
 
         void parseFirstLine(const std::string& first_line);

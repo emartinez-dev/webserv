@@ -162,6 +162,7 @@ int  Cluster::receive(pollfd const &connection)
 	}
 	else
 	{
+		// This way of reading if a request is complete is slowing our program a lot I think
 		Request	readRequest(connection_buffers[connection.fd]);
 		if (readRequest.receivedHeaders() && readRequest.receivedBody())
 			return 1;

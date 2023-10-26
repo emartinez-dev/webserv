@@ -35,5 +35,6 @@
 # define CGI_TIMEOUT 5
 # define URL_MAX_LENGTH 2000
 # define READ_BUFFER_SIZE 1024
+# define DEFAULT_UPLOAD_PATH "/files/"
 
 #endif

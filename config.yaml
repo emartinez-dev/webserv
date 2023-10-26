@@ -2,7 +2,7 @@ server:
     root: example
     server_name: johnnyserver.com 
     cgi_path: /usr/local/bin/python3
-    client_max_body_size: 3000  
+    client_max_body_size: 3000000
     error_page: 
         path: /errorPages/404.html
         status_code: 404
@@ -27,7 +27,16 @@ server:
         root: /tours/
         index: time.py
         autoindex: on 
+        allow_uploads: on
+        uploads_path: files/
         cgi_ext: .py
+        allow_methods: GET POST
+    location:
+		route: /uploads/
+        root: /tours/
+        autoindex: on
+        allow_uploads: on
+        uploads_path: files/
         allow_methods: GET POST
     location: 
 		route: /test/

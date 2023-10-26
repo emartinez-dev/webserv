@@ -26,15 +26,15 @@ Request::Request(const std::vector<char>& request_buffer)
     }
 }
 
-void Request::parseHeaders(const std::string& _headers) {
-    std::istringstream ss(_headers);
+void Request::parseHeaders(const std::string& headers) {
+    std::istringstream ss(headers);
     std::string header;
     while (std::getline(ss, header)) {
         size_t pos = header.find_first_of(": ");
         if (pos != std::string::npos) {
             std::string key = splitKey(header);
             std::string value = splitValue(header);
-            headers[key] = value;
+            _headers[key] = value;
         }
     }
 }
@@ -70,7 +70,7 @@ Request::Request(const Request& other) {
 	body = other.body;
     path_ = other.path_;
     version_ = other.version_;
-    headers = other.headers;
+    _headers = other._headers;
     parameters = other.parameters;
 }
 
@@ -84,7 +84,7 @@ Request& Request::operator=(const Request& other) {
     path_ = other.path_;
 	body = other.body;
     version_ = other.version_;
-    headers = other.headers;
+    _headers = other._headers;
     parameters = other.parameters;
 
     return *this;
@@ -116,16 +116,16 @@ std::string Request::getVersion() const {
 
 // Función para obtener un encabezado específico por su nombre
 std::string Request::getHeader(const std::string& name) const {
-    return (getMapValue(name, this->headers));
+    return (getMapValue(name, this->_headers));
 }
 
 std::string Request::getHeaderKey(const std::string& name) const {
-    return (getMapKey(name, this->headers));
+    return (getMapKey(name, this->_headers));
 }
 
 // Función para obtener todos los encabezados
 std::map<std::string, std::string> Request::getHeaders() const {
-    return headers;
+    return _headers;
 }
 
 // Función para obtener todos los parámetros
@@ -163,7 +163,10 @@ void  Request::printRequest(void) const
     }
 
     std::cout << "Body length: " << body.length() << std::endl;
-    std::cout << "Body______________________\n" << body << "________________endbody"<< std::endl;
+	if (body.length() < 100)
+		std::cout << "Body______________________\n" << body << "________________endbody"<< std::endl;
+	else
+		std::cout << "Body______________________\n" << "[ too large ]" << "________________endbody"<< std::endl;
 
     std::cout << "Parámetros:" << std::endl;
     std::map<std::string, std::string> parameters = getParameters();
