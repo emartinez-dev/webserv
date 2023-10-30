@@ -13,7 +13,7 @@ class Location
 {
 	private:
 		std::map<std::string, std::string> conf;
-		int allow_methods;
+		int allowedMethods;
 	public:
 		Location();
 		~Location();
@@ -24,7 +24,7 @@ class Location
 		void  setConf(const std::string &key, const std::string &value);
 		std::map<std::string, std::string>	getConf();
 		bool  matches(const std::string &path);
-		int	  getAllowMethods() const;
+		int	  getAllowedMethods() const;
 		const std::string getValue(std::string const &key) const;
 		bool  hasRedirect(void) const;
 };

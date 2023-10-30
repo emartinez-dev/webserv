@@ -14,27 +14,27 @@ Request::Request(const std::vector<char>& request_buffer)
 		std::string headers = request_str.substr(0, pos);
         parseFirstLine(first_line);
         parseHeaders(headers);
-		std::string url_parameters = parseURL(path_);
+		std::string url_parameters = parseURL(path);
 		parseParameters(url_parameters);
     }
 
     // Encuentra el inicio del cuerpo de la solicitud
     if (request_str.find("\r\n\r\n") != std::string::npos) {
-		received_headers = true;
+		_receivedHeaders = true;
         body = request_str.substr(pos + 4);
         parseParameters(body);
     }
 }
 
-void Request::parseHeaders(const std::string& headers) {
-    std::istringstream ss(headers);
+void Request::parseHeaders(const std::string& _headers) {
+    std::istringstream ss(_headers);
     std::string header;
     while (std::getline(ss, header)) {
         size_t pos = header.find_first_of(": ");
         if (pos != std::string::npos) {
             std::string key = splitKey(header);
             std::string value = splitValue(header);
-            _headers[key] = value;
+            headers[key] = value;
         }
     }
 }
@@ -44,65 +44,60 @@ void Request::parseFirstLine(const std::string& first_line) {
     size_t pos1 = first_line.find(' ');
     size_t pos2 = first_line.find(' ', pos1 + 1);
     if (pos1 != std::string::npos && pos2 != std::string::npos) {
-        method_ = first_line.substr(0, pos1);
-        path_ = first_line.substr(pos1 + 1, pos2 - pos1 - 1);
-        version_ = first_line.substr(pos2 + 1);
+        method = first_line.substr(0, pos1);
+        path = first_line.substr(pos1 + 1, pos2 - pos1 - 1);
+        version = first_line.substr(pos2 + 1);
     }
 }
 
 
-std::string Request::parseURL(const std::string &path)
+std::string Request::parseURL(const std::string &_path)
 {
 	std::string	  parameters;
-	size_t	pos = path.find("?");
+	size_t	pos = _path.find("?");
 
 	if (pos == std::string::npos)
 		return "";
-	parameters = path.substr(pos + 1);
-	path_ = path.substr(0, pos);
+	parameters = _path.substr(pos + 1);
+	path = _path.substr(0, pos);
 	return parameters;
 }
 
 // Constructor de copia de la clase HttpRequest
 Request::Request(const Request& other) {
-	received_headers = other.received_headers;
-    method_ = other.method_;
+	_receivedHeaders = other._receivedHeaders;
+    method = other.method;
 	body = other.body;
-    path_ = other.path_;
-    version_ = other.version_;
-    _headers = other._headers;
+    path = other.path;
+    version = other.version;
+    headers = other.headers;
     parameters = other.parameters;
 }
 
 // Operador de asignación de la clase HttpRequest
 Request& Request::operator=(const Request& other) {
-    if (this == &other) {
-        return *this;
+    if (this != &other) {
+		_receivedHeaders = other._receivedHeaders;
+		method = other.method;
+		path = other.path;
+		body = other.body;
+		version = other.version;
+		headers = other.headers;
+		parameters = other.parameters;
     }
-	received_headers = other.received_headers;
-    method_ = other.method_;
-    path_ = other.path_;
-	body = other.body;
-    version_ = other.version_;
-    _headers = other._headers;
-    parameters = other.parameters;
-
     return *this;
 }
 
-// Destructor de la clase HttpRequest
 Request::~Request() {
-    // No se requiere ninguna operación especial de limpieza
 }
 
-// Función para obtener el método HTTP
-std::string Request::getMethod() const {
-    return method_;
+const std::string &Request::getMethod() const {
+    return method;
 }
 
 // Función para obtener la ruta
-std::string Request::getPath() const {
-    return path_;
+const std::string &Request::getPath() const {
+    return path;
 }
 
 const std::string &Request::getBody() const {
@@ -110,26 +105,26 @@ const std::string &Request::getBody() const {
 }
 
 // Función para obtener la versión HTTP
-std::string Request::getVersion() const {
-    return version_;
+const std::string &Request::getVersion() const {
+    return version;
 }
 
 // Función para obtener un encabezado específico por su nombre
-std::string Request::getHeader(const std::string& name) const {
-    return (getMapValue(name, this->_headers));
+const std::string &Request::getHeader(const std::string& name) const {
+    return (getMapValue(name, this->headers));
 }
 
-std::string Request::getHeaderKey(const std::string& name) const {
-    return (getMapKey(name, this->_headers));
+const std::string &Request::getHeaderKey(const std::string& name) const {
+    return (getMapKey(name, this->headers));
 }
 
 // Función para obtener todos los encabezados
-std::map<std::string, std::string> Request::getHeaders() const {
-    return _headers;
+const std::map<std::string, std::string> &Request::getHeaders() const {
+    return headers;
 }
 
 // Función para obtener todos los parámetros
-std::map<std::string, std::string> Request::getParameters() const {
+const std::map<std::string, std::string> &Request::getParameters() const {
     return parameters;
 }
 
@@ -178,7 +173,7 @@ void  Request::printRequest(void) const
 
 bool  Request::receivedHeaders(void) const
 {
-	return received_headers;
+	return _receivedHeaders;
 }
 
 bool  Request::receivedBody(void) const

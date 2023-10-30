@@ -6,8 +6,8 @@
 class ErrorPage
 {
 	private:
-		int status_code;
-		std::string path;
+		int			statusCode;
+		std::string	path;
 	public:
 		ErrorPage();
 		~ErrorPage();

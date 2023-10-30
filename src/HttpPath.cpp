@@ -1,51 +1,55 @@
 #include "HttpPath.hpp"
 #include "Utils.hpp"
 
+HttpPath::HttpPath()
+{}
 
-/*the extension or empty if it does not have an extension.Methods 
-    for orthodox canonical class.*/
-HttpPath::HttpPath(const std::string &path, const Location *location): path_(path) {
+HttpPath::HttpPath(const std::string &path, const Location *location): path(path) {
     initExtension();
-    root_ = concatRoot(location);
+	if (location)
+		root = concatRoot(location);
+	else
+		root = "";
 }
-
-
 
 HttpPath::~HttpPath() {
 }
 
 HttpPath::HttpPath(HttpPath const &copy) {
-    path_ = copy.path_;
-    extension_ = copy.extension_;
-    root_ = copy.root_;
-    
+    path = copy.path;
+    extension = copy.extension;
+    root = copy.root;
+	validPath = copy.validPath;
 }
 
 HttpPath	&HttpPath::operator=(const HttpPath &copy) {
     if (this != &copy) {
-        *this = copy;
+		path = copy.path;
+		extension = copy.extension;
+		root = copy.root;
+		validPath = copy.validPath;
     }
     return *this;
 }
 
 /*GETTERS*/
-std::string HttpPath::getPath() const{
-    return (path_);
+const std::string &HttpPath::getPath() const{
+    return (path);
 }
-std::string HttpPath::getExtension() const{
-    return (extension_);
+const std::string &HttpPath::getExtension() const{
+    return (extension);
 }
-std::string HttpPath::getRoot() const{
-    return (root_);
+const std::string &HttpPath::getRoot() const{
+    return (root);
 }
 
 /*SETTERS*/
-void HttpPath::setPath(std::string& newPath){
-    path_ = newPath;
+void HttpPath::setPath(const std::string& newPath){
+    path = newPath;
 }
 
-void HttpPath::setExtension(std::string& newExtension){
-    extension_ = newExtension;
+void HttpPath::setExtension(const std::string& newExtension){
+    extension = newExtension;
 }
 
 /**
@@ -54,39 +58,37 @@ void HttpPath::setExtension(std::string& newExtension){
  * @return std::string the extension or empty if it does not have an extension.
  */
 void HttpPath::initExtension(){
-    size_t pos = path_.rfind(".");
-    size_t slash_pos = path_.rfind("/");
+    size_t pos = path.rfind(".");
+    size_t slash_pos = path.rfind("/");
     if (pos > slash_pos && pos != std::string::npos) {
-        extension_ = path_.substr(pos, path_.length());
+        extension = path.substr(pos, path.length());
     } else {
-        extension_ = "";
+        extension = "";
     }
 }
 
 bool HttpPath::URLisValid() {
-	if (path_.length() > URL_MAX_LENGTH)
+	if (path.length() > URL_MAX_LENGTH)
 		return (false);
 	std::string valid_chars = "-._~:/?#[]@!$&'()*+,;%=";
-    for (size_t i = 0; i < path_.length(); ++i) {
-		if (valid_chars.find(path_[i]) == std::string::npos && !isalnum(path_[i])) {
+    for (size_t i = 0; i < path.length(); ++i) {
+		if (valid_chars.find(path[i]) == std::string::npos && !isalnum(path[i])) {
 			return false;
 		}
     }
     return true;
 }
 
-/* SPLIT ROOT AND CONCATENATE */
-
 std::string HttpPath::concatRoot(const Location *location)
 {
-    replaceFirstSubstring(path_, location->getValue("route"), location->getValue("root"));
-	return (path_);
+    replaceFirstSubstring(path, location->getValue("route"), location->getValue("root"));
+	return (path);
 }
 
 void HttpPath::printHttpPath() {
     std::cout << std::endl;
-    std::cout << "path_: " << path_ << std::endl;
-    std::cout << "extension_: " << extension_ << std::endl;
-    std::cout << "root_: " << root_ << std::endl;
+    std::cout << "path_: " << path << std::endl;
+    std::cout << "extension_: " << extension << std::endl;
+    std::cout << "root_: " << root << std::endl;
     std::cout << std::endl;
 }

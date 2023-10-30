@@ -18,14 +18,14 @@ Location::~Location()
 Location::Location(Location const &copy)
 {
 	this->conf = copy.conf;
-	this->allow_methods = copy.allow_methods;
+	this->allowedMethods = copy.allowedMethods;
 }
 
 Location	&Location::operator=(const Location &copy)
 {
 	if (this != &copy) {
 		this->conf = copy.conf;
-		this->allow_methods = copy.allow_methods;
+		this->allowedMethods = copy.allowedMethods;
 	}
 	return *this;
 }
@@ -38,7 +38,7 @@ std::map<std::string, std::string>	Location::getConf() {
 	return(conf);
 }
 
-int	Location::getAllowMethods() const{
+int	Location::getAllowedMethods() const{
 	int methods = 0;
 	if (getValue("allow_methods").find("GET") != LAST)
 		methods += 1;

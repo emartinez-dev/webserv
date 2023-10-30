@@ -54,6 +54,16 @@ const std::string& getMapValue(const std::string& name, const std::map<std::stri
     }
 }
 
+const std::string& getMapValue(const std::string& name, const std::unordered_map<std::string, std::string>& map) {
+    std::unordered_map<std::string, std::string>::const_iterator it = map.find(name);
+	static const std::string &empty = "";
+    if (it != map.end()) {
+        return it->second;
+    } else {
+        return empty;
+    }
+}
+
 const std::string& getMapKey(const std::string& name, const std::map<std::string, std::string>& map) {
     std::map<std::string, std::string>::const_iterator it = map.find(name);
     static const std::string &empty = "";
@@ -64,7 +74,17 @@ const std::string& getMapKey(const std::string& name, const std::map<std::string
     }
 }
 
-std::string itoa(std::streampos number) {
+const std::string& getMapKey(const std::string& name, const std::unordered_map<std::string, std::string>& map) {
+    std::unordered_map<std::string, std::string>::const_iterator it = map.find(name);
+    static const std::string &empty = "";
+    if (it != map.end()) {
+        return it->first;
+    } else {
+        return empty;
+    }
+}
+
+std::string itoa(size_t number) {
 	std::ostringstream	strNumber;
 	strNumber << number;
 	return (strNumber.str());

@@ -7,11 +7,12 @@
 class HttpPath
 {
     private:
-        std::string path_;
-        std::string extension_;
-        std::string root_;
-		bool  valid_path;
+        std::string path;
+        std::string extension;
+        std::string root;
+		bool		validPath;
         HttpPath();
+        void initExtension();
 
     public:
         HttpPath(const std::string &path, const Location *location);
@@ -20,21 +21,16 @@ class HttpPath
         HttpPath	&operator=(HttpPath const &copy);
 
         /*Getters and setters*/
-        std::string getPath() const;
-        std::string getExtension() const;
-        std::string getRoot() const;
+        const std::string &getPath() const;
+        const std::string &getExtension() const;
+        const std::string &getRoot() const;
 
-        void setPath(std::string& newPath);
-        void setExtension(std::string& newExtension);
-        void initExtension();
-        void initVector();
+        void setPath(const std::string& newPath);
+        void setExtension(const std::string& newExtension);
 
-        /* PARSER PATH */
-        bool URLisValid();
-
-        /* SPLIT ROOT AND CONCATENATE */
+        bool		URLisValid();
         std::string concatRoot(const Location *location);
-        void printHttpPath();
+        void		printHttpPath();
 };
 
 #endif

@@ -30,7 +30,7 @@ void Listen::setPort(std::string value) {
 
 }
 
-const std::string Listen::getHost() const {
+const std::string &Listen::getHost() const {
 	return (host);
 }
 

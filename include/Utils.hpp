@@ -10,10 +10,12 @@ std::string		  splitKey(std::string const &line);
 std::string		  splitValue(std::string const &line);
 const std::string &getMapKey(const std::string& name, const std::map<std::string, std::string>& map);
 const std::string &getMapValue(const std::string& name, const std::map<std::string, std::string>& map);
+const std::string &getMapKey(const std::string& name, const std::unordered_map<std::string, std::string>& map);
+const std::string &getMapValue(const std::string& name, const std::unordered_map<std::string, std::string>& map);
 
 std::string		  getFileExtension(const std::string &file);
 
-std::string		  itoa(std::streampos number);
+std::string		  itoa(size_t number);
 
 std::string		  removeSubstring(const std::string& original, const std::string& toRemove);
 void			  replaceFirstSubstring(std::string& str, const std::string& oldSubstr, const std::string& newSubstr);

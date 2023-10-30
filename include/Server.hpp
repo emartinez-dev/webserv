@@ -7,8 +7,8 @@
 class Server
 {
 	private:
-		sockaddr_in	server_address;
-		int			server_socket;
+		sockaddr_in	serverAddress;
+		int			serverSocket;
 		Server();
 
 	public:
@@ -16,8 +16,8 @@ class Server
 		~Server();
 		Server(Server const &copy);
 		Server	&operator=(Server const &copy);
-		int			  get_server_socket(void) const;
-		sockaddr_in	  get_server_address(void) const;
+		int			  getServerSocket(void) const;
+		sockaddr_in	  getServerAddress(void) const;
 };
 
 #endif

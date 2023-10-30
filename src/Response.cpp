@@ -1,16 +1,11 @@
 #include "Response.hpp"
-#include "Cluster.hpp"
-#include "ServerConfig.hpp"
-#include "Utils.hpp"
-#include "WebServerExceptions.hpp"
-#include "webserv.hpp"
 
 Response::Response()
 {
 }
 
 Response::Response(const Request &request, const Config &config):version(request.getVersion()), \
-	status_code(HTTP_STATUS_OK)
+	statusCode(HTTP_STATUS_OK)
 {
 	ServerConfig const *server_config = config.getServer(request.getHeader("Host"));
 	Location const *server_location = server_config->getLocation(request.getPath());
@@ -22,7 +17,7 @@ Response::Response(const Request &request, const Config &config):version(request
 		{
 			if (request_path.URLisValid())
 			{
-				if (isAllowedMethod(server_location->getAllowMethods(), request.getMethod()))
+				if (isAllowedMethod(server_location->getAllowedMethods(), request.getMethod()))
 				{
 					if (server_location->hasRedirect())
 						redirectionHandler(request, *server_location);
@@ -46,10 +41,10 @@ Response::Response(const Request &request, const Config &config):version(request
 	}
 	else
 		setStatusCode(HTTP_STATUS_NOT_FOUND);
-	if (status_code >= 400)
+	if (statusCode >= 400)
 		getErrorPage(*server_config);
 	bodyToBodyLength();
-	setHeader("Content-Length", itoa(body_len));
+	setHeader("Content-Length", itoa(bodyLength));
 	setHeader("Connection", "close");
 }
 
@@ -61,14 +56,14 @@ void Response::redirectionHandler(const Request &request, const Location &locati
 
 void Response::getHandler(const Request &request, const Location &location, const ServerConfig &config)
 {
-	if (location.getValue("cgi_ext") != "" && getFileExtension(file_path) == location.getValue("cgi_ext"))
-		runCGI(config.getValue("cgi_path"), file_path, request);
-	else if (isFolder(file_path) && location.getValue("cgi_ext") != "" && getFileExtension(location.getValue("index")) == location.getValue("cgi_ext"))
-		runCGI(config.getValue("cgi_path"), file_path + location.getValue("index"), request);
-	else if (isFolder(file_path))
+	if (location.getValue("cgi_ext") != "" && getFileExtension(filePath) == location.getValue("cgi_ext"))
+		runCGI(config.getValue("cgi_path"), filePath, request);
+	else if (isFolder(filePath) && location.getValue("cgi_ext") != "" && getFileExtension(location.getValue("index")) == location.getValue("cgi_ext"))
+		runCGI(config.getValue("cgi_path"), filePath + location.getValue("index"), request);
+	else if (isFolder(filePath))
 		index(location);
-	else if (isFile(file_path) && isAccessible(file_path))
-		readFileAndsetBody(file_path);
+	else if (isFile(filePath) && isAccessible(filePath))
+		readFileAndsetBody(filePath);
 	else
 		setStatusCode(HTTP_STATUS_NOT_FOUND);
 }
@@ -76,10 +71,10 @@ void Response::getHandler(const Request &request, const Location &location, cons
 
 void Response::postHandler(const Request &request, const Location &location, const ServerConfig &config)
 {
-	if (location.getValue("cgi_ext") != "" && getFileExtension(file_path) == location.getValue("cgi_ext"))
-		runCGI(config.getValue("cgi_path"), file_path, request);
-	else if (isFolder(file_path) && location.getValue("cgi_ext") != "" && getFileExtension(location.getValue("index")) == location.getValue("cgi_ext"))
-		runCGI(config.getValue("cgi_path"), file_path + location.getValue("index"), request);
+	if (location.getValue("cgi_ext") != "" && getFileExtension(filePath) == location.getValue("cgi_ext"))
+		runCGI(config.getValue("cgi_path"), filePath, request);
+	else if (isFolder(filePath) && location.getValue("cgi_ext") != "" && getFileExtension(location.getValue("index")) == location.getValue("cgi_ext"))
+		runCGI(config.getValue("cgi_path"), filePath + location.getValue("index"), request);
 	else if (location.getValue("allow_uploads") == "on" && request.getHeader("Content-Type").find("multipart/form-data") != std::string::npos)
 		uploadFile(location, request);
 	else
@@ -88,11 +83,11 @@ void Response::postHandler(const Request &request, const Location &location, con
 
 void Response::deleteHandler(void)
 {
-	if (isFolder(file_path))
+	if (isFolder(filePath))
 		setStatusCode(HTTP_STATUS_NOT_FOUND);
-	else if (isFile(file_path) && access(file_path.c_str(), F_OK) == 0)
+	else if (isFile(filePath) && access(filePath.c_str(), F_OK) == 0)
 	{
-		if (remove(file_path.c_str()) == 0)
+		if (remove(filePath.c_str()) == 0)
 			setStatusCode(HTTP_STATUS_NO_CONTENT);
 		else
 			setStatusCode(HTTP_STATUS_INTERNAL_SERVER_ERROR);
@@ -102,12 +97,12 @@ void Response::deleteHandler(void)
 
 }
 
-Response::Response(int error_code):version("HTTP/1.1\r"), status_code(error_code)
+Response::Response(int error_code):version("HTTP/1.1\r"), statusCode(error_code)
 {
-	if (status_code >= 400)
+	if (statusCode >= 400)
 		createErrorPage();
 	bodyToBodyLength();
-	setHeader("Content-Length", itoa(body_len));
+	setHeader("Content-Length", itoa(bodyLength));
 	setHeader("Connection", "close");
 }
 
@@ -115,8 +110,8 @@ Response::~Response()
 {
 }
 
-Response::Response(Response const &copy):version(copy.version),status_code(copy.status_code),
-	body(copy.body), body_len(copy.body_len),headers(copy.headers)
+Response::Response(Response const &copy):version(copy.version),statusCode(copy.statusCode),
+	body(copy.body), bodyLength(copy.bodyLength),headers(copy.headers)
 {
 }
 
@@ -124,9 +119,9 @@ Response	&Response::operator=(const Response &copy)
 {
 	if (this != &copy) {
 		version = copy.version;
-		status_code = copy.status_code;
+		statusCode = copy.statusCode;
 		body = copy.body;
-		body_len = copy.body_len;
+		bodyLength = copy.bodyLength;
 		headers = copy.headers;
 	}
 	return *this;
@@ -135,12 +130,12 @@ Response	&Response::operator=(const Response &copy)
 /*GETTERS*/
 
 std::string Response::getFirstLine () const {
-	return (version + " " + itoa(status_code) + " " + getStatusMessage() + "\r\n");
+	return (version + " " + itoa(statusCode) + " " + getStatusMessage() + "\r\n");
 }
 
 std::string Response::getStatusMessage() const {
 
-    switch (status_code) {
+    switch (statusCode) {
         case HTTP_STATUS_OK:
             return "OK";
         case HTTP_STATUS_CREATED:
@@ -233,7 +228,7 @@ const std::string Response::getContent(void) const
 
 void  Response::setStatusCode(const int status)
 {
-	this->status_code = status;
+	this->statusCode = status;
 }
 
 void  Response::setHeader(const std::string &key, const std::string &value)
@@ -247,7 +242,7 @@ void  Response::setBody(const std::string &body)
 }
 
 void Response::setFilePath(const std::string &root_main, const std::string &add_root) {
-	file_path = (root_main + add_root);
+	filePath = (root_main + add_root);
 }
 
 void Response::setContentLength(std::string& key) {
@@ -318,7 +313,7 @@ bool Response::isAllowedMethod(int allowed_methods, const std::string &request_m
 void Response::index(const Location &location) {
 	std::string const &index_file = location.getValue("index");
 	std::string const &auto_index = location.getValue("autoindex");
-	std::string index_path = file_path + index_file;
+	std::string index_path = filePath + index_file;
 
 	if (isFolder(index_path) || !readFileAndsetBody(index_path)) {
 		if (auto_index == "on")
@@ -329,7 +324,7 @@ void Response::index(const Location &location) {
 }
 
 void Response::bodyToBodyLength(void){
-	body_len = body.size();
+	bodyLength = body.size();
 }
 
 void Response::addBody(std::string const &addString) {
@@ -348,8 +343,8 @@ std::string Response::createClousureHtml() {
 }
 
 void Response::autoindex() {
-    DIR* directory = opendir(file_path.c_str());
-    if (isFolder(file_path) && directory) {
+    DIR* directory = opendir(filePath.c_str());
+    if (isFolder(filePath) && directory) {
 		setHeader("Content-Type", "text/html");
         struct dirent* entry;
 		addBody(createHeadHtml("autoindex"));
@@ -373,14 +368,14 @@ void Response::autoindex() {
 
 void Response::createErrorPage() {
 	createHeadHtml("Error");
-	addBody("<h1 style=\"text-align: center; font-size: 24px;\">" + itoa(status_code) + "</h1>");
+	addBody("<h1 style=\"text-align: center; font-size: 24px;\">" + itoa(statusCode) + "</h1>");
 	addBody("<h1 style=\"text-align: center; font-size: 24px;\">" + getStatusMessage() + "</h1>");
 	createClousureHtml();
 }
 
 void Response::getErrorPage(const ServerConfig &server)
 {
-	std::string	error_path = server.getValue("root") + server.getErrorPage(status_code);
+	std::string	error_path = server.getValue("root") + server.getErrorPage(statusCode);
 
 	if (error_path != "" && isFile(error_path) && isAccessible(error_path))
 		readFileAndsetBody(error_path);
@@ -409,8 +404,8 @@ std::string Response::redirectAddress(const std::string &url, const Location &lo
 
 void Response::printResponse() const {
 	std::cout << "version: " << version << std::endl;
-	std::cout << "status_code: " << status_code << std::endl;
-	std::cout << "body_len: " << body_len << std::endl;
+	std::cout << "status_code: " << statusCode << std::endl;
+	std::cout << "body_len: " << bodyLength << std::endl;
 	std::cout << "body: " << body << std::endl;
 }
 
@@ -499,7 +494,7 @@ std::string getFileName(const std::string &request_body)
 // TODO: we should also check for chunked files
 void Response::uploadFile(const Location &location, const Request &request)
 {
-	std::string upload_path = file_path;
+	std::string upload_path = filePath;
 
 	if (location.getValue("uploads_path") == "")
 		upload_path += DEFAULT_UPLOAD_PATH;

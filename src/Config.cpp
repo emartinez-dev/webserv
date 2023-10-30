@@ -4,15 +4,14 @@ Config::Config(std::string &inputfile)
 {
 	std::ifstream config_file(inputfile);
 
-	if (check_file(config_file))
+	if (checkFile(config_file))
 		throw ConfigurationFileException();
-	if (checkValues())
+	if (checkServersConfig())
 		throw IncorrectConfigurationFileException();
 
 }
 
 Config::~Config() {
-
 }
 
 Config::Config(Config const &copy):servers(copy.servers){
@@ -25,7 +24,7 @@ Config	&Config::operator=(Config const &copy) {
 	return *this;
 }
 
-int	Config::check_file(std::ifstream &config_file)	{
+int	Config::checkFile(std::ifstream &config_file)	{
 	
 	std::string line;
 	if (!config_file.is_open())
@@ -36,15 +35,15 @@ int	Config::check_file(std::ifstream &config_file)	{
 		return 1;
 	}
 	else
-		add_server(config_file, line);
-return 0;
+		parseServer(config_file, line);
+	return 0;
 }
 
-const std::vector<ServerConfig> Config::getServerConfigs() const {
+const std::vector<ServerConfig> &Config::getServerConfigs() const {
 	return servers;
 }
 
-void Config::add_server(std::ifstream &config_file, std::string line)
+void Config::parseServer(std::ifstream &config_file, std::string line)
 {
 	ServerConfig	conf;
 
@@ -53,7 +52,7 @@ void Config::add_server(std::ifstream &config_file, std::string line)
 		if (line.empty()) continue;
 		conf.splitKeyValue(line, config_file);
 		if (line.find("server:") != std::string::npos)
-			add_server(config_file, line);
+			parseServer(config_file, line);
 	}
 	servers.push_back(conf);
 }
@@ -76,7 +75,7 @@ const ServerConfig *Config::getServer(std::string const &host) const
 	return (&servers[servers.size() - 1]);
 }
 
-int Config::checkValues() {
+int Config::checkServersConfig() {
 	for (size_t i = 0; i < servers.size(); i++)
 	{
 		if (servers[i].checkServerConfig())

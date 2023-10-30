@@ -10,7 +10,7 @@ ServerConfig::~ServerConfig()
 {
 }
 
-ServerConfig::ServerConfig(ServerConfig const &copy):conf(copy.conf),locations(copy.locations),listens(copy.listens),error_pages(copy.error_pages)
+ServerConfig::ServerConfig(ServerConfig const &copy):conf(copy.conf),locations(copy.locations),listens(copy.listens),errorPages(copy.errorPages)
 {
 }
 
@@ -21,7 +21,7 @@ ServerConfig	&ServerConfig::operator=(const ServerConfig &copy)
 		conf = copy.conf;
 		locations = copy.locations;
 		listens = copy.listens;
-		error_pages = copy.error_pages;
+		errorPages = copy.errorPages;
 	}
 	return *this;
 }
@@ -73,7 +73,7 @@ void	ServerConfig::splitKeyValue(std::string &line, std::ifstream &config_file) 
 				else if (key == "status_code")
 					error.setCode(value);
 			}
-			error_pages.push_back(error);
+			errorPages.push_back(error);
 		}
 		else if (key == "location")
 		{
@@ -110,7 +110,7 @@ std::vector<Listen> ServerConfig::getListens() {
 }
 
 std::vector<ErrorPage> ServerConfig::getErrorPages() {
-	return error_pages;
+	return errorPages;
 }
 
 // TODO: abstract this to a function or something, we repeat this a lot
@@ -208,7 +208,7 @@ const Location *ServerConfig::getLocation(std::string const &url) const
 
 std::string ServerConfig::getErrorPage(int status_code) const
 {
-	for (std::vector<ErrorPage>::const_iterator it = error_pages.begin(); it != error_pages.end(); ++it)
+	for (std::vector<ErrorPage>::const_iterator it = errorPages.begin(); it != errorPages.end(); ++it)
 	{
 		if (status_code == it->getCode())
 			return it->getPath();

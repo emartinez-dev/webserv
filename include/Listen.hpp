@@ -7,7 +7,7 @@ class Listen
 {
 	private:
 		std::string host;
-		int port;
+		int			port;
 	public:
 		Listen();
 		~Listen();
@@ -17,8 +17,8 @@ class Listen
 		void setHost(std::string value);
 		void setPort(std::string value);
 		
-		const std::string getHost() const;
-		int getPort() const;
+		const std::string &getHost() const;
+		int				  getPort() const;
 };
 
 #endif

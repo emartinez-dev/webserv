@@ -7,6 +7,8 @@
 # include "HttpPath.hpp"
 # include "Utils.hpp"
 # include "webserv.hpp"
+# include "Utils.hpp"
+# include "WebServerExceptions.hpp"
 
 // Informacionales (1xx)
 #define HTTP_STATUS_CONTINUE 100              // 100 Continue
@@ -84,40 +86,30 @@ class Response
 {
 	private:
 		std::string		version;
-		int			 	status_code;
+		int			 	statusCode;
 		std::string	  	body;
-		std::streampos	body_len;
-		std::string 	file_path;
-
+		size_t			bodyLength;
+		std::string 	filePath;
 		std::map<std::string, std::string> headers;
-		size_t			size_body;
-	public:
-		Response();
-		Response(const Request &request, const Config &config);
-		Response(int error_code);
-		~Response();
-		Response(Response const &copy);
-		Response	&operator=(Response const &copy);
 
-		void  				setStatusCode(const int status_code);
+		std::string 		getFirstLine() const;
+		std::string 		getContentType(const std::string& fileExtension);
+		void  				setFilePath(const std::string &rootMain, const std::string &addRoot);
+		void  				setContentLength(std::string& key);
+		std::string 		getStatusMessage() const;
+		int					getRequestMethod(const std::string &methodStr);
+		bool 				getSize();
+
+		void  				setStatusCode(const int _statusCode);
 		void  				setHeader(const std::string &key, const std::string &value);
 		void  				setBody(const std::string &body);
-		void  				setFilePath(const std::string &root_main, const std::string &add_root);
-		void  				setContentLength(std::string& key);
-		int					getRequestMethod(const std::string &method_str);
-
-		const std::string 	getContent(void) const;
-		bool 				readFileAndsetBody(const std::string &path);
-		std::string 		getFirstLine() const;
-		std::string 		getStatusMessage() const;
-		bool 				getSize();
-		std::string 		getContentType(const std::string& fileExtension);
 
 		void 				printResponse()const;
 
-		bool				isAllowedMethod(int allowed_methods, const std::string &request_method);
-		void				autoindex();
+		bool 				readFileAndsetBody(const std::string &path);
+		bool				isAllowedMethod(int allowedMethods, const std::string &requestMethod);
 		void				index(const Location &location);
+		void				autoindex();
 		void 				bodyToBodyLength();
 
 		void 				addBody(std::string const &addString);
@@ -133,8 +125,19 @@ class Response
 		void				getHandler(const Request &request, const Location &location, const ServerConfig &config);
 		void				postHandler(const Request &request, const Location &location, const ServerConfig &config);
 		void				deleteHandler(void);
-		void				runCGI(const std::string& cgi_path, const std::string& cgi_file, const Request &request);
-	void					uploadFile(const Location &location, const Request &request);
+		void				runCGI(const std::string& cgiPath, const std::string& cgiFile, const Request &request);
+		void				uploadFile(const Location &location, const Request &request);
+
+
+	public:
+		Response();
+		Response(const Request &request, const Config &config);
+		Response(int errorCode);
+		~Response();
+		Response(Response const &copy);
+		Response	&operator=(Response const &copy);
+
+		const std::string 	getContent(void) const;
 };
 
 #endif
