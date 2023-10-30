@@ -69,6 +69,7 @@ void Response::getHandler(const Request &request, const Location &location, cons
 }
 
 
+/* A POST request to a static HTML page is basically a GET request, it does nothing, just retrieving content */
 void Response::postHandler(const Request &request, const Location &location, const ServerConfig &config)
 {
 	if (location.getValue("cgi_ext") != "" && getFileExtension(filePath) == location.getValue("cgi_ext"))
@@ -77,6 +78,8 @@ void Response::postHandler(const Request &request, const Location &location, con
 		runCGI(config.getValue("cgi_path"), filePath + location.getValue("index"), request);
 	else if (location.getValue("allow_uploads") == "on" && request.getHeader("Content-Type").find("multipart/form-data") != std::string::npos)
 		uploadFile(location, request);
+	else if (request.getHeader("Content-Type").find("application/x-www-form-urlencoded") != std::string::npos)
+		getHandler(request, location, config);
 	else
 		setStatusCode(HTTP_STATUS_METHOD_NOT_ALLOWED);
 }
@@ -489,9 +492,6 @@ std::string getFileName(const std::string &request_body)
 	return "";
 }
 
-// TODO: I think URL-encoded POST requests aren't getting accepted
-// TODO: refactor this
-// TODO: we should also check for chunked files
 void Response::uploadFile(const Location &location, const Request &request)
 {
 	std::string upload_path = filePath;

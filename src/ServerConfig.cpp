@@ -113,15 +113,11 @@ std::vector<ErrorPage> ServerConfig::getErrorPages() {
 	return errorPages;
 }
 
-// TODO: abstract this to a function or something, we repeat this a lot
 const std::string ServerConfig::getValue(std::string const &key) const
 {
 	return (getMapValue(key, this->conf));
 }
 
-
-// This functions also remove the trailing \r
-// TODO: abstract this to a function or something
 static const std::string getHostname(std::string const &host)
 {
 	if (host.find(":") == std::string::npos)
