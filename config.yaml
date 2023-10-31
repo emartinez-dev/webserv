@@ -16,6 +16,20 @@ server:
         autoindex: on
         allow_methods: GET
         cgi_ext: .php
+  location:
+        route: /jonny/
+        root: /jonny/
+        index:  index.html
+        autoindex: on
+        allow_methods: GET
+        cgi_ext: .php
+  location:
+        route: /jonnyserver/
+        root: /jonnyserver/
+        index:  index.html
+        autoindex: on
+        allow_methods: GET
+        cgi_ext: .php
     location: 
 		route: /index/
         root: /
