@@ -2,9 +2,8 @@
 #include "Config.hpp"
 #include "Cluster.hpp"
 
-int	main(int argc, char **argv, char **envp)
+int	main(int argc, char **argv)
 {
-	(void) envp;
 	if (argc != 2)
 	{
 		std::cout << "Wrong number of params. Usage: ./webserv [config_file]\n";
