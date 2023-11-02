@@ -1,4 +1,5 @@
 #include "Response.hpp"
+#include "Utils.hpp"
 
 Response::Response()
 {
@@ -58,7 +59,7 @@ void Response::getHandler(const Request &request, const Location &location, cons
 {
 	if (location.getValue("cgi_ext") != "" && getFileExtension(filePath) == location.getValue("cgi_ext"))
 		runCGI(config.getValue("cgi_path"), filePath, request);
-	else if (isFolder(filePath) && location.getValue("cgi_ext") != "" && getFileExtension(location.getValue("index")) == location.getValue("cgi_ext"))
+	else if (isFolder(filePath) && location.getValue("cgi_ext") != "" && getFileExtension(location.getValue("index")) == location.getValue("cgi_ext") && isAccessible(filePath + location.getValue("index")))
 		runCGI(config.getValue("cgi_path"), filePath + location.getValue("index"), request);
 	else if (isFolder(filePath))
 		index(location);
@@ -492,16 +493,28 @@ std::string getFileName(const std::string &request_body)
 	return "";
 }
 
+std::string getParentFolder(const std::string &path)
+{
+	size_t pos = path.rfind("/");
+
+	if (path[path.length() - 1] != '/')
+	{
+		if (pos != std::string::npos)
+			return (path.substr(0, pos));
+	}
+	return (path);
+}
+
 void Response::uploadFile(const Location &location, const Request &request)
 {
-	std::string upload_path = filePath;
+	std::string upload_path = getParentFolder(filePath);
 
+	if (upload_path[upload_path.length() - 1] != '/')
+		upload_path += '/';
 	if (location.getValue("uploads_path") == "")
 		upload_path += DEFAULT_UPLOAD_PATH;
 	else
 		upload_path += location.getValue("uploads_path");
-	if (upload_path[upload_path.length() - 1] != '/')
-		upload_path += '/';
 
 	std::string filename = getFileName(request.getBody());
 	size_t body_separator = request.getBody().find("\r\n\r\n");
